@@ -9,6 +9,7 @@ export default function CompanySearchExample() {
   const handleCompanySelect = (company: Company) => {
     setSelectedCompany(company);
     console.log("Selected company:", company);
+    console.log("Logo URL:", company.logoUrl);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -31,20 +32,68 @@ export default function CompanySearchExample() {
 
         {selectedCompany && (
           <div className="mt-4 p-4 bg-gray-50 dark:bg-gray-900 rounded-lg">
-            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-2">
+            <h3 className="font-semibold text-gray-900 dark:text-gray-100 mb-3">
               Selected Company:
             </h3>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Name:</strong> {selectedCompany.name}
-            </p>
-            <p className="text-sm text-gray-700 dark:text-gray-300">
-              <strong>Domain:</strong> {selectedCompany.domain}
-            </p>
-            {selectedCompany.logoUrl && (
-              <p className="text-sm text-gray-700 dark:text-gray-300">
-                <strong>Logo:</strong> {selectedCompany.logoUrl}
-              </p>
-            )}
+            <div className="flex items-center gap-3">
+              {selectedCompany.logoUrl ? (
+                <div className="relative">
+                  <img
+                    src={selectedCompany.logoUrl}
+                    alt={`${selectedCompany.name} logo`}
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 rounded object-contain flex-shrink-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1"
+                    onError={(e) => {
+                      console.error(
+                        "Failed to load logo:",
+                        selectedCompany.logoUrl
+                      );
+                      const img = e.target as HTMLImageElement;
+                      img.style.display = "none";
+                      const fallback = document.getElementById("logo-fallback");
+                      if (fallback) {
+                        fallback.style.display = "flex";
+                      }
+                    }}
+                    onLoad={() => {
+                      console.log(
+                        "Logo loaded successfully:",
+                        selectedCompany.logoUrl
+                      );
+                    }}
+                  />
+                  <div
+                    className="w-12 h-12 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-700 absolute top-0 left-0"
+                    style={{ display: "none" }}
+                    id="logo-fallback"
+                  >
+                    <span className="text-lg font-medium text-gray-500 dark:text-gray-400">
+                      {selectedCompany.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <div className="w-12 h-12 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0 border border-gray-200 dark:border-gray-700">
+                  <span className="text-lg font-medium text-gray-500 dark:text-gray-400">
+                    {selectedCompany.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100">
+                  {selectedCompany.name}
+                </p>
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  {selectedCompany.domain}
+                </p>
+                {selectedCompany.logoUrl && (
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                    Logo: {selectedCompany.logoUrl}
+                  </p>
+                )}
+              </div>
+            </div>
           </div>
         )}
 

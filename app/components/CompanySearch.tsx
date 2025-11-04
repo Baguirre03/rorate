@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
 
 export interface Company {
   name: string;
@@ -93,7 +92,9 @@ export default function CompanySearch({
       const selected: Company = {
         name: company.name,
         domain: company.domain,
-        logoUrl: company.logo,
+        logoUrl: company.domain
+          ? `/api/logo?domain=${encodeURIComponent(company.domain)}`
+          : null,
       };
       setSelectedCompany(selected);
       setSearchQuery(company.name);
@@ -232,25 +233,11 @@ export default function CompanySearch({
                   selectedIndex === index ? "bg-gray-100 dark:bg-gray-700" : ""
                 }`}
               >
-                {company.logo ? (
-                  <Image
-                    src={company.logo}
-                    alt={`${company.name} logo`}
-                    width={32}
-                    height={32}
-                    unoptimized
-                    className="w-8 h-8 rounded object-contain flex-shrink-0"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).style.display = "none";
-                    }}
-                  />
-                ) : (
-                  <div className="w-8 h-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                      {company.name.charAt(0).toUpperCase()}
-                    </span>
-                  </div>
-                )}
+                <div className="w-8 h-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                  <span className="text-xs text-gray-500 dark:text-gray-400">
+                    {company.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
                 <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                   {company.name}
                 </span>
@@ -262,13 +249,28 @@ export default function CompanySearch({
 
       {/* Selected company info (optional, for display purposes) */}
       {selectedCompany && !isOpen && (
-        <div className="mt-2 flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
-          <span>Selected: {selectedCompany.name}</span>
-          {selectedCompany.domain && (
-            <span className="text-gray-400 dark:text-gray-500">
-              ({selectedCompany.domain})
-            </span>
+        <div className="mt-2 flex items-center gap-3 text-sm">
+          {selectedCompany.logoUrl && (
+            <img
+              src={selectedCompany.logoUrl}
+              alt={`${selectedCompany.name} logo`}
+              width={32}
+              height={32}
+              className="w-8 h-8 rounded object-contain flex-shrink-0"
+              onError={(e) => {
+                (e.target as HTMLImageElement).style.display = "none";
+              }}
+              loading="lazy"
+            />
           )}
+          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
+            <span>Selected: {selectedCompany.name}</span>
+            {selectedCompany.domain && (
+              <span className="text-gray-400 dark:text-gray-500">
+                ({selectedCompany.domain})
+              </span>
+            )}
+          </div>
         </div>
       )}
     </div>
