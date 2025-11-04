@@ -74,9 +74,18 @@ export default function CompanySearch({
 
   // Debounce effect
   useEffect(() => {
+    // Don't search if dropdown is closed and we have a selected company with matching name
+    if (!isOpen && selectedCompany && searchQuery === selectedCompany.name) {
+      return;
+    }
+
     const timeoutId = setTimeout(() => {
       if (searchQuery.trim()) {
-        searchCompanies(searchQuery);
+        // Only search if the query doesn't exactly match the selected company name
+        // or if user is actively typing (dropdown should be open)
+        if (searchQuery !== selectedCompany?.name || isOpen) {
+          searchCompanies(searchQuery);
+        }
       } else {
         setSuggestions([]);
         setIsOpen(false);
@@ -84,7 +93,7 @@ export default function CompanySearch({
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, searchCompanies]);
+  }, [searchQuery, searchCompanies, isOpen, selectedCompany]);
 
   // Handle company selection
   const handleSelectCompany = useCallback(
@@ -187,7 +196,12 @@ export default function CompanySearch({
             setError(null);
           }}
           onFocus={() => {
-            if (suggestions.length > 0) {
+            // Only open dropdown if there are suggestions and no company is selected
+            // or if the current query doesn't match the selected company
+            if (
+              suggestions.length > 0 &&
+              (!selectedCompany || searchQuery !== selectedCompany.name)
+            ) {
               setIsOpen(true);
             }
           }}
