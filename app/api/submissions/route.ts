@@ -1,26 +1,25 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabase } from "@/lib/supabaseClient";
+import {
+  SubmissionInsert,
+  SubmissionRequestBody,
+  SubmissionResponse,
+} from "@/types/supabase";
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const body: SubmissionRequestBody = await request.json();
     const {
+      linkedinUrl,
       companyName,
       year,
-      position,
-      returnOfferExtended,
+      term,
       internType,
-      school,
-      location,
+      returnOfferExtended,
     } = body;
 
     // Validate required fields
-    if (
-      !companyName ||
-      !year ||
-      !position ||
-      returnOfferExtended === undefined
-    ) {
+    if (!companyName || !year || !term || returnOfferExtended === undefined) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -45,27 +44,30 @@ export async function POST(request: NextRequest) {
       company = newCompany;
     }
 
+    const submissionData: SubmissionInsert = {
+      company_id: company.id,
+      year,
+      term,
+      return_offer_extended: returnOfferExtended,
+      status: "waiting",
+      intern_type: internType || null,
+      linkedin_url: linkedinUrl || null,
+    };
+
     const { data: submission, error: submissionError } = await supabase
       .from("submissions")
-      .insert({
-        company_id: company.id,
-        year,
-        position,
-        return_offer_extended: returnOfferExtended,
-        status: "waiting",
-        intern_type: internType,
-        school,
-        location,
-      })
+      .insert(submissionData)
       .select()
       .single();
 
     if (submissionError) throw submissionError;
 
-    return NextResponse.json({
+    const response: SubmissionResponse = {
       success: true,
       data: submission,
-    });
+    };
+
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error creating submission:", error);
     return NextResponse.json(

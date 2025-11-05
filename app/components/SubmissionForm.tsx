@@ -1,17 +1,11 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import CompanySearch, { Company } from "./CompanySearch";
-
-interface FormData {
-  linkedinUrl: string;
-  companyName: string;
-  year: number;
-  term: string;
-  internType: string;
-  returnOfferExtended: boolean | null;
-}
+import { SubmissionFormData, SubmissionRequestBody } from "@/types/supabase";
 
 interface FormErrors {
   linkedinUrl?: string;
@@ -20,6 +14,20 @@ interface FormErrors {
   term?: string;
   internType?: string;
   returnOfferExtended?: string;
+}
+
+// Type guard to ensure payload matches API expectations
+function createSubmissionPayload(
+  formData: SubmissionFormData
+): SubmissionRequestBody {
+  return {
+    linkedinUrl: formData.linkedinUrl.trim() || undefined,
+    companyName: formData.companyName.trim(),
+    year: formData.year,
+    term: formData.term,
+    internType: formData.internType || undefined,
+    returnOfferExtended: formData.returnOfferExtended === true,
+  };
 }
 
 const INTERN_TYPES = [
@@ -37,7 +45,8 @@ const YEARS = Array.from({ length: 7 }, (_, i) => currentYear - i);
 const TERMS = ["Fall", "Spring", "Summer"];
 
 export default function SubmissionForm() {
-  const [formData, setFormData] = useState<FormData>({
+  const router = useRouter();
+  const [formData, setFormData] = useState<SubmissionFormData>({
     linkedinUrl: "",
     companyName: "",
     year: currentYear,
@@ -184,14 +193,7 @@ export default function SubmissionForm() {
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      const payload = {
-        linkedinUrl: formData.linkedinUrl.trim(),
-        companyName: formData.companyName.trim(),
-        year: formData.year,
-        term: formData.term,
-        internType: formData.internType,
-        returnOfferExtended: formData.returnOfferExtended === true,
-      };
+      const payload: SubmissionRequestBody = createSubmissionPayload(formData);
 
       const response = await fetch("/api/submissions", {
         method: "POST",
@@ -207,29 +209,24 @@ export default function SubmissionForm() {
         throw new Error(data.error || "Failed to submit");
       }
 
-      // Success
-      setSubmitStatus({
-        type: "success",
-        message:
-          "Thank you! Your submission is pending review and will appear on the site after moderation.",
+      // Success - show toast and redirect to homepage
+      toast.success("Submission successful!", {
+        description:
+          "Your submission is pending review and will appear on the site after moderation.",
       });
 
-      // Clear form
-      setFormData({
-        linkedinUrl: "",
-        companyName: "",
-        year: currentYear,
-        term: "",
-        internType: "",
-        returnOfferExtended: null,
-      });
-      setSelectedCompany(null);
-      setErrors({});
-
-      // Scroll to top
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      // Redirect to homepage after a short delay to allow toast to show
+      setTimeout(() => {
+        router.push("/");
+      }, 500);
     } catch (error) {
       console.error("Submission error:", error);
+      toast.error("Submission failed", {
+        description:
+          error instanceof Error
+            ? error.message
+            : "Something went wrong. Please try again.",
+      });
       setSubmitStatus({
         type: "error",
         message: "❌ Something went wrong. Please try again.",
