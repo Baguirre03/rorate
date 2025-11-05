@@ -14,7 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      companies: {
+        Row: {
+          created_at: string | null
+          id: number
+          name: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: number
+          name: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: number
+          name?: string
+        }
+        Relationships: []
+      }
+      submissions: {
+        Row: {
+          company_id: number
+          id: number
+          intern_type: string | null
+          location: string | null
+          position: string
+          return_offer_extended: boolean
+          school: string | null
+          status: string
+          submitted_at: string | null
+          year: number
+        }
+        Insert: {
+          company_id: number
+          id?: number
+          intern_type?: string | null
+          location?: string | null
+          position: string
+          return_offer_extended: boolean
+          school?: string | null
+          status: string
+          submitted_at?: string | null
+          year: number
+        }
+        Update: {
+          company_id?: number
+          id?: number
+          intern_type?: string | null
+          location?: string | null
+          position?: string
+          return_offer_extended?: boolean
+          school?: string | null
+          status?: string
+          submitted_at?: string | null
+          year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "submissions_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

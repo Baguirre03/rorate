@@ -234,38 +234,23 @@ export default function CompanySearch({
           role="listbox"
           className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-auto"
         >
-          {error ? (
-            <div className="px-4 py-3 text-sm text-red-600 dark:text-red-400">
-              {error}
-            </div>
-          ) : suggestions.length === 0 && !isLoading ? (
-            <div className="px-4 py-3 text-sm text-gray-500 dark:text-gray-400">
-              No companies found - type to add manually
-            </div>
-          ) : (
-            suggestions.map((company, index) => (
-              <button
-                key={`${company.domain}-${index}`}
-                type="button"
-                role="option"
-                aria-selected={selectedIndex === index}
-                onClick={() => handleSelectCompany(company)}
-                onMouseEnter={() => setSelectedIndex(index)}
-                className={`w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
-                  selectedIndex === index ? "bg-gray-100 dark:bg-gray-700" : ""
-                }`}
-              >
-                <div className="w-8 h-8 rounded bg-gray-200 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                  <span className="text-xs text-gray-500 dark:text-gray-400">
-                    {company.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                  {company.name}
-                </span>
-              </button>
-            ))
-          )}
+          {suggestions.map((company, index) => (
+            <button
+              key={`${company.domain}-${index}`}
+              type="button"
+              role="option"
+              aria-selected={selectedIndex === index}
+              onClick={() => handleSelectCompany(company)}
+              onMouseEnter={() => setSelectedIndex(index)}
+              className={`w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+                selectedIndex === index ? "bg-gray-100 dark:bg-gray-700" : ""
+              }`}
+            >
+              <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                {company.name}
+              </span>
+            </button>
+          ))}
         </div>
       )}
 

@@ -44,7 +44,7 @@ export default function CompanySearchExample() {
                     alt={`${selectedCompany.name} logo`}
                     width={48}
                     height={48}
-                    className="w-12 h-12 rounded object-contain flex-shrink-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1"
+                    className="w-12 h-12 rounded object-contain shrink-0 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-1"
                     onError={(e) => {
                       console.error(
                         "Failed to load logo:",

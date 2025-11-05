@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
         hostname: "**.logo.clearbit.com",
       },
     ],
+    localPatterns: [
+      {
+        pathname: "/api/logo",
+      },
+    ],
     unoptimized: false,
   },
 };
