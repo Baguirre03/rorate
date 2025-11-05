@@ -13,6 +13,7 @@ interface CompanySearchProps {
   onCompanySelect: (company: Company) => void;
   value?: string;
   className?: string;
+  onInputChange?: (value: string) => void;
 }
 
 interface ClearbitSuggestion {
@@ -25,6 +26,7 @@ export default function CompanySearch({
   onCompanySelect,
   value = "",
   className = "",
+  onInputChange,
 }: CompanySearchProps) {
   const [searchQuery, setSearchQuery] = useState(value);
   const [suggestions, setSuggestions] = useState<ClearbitSuggestion[]>([]);
@@ -65,7 +67,19 @@ export default function CompanySearch({
         }
 
         const data: ClearbitSuggestion[] = await response.json();
-        setSuggestions(data);
+
+        // Deduplicate companies by name (case-insensitive)
+        const seenNames = new Set<string>();
+        const uniqueSuggestions = data.filter((company) => {
+          const normalizedName = company.name.toLowerCase().trim();
+          if (seenNames.has(normalizedName)) {
+            return false;
+          }
+          seenNames.add(normalizedName);
+          return true;
+        });
+
+        setSuggestions(uniqueSuggestions);
         // Only open if shouldOpen is true (user is typing, not just selecting)
         if (shouldOpen) {
           setIsOpen(true);
@@ -81,6 +95,11 @@ export default function CompanySearch({
     },
     [selectedCompany]
   );
+
+  // Sync value prop with internal state
+  useEffect(() => {
+    setSearchQuery(value);
+  }, [value]);
 
   // Debounce effect
   useEffect(() => {
@@ -185,12 +204,6 @@ export default function CompanySearch({
 
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
-      <label
-        htmlFor="company-search"
-        className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-      >
-        Company
-      </label>
       <div className="relative">
         <input
           ref={inputRef}
@@ -204,6 +217,7 @@ export default function CompanySearch({
               setSelectedCompany(null);
             }
             setError(null);
+            onInputChange?.(newValue);
           }}
           onFocus={() => {
             if (

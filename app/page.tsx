@@ -1,5 +1,3 @@
-import CompanySearchExample from "./components/CompanySearchExample";
-
 export default function Home() {
   return (
     <div className="min-h-screen bg-zinc-50 dark:bg-black py-12 px-4">
@@ -7,7 +5,6 @@ export default function Home() {
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-gray-100">
           Return Offer Rates
         </h1>
-        <CompanySearchExample />
       </div>
     </div>
   );
