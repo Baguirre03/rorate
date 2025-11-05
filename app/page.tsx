@@ -5,7 +5,7 @@ export default function Home() {
     <div className="min-h-screen bg-zinc-50 dark:bg-black py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-center mb-8 text-gray-900 dark:text-gray-100">
-          Company Search Component Test
+          Return Offer Rates
         </h1>
         <CompanySearchExample />
       </div>
