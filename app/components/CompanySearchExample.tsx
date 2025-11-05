@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import CompanySearch, { Company } from "./CompanySearch";
 
 export default function CompanySearchExample() {
@@ -38,7 +39,7 @@ export default function CompanySearchExample() {
             <div className="flex items-center gap-3">
               {selectedCompany.logoUrl ? (
                 <div className="relative">
-                  <img
+                  <Image
                     src={selectedCompany.logoUrl}
                     alt={`${selectedCompany.name} logo`}
                     width={48}
@@ -49,7 +50,7 @@ export default function CompanySearchExample() {
                         "Failed to load logo:",
                         selectedCompany.logoUrl
                       );
-                      const img = e.target as HTMLImageElement;
+                      const img = e.currentTarget as HTMLImageElement;
                       img.style.display = "none";
                       const fallback = document.getElementById("logo-fallback");
                       if (fallback) {

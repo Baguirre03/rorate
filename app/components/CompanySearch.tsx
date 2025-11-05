@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import Image from "next/image";
 
 export interface Company {
   name: string;
@@ -37,55 +38,61 @@ export default function CompanySearch({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Debounced search function
-  const searchCompanies = useCallback(async (query: string) => {
-    if (!query.trim()) {
-      setSuggestions([]);
-      setIsOpen(false);
-      return;
-    }
-
-    setIsLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(
-        `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(
-          query
-        )}`
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch company suggestions");
+  const searchCompanies = useCallback(
+    async (query: string, shouldOpen = true) => {
+      if (!query.trim()) {
+        setSuggestions([]);
+        setIsOpen(false);
+        return;
       }
 
-      const data: ClearbitSuggestion[] = await response.json();
-      setSuggestions(data);
-      setIsOpen(true);
-      setSelectedIndex(-1);
-    } catch (err) {
-      setError("Failed to load company suggestions");
-      setSuggestions([]);
-      console.error("Company search error:", err);
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      if (selectedCompany && query === selectedCompany.name && !shouldOpen) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch(
+          `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(
+            query
+          )}`
+        );
+
+        if (!response.ok) {
+          throw new Error("Failed to fetch company suggestions");
+        }
+
+        const data: ClearbitSuggestion[] = await response.json();
+        setSuggestions(data);
+        // Only open if shouldOpen is true (user is typing, not just selecting)
+        if (shouldOpen) {
+          setIsOpen(true);
+        }
+        setSelectedIndex(-1);
+      } catch (err) {
+        setError("Failed to load company suggestions");
+        setSuggestions([]);
+        console.error("Company search error:", err);
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [selectedCompany]
+  );
 
   // Debounce effect
   useEffect(() => {
-    // Don't search if dropdown is closed and we have a selected company with matching name
-    if (!isOpen && selectedCompany && searchQuery === selectedCompany.name) {
+    // Don't search if query exactly matches selected company (prevent re-opening after selection)
+    if (selectedCompany && searchQuery === selectedCompany.name) {
       return;
     }
 
     const timeoutId = setTimeout(() => {
       if (searchQuery.trim()) {
-        // Only search if the query doesn't exactly match the selected company name
-        // or if user is actively typing (dropdown should be open)
-        if (searchQuery !== selectedCompany?.name || isOpen) {
-          searchCompanies(searchQuery);
-        }
+        // Only search and open if user is actively typing (not just selected a company)
+        searchCompanies(searchQuery, true);
       } else {
         setSuggestions([]);
         setIsOpen(false);
@@ -93,7 +100,7 @@ export default function CompanySearch({
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [searchQuery, searchCompanies, isOpen, selectedCompany]);
+  }, [searchQuery, searchCompanies, selectedCompany]);
 
   // Handle company selection
   const handleSelectCompany = useCallback(
@@ -191,13 +198,14 @@ export default function CompanySearch({
           type="text"
           value={searchQuery}
           onChange={(e) => {
-            setSearchQuery(e.target.value);
-            setSelectedCompany(null);
+            const newValue = e.target.value;
+            setSearchQuery(newValue);
+            if (selectedCompany && newValue !== selectedCompany.name) {
+              setSelectedCompany(null);
+            }
             setError(null);
           }}
           onFocus={() => {
-            // Only open dropdown if there are suggestions and no company is selected
-            // or if the current query doesn't match the selected company
             if (
               suggestions.length > 0 &&
               (!selectedCompany || searchQuery !== selectedCompany.name)
@@ -265,16 +273,15 @@ export default function CompanySearch({
       {selectedCompany && !isOpen && (
         <div className="mt-2 flex items-center gap-3 text-sm">
           {selectedCompany.logoUrl && (
-            <img
+            <Image
               src={selectedCompany.logoUrl}
               alt={`${selectedCompany.name} logo`}
               width={32}
               height={32}
-              className="w-8 h-8 rounded object-contain flex-shrink-0"
+              className="w-8 h-8 rounded object-contain shrink-0"
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
               }}
-              loading="lazy"
             />
           )}
           <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
