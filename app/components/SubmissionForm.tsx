@@ -19,12 +19,25 @@ interface FormErrors {
   returnOfferExtended?: string;
 }
 
+// Normalize LinkedIn URL - add https:// if missing
+function normalizeLinkedInUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return trimmed;
+  // If it doesn't start with http:// or https://, add https://
+  if (!trimmed.match(/^https?:\/\//i)) {
+    return `https://${trimmed}`;
+  }
+  return trimmed;
+}
+
 // Type guard to ensure payload matches API expectations
 function createSubmissionPayload(
   formData: SubmissionFormData
 ): SubmissionRequestBody {
   return {
-    linkedinUrl: formData.linkedinUrl.trim() || undefined,
+    linkedinUrl: formData.linkedinUrl.trim()
+      ? normalizeLinkedInUrl(formData.linkedinUrl)
+      : undefined,
     companyName: formData.companyName.trim(),
     year: formData.year,
     term: formData.term,
@@ -66,23 +79,8 @@ export default function SubmissionForm() {
   }>({ type: null, message: "" });
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
 
-  const validateLinkedInUrl = (url: string): boolean => {
-    if (!url.trim()) return false;
-    const linkedinPattern =
-      /^https?:\/\/(www\.)?linkedin\.com\/in\/[a-zA-Z0-9-]+\/?$/;
-    return linkedinPattern.test(url);
-  };
-
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
-
-    // LinkedIn URL validation
-    if (!formData.linkedinUrl.trim()) {
-      newErrors.linkedinUrl = "LinkedIn profile URL is required";
-    } else if (!validateLinkedInUrl(formData.linkedinUrl)) {
-      newErrors.linkedinUrl =
-        "Please enter a valid LinkedIn URL (e.g., https://linkedin.com/in/yourprofile)";
-    }
 
     // Company name validation
     if (!formData.companyName.trim()) {
@@ -255,7 +253,6 @@ export default function SubmissionForm() {
   };
 
   const allRequiredFieldsFilled =
-    formData.linkedinUrl.trim() &&
     formData.companyName.trim() &&
     formData.year &&
     formData.term &&
@@ -299,7 +296,7 @@ export default function SubmissionForm() {
           {/* LinkedIn Profile URL */}
           <div className="space-y-2">
             <Label htmlFor="linkedinUrl" className="text-sm font-medium">
-              LinkedIn Profile URL <span className="text-destructive">*</span>
+              LinkedIn Profile URL
             </Label>
             <Input
               type="url"
