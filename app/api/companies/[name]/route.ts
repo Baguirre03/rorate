@@ -27,6 +27,7 @@ export async function GET(
     const year = searchParams.get("year");
 
     // Get all accepted submissions for this company
+    // Use ilike for case-insensitive exact match
     let query = supabase
       .from("submissions")
       .select(
@@ -39,7 +40,7 @@ export async function GET(
       `
       )
       .eq("status", "accepted")
-      .eq("companies.name", companyName);
+      .ilike("companies.name", companyName);
 
     // Apply filters if provided
     if (internType) {
@@ -57,6 +58,16 @@ export async function GET(
       .order("submitted_at", { ascending: false });
 
     if (error) throw error;
+
+    // Filter to ensure exact case-insensitive match
+    const exactMatchSubmissions =
+      submissions?.filter((submission) => {
+        const companies = Array.isArray(submission.companies)
+          ? submission.companies[0]
+          : submission.companies;
+        const dbCompanyName = companies?.name;
+        return dbCompanyName?.toLowerCase() === companyName.toLowerCase();
+      }) || [];
 
     // Try to get company domain from Clearbit
     let companyDomain: string | null = null;
@@ -86,7 +97,7 @@ export async function GET(
       console.error("Failed to fetch company domain:", err);
     }
 
-    if (!submissions || submissions.length === 0) {
+    if (!exactMatchSubmissions || exactMatchSubmissions.length === 0) {
       return NextResponse.json({
         company: null,
         stats: {
@@ -100,14 +111,14 @@ export async function GET(
     }
 
     // Calculate statistics
-    const total = submissions.length;
-    const offers = submissions.filter(
+    const total = exactMatchSubmissions.length;
+    const offers = exactMatchSubmissions.filter(
       (s) => s.return_offer_extended === true
     ).length;
     const percentage = total > 0 ? Math.round((offers / total) * 100) : 0;
 
     // Group by year
-    const byYear = submissions.reduce((acc, submission) => {
+    const byYear = exactMatchSubmissions.reduce((acc, submission) => {
       const year = submission.year;
       if (!acc[year]) {
         acc[year] = {
@@ -135,9 +146,17 @@ export async function GET(
       })
     );
 
+    // Get the company name from the first submission (should be consistent)
+    const firstCompany = exactMatchSubmissions[0].companies
+      ? Array.isArray(exactMatchSubmissions[0].companies)
+        ? exactMatchSubmissions[0].companies[0]
+        : exactMatchSubmissions[0].companies
+      : null;
+
     return NextResponse.json({
       company: {
-        ...submissions[0].companies,
+        id: firstCompany?.id || 0,
+        name: firstCompany?.name || companyName,
         domain: companyDomain,
         logoUrl: companyDomain
           ? `/api/logo?domain=${encodeURIComponent(companyDomain)}`
@@ -149,7 +168,7 @@ export async function GET(
         percentage,
       },
       byYear: yearStats.sort((a, b) => b.year - a.year),
-      submissions,
+      submissions: exactMatchSubmissions,
     });
   } catch (error) {
     console.error("Error fetching company data:", error);

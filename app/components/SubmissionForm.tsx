@@ -447,30 +447,30 @@ export default function SubmissionForm() {
             <Label className="text-sm font-medium">
               Return Offer Extended? <span className="text-destructive">*</span>
             </Label>
-            <div className="flex gap-6">
-              <label className="flex items-center gap-2.5 cursor-pointer group">
+            <div className="flex gap-4">
+              <label className="flex items-center gap-3 cursor-pointer px-6 py-3 rounded-md border border-input hover:bg-accent hover:border-ring transition-colors min-w-[120px] justify-center group">
                 <input
                   type="radio"
                   name="returnOfferExtended"
                   checked={formData.returnOfferExtended === true}
                   onChange={() => handleReturnOfferChange(true)}
                   disabled={isSubmitting}
-                  className="h-4 w-4 text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-5 w-5 text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <span className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors">
+                <span className="text-sm font-medium text-foreground group-hover:text-foreground transition-colors">
                   Yes
                 </span>
               </label>
-              <label className="flex items-center gap-2.5 cursor-pointer group">
+              <label className="flex items-center gap-3 cursor-pointer px-6 py-3 rounded-md border border-input hover:bg-accent hover:border-ring transition-colors min-w-[120px] justify-center group">
                 <input
                   type="radio"
                   name="returnOfferExtended"
                   checked={formData.returnOfferExtended === false}
                   onChange={() => handleReturnOfferChange(false)}
                   disabled={isSubmitting}
-                  className="h-4 w-4 text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-5 w-5 text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <span className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors">
+                <span className="text-sm font-medium text-foreground group-hover:text-foreground transition-colors">
                   No
                 </span>
               </label>
