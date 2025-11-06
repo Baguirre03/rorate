@@ -3,9 +3,12 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { Loader2, ArrowLeft } from "lucide-react";
 import CompanySearch, { Company } from "./CompanySearch";
 import { SubmissionFormData, SubmissionRequestBody } from "@/types/supabase";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface FormErrors {
   linkedinUrl?: string;
@@ -117,11 +120,14 @@ export default function SubmissionForm() {
 
   const handleCompanySelect = useCallback(
     (company: Company) => {
-      setFormData((prev) => ({ ...prev, companyName: company.name }));
+      setFormData((prev: SubmissionFormData) => ({
+        ...prev,
+        companyName: company.name,
+      }));
       setSelectedCompany(company);
       // Clear company name error if it exists
       if (errors.companyName) {
-        setErrors((prev) => ({ ...prev, companyName: undefined }));
+        setErrors((prev: FormErrors) => ({ ...prev, companyName: undefined }));
       }
     },
     [errors.companyName]
@@ -133,32 +139,44 @@ export default function SubmissionForm() {
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev: SubmissionFormData) => ({ ...prev, [name]: value }));
 
     // Clear error for this field when user starts typing
     if (errors[name as keyof FormErrors]) {
-      setErrors((prev) => ({ ...prev, [name]: undefined }));
+      setErrors((prev: FormErrors) => ({ ...prev, [name]: undefined }));
     }
   };
 
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = parseInt(e.target.value);
-    setFormData((prev) => ({ ...prev, year: value || currentYear }));
+    setFormData((prev: SubmissionFormData) => ({
+      ...prev,
+      year: value || currentYear,
+    }));
     if (errors.year) {
-      setErrors((prev) => ({ ...prev, year: undefined }));
+      setErrors((prev: FormErrors) => ({ ...prev, year: undefined }));
     }
   };
 
   const handleReturnOfferChange = (value: boolean) => {
-    setFormData((prev) => ({ ...prev, returnOfferExtended: value }));
+    setFormData((prev: SubmissionFormData) => ({
+      ...prev,
+      returnOfferExtended: value,
+    }));
     if (errors.returnOfferExtended) {
-      setErrors((prev) => ({ ...prev, returnOfferExtended: undefined }));
+      setErrors((prev: FormErrors) => ({
+        ...prev,
+        returnOfferExtended: undefined,
+      }));
     }
   };
 
   const handleCompanyInputChange = useCallback(
     (value: string) => {
-      setFormData((prev) => ({ ...prev, companyName: value }));
+      setFormData((prev: SubmissionFormData) => ({
+        ...prev,
+        companyName: value,
+      }));
 
       // If user manually types and it doesn't match selected company, clear selection
       if (selectedCompany && value !== selectedCompany.name) {
@@ -166,7 +184,7 @@ export default function SubmissionForm() {
       }
 
       if (errors.companyName) {
-        setErrors((prev) => ({ ...prev, companyName: undefined }));
+        setErrors((prev: FormErrors) => ({ ...prev, companyName: undefined }));
       }
     },
     [selectedCompany, errors.companyName]
@@ -245,13 +263,28 @@ export default function SubmissionForm() {
     formData.returnOfferExtended !== null;
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-8">
-      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 md:p-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-            Submit Your Return Offer Data
+    <div className="min-h-screen bg-background">
+      {/* Header with Back Button */}
+      <div className="border-b border-border">
+        <div className="max-w-4xl mx-auto px-6 py-4">
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/")}
+            className="px-3 py-2 font-normal text-muted-foreground hover:text-foreground hover:bg-accent"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Home
+          </Button>
+        </div>
+      </div>
+
+      <div className="max-w-2xl mx-auto px-6 py-12">
+        {/* Header Section - Similar to levels.fyi */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-foreground tracking-tight">
+            Submit Your Return Offer
           </h1>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-base text-muted-foreground">
             Help others by sharing your internship return offer experience. All
             submissions are reviewed before being published.
           </p>
@@ -259,26 +292,30 @@ export default function SubmissionForm() {
 
         {submitStatus.type && (
           <div
-            className={`mb-6 p-4 rounded-lg ${
+            className={`mb-6 p-4 rounded-lg border ${
               submitStatus.type === "success"
-                ? "bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 border border-green-200 dark:border-green-800"
-                : "bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 border border-red-200 dark:border-red-800"
+                ? "bg-green-50 dark:bg-green-950/50 text-green-900 dark:text-green-100 border-green-200 dark:border-green-900"
+                : "bg-red-50 dark:bg-red-950/50 text-red-900 dark:text-red-100 border-red-200 dark:border-red-900"
             }`}
           >
             {submitStatus.message}
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Section Header */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-foreground mb-1">
+              Submission Information
+            </h2>
+          </div>
+
           {/* LinkedIn Profile URL */}
-          <div>
-            <label
-              htmlFor="linkedinUrl"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              LinkedIn Profile URL <span className="text-red-500">*</span>
-            </label>
-            <input
+          <div className="space-y-2">
+            <Label htmlFor="linkedinUrl" className="text-sm font-medium">
+              LinkedIn Profile URL <span className="text-destructive">*</span>
+            </Label>
+            <Input
               type="url"
               id="linkedinUrl"
               name="linkedinUrl"
@@ -286,36 +323,27 @@ export default function SubmissionForm() {
               onChange={handleInputChange}
               placeholder="https://linkedin.com/in/yourprofile"
               disabled={isSubmitting}
-              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                errors.linkedinUrl
-                  ? "border-red-500 dark:border-red-500"
-                  : "border-gray-300 dark:border-gray-600"
-              } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={errors.linkedinUrl ? "border-destructive" : ""}
             />
             {errors.linkedinUrl && (
-              <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
-                {errors.linkedinUrl}
-              </p>
+              <p className="text-sm text-destructive">{errors.linkedinUrl}</p>
             )}
-            <p className="mt-1.5 text-xs text-gray-500 dark:text-gray-400">
+            <p className="text-xs text-muted-foreground">
               Proof of internship - your LinkedIn profile
             </p>
           </div>
 
           {/* Company Name */}
-          <div>
-            <label
-              htmlFor="companyName"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Company Name <span className="text-red-500">*</span>
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="companyName" className="text-sm font-medium">
+              Company <span className="text-destructive">*</span>
+            </Label>
             <div
-              className={`${
+              className={
                 errors.companyName
-                  ? "border-red-500 rounded-lg border-2 p-1"
+                  ? "rounded-md border-2 border-destructive p-1"
                   : ""
-              }`}
+              }
             >
               <CompanySearch
                 onCompanySelect={handleCompanySelect}
@@ -324,9 +352,7 @@ export default function SubmissionForm() {
               />
             </div>
             {errors.companyName && (
-              <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
-                {errors.companyName}
-              </p>
+              <p className="text-sm text-destructive">{errors.companyName}</p>
             )}
             <input
               type="hidden"
@@ -336,25 +362,20 @@ export default function SubmissionForm() {
           </div>
 
           {/* Year and Term */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="term"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Term <span className="text-red-500">*</span>
-              </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="term" className="text-sm font-medium">
+                Term <span className="text-destructive">*</span>
+              </Label>
               <select
                 id="term"
                 name="term"
                 value={formData.term}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                  errors.term
-                    ? "border-red-500 dark:border-red-500"
-                    : "border-gray-300 dark:border-gray-600"
-                } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                  errors.term ? "border-destructive" : ""
+                }`}
               >
                 <option value="">Select a term</option>
                 {TERMS.map((term) => (
@@ -364,29 +385,22 @@ export default function SubmissionForm() {
                 ))}
               </select>
               {errors.term && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
-                  {errors.term}
-                </p>
+                <p className="text-sm text-destructive">{errors.term}</p>
               )}
             </div>
-            <div>
-              <label
-                htmlFor="year"
-                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-              >
-                Year <span className="text-red-500">*</span>
-              </label>
+            <div className="space-y-2">
+              <Label htmlFor="year" className="text-sm font-medium">
+                Year <span className="text-destructive">*</span>
+              </Label>
               <select
                 id="year"
                 name="year"
                 value={formData.year}
                 onChange={handleYearChange}
                 disabled={isSubmitting}
-                className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                  errors.year
-                    ? "border-red-500 dark:border-red-500"
-                    : "border-gray-300 dark:border-gray-600"
-                } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed`}
+                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                  errors.year ? "border-destructive" : ""
+                }`}
               >
                 <option value="">Select a year</option>
                 {YEARS.map((year) => (
@@ -396,32 +410,25 @@ export default function SubmissionForm() {
                 ))}
               </select>
               {errors.year && (
-                <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
-                  {errors.year}
-                </p>
+                <p className="text-sm text-destructive">{errors.year}</p>
               )}
             </div>
           </div>
 
           {/* Intern Type */}
-          <div>
-            <label
-              htmlFor="internType"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Intern Type <span className="text-red-500">*</span>
-            </label>
+          <div className="space-y-2">
+            <Label htmlFor="internType" className="text-sm font-medium">
+              Intern Type <span className="text-destructive">*</span>
+            </Label>
             <select
               id="internType"
               name="internType"
               value={formData.internType}
               onChange={handleInputChange}
               disabled={isSubmitting}
-              className={`w-full px-4 py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors ${
-                errors.internType
-                  ? "border-red-500 dark:border-red-500"
-                  : "border-gray-300 dark:border-gray-600"
-              } bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 disabled:opacity-50 disabled:cursor-not-allowed`}
+              className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                errors.internType ? "border-destructive" : ""
+              }`}
             >
               <option value="">Select an intern type</option>
               {INTERN_TYPES.map((type) => (
@@ -431,67 +438,68 @@ export default function SubmissionForm() {
               ))}
             </select>
             {errors.internType && (
-              <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
-                {errors.internType}
-              </p>
+              <p className="text-sm text-destructive">{errors.internType}</p>
             )}
           </div>
 
           {/* Return Offer Extended */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-              Return Offer Extended? <span className="text-red-500">*</span>
-            </label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium">
+              Return Offer Extended? <span className="text-destructive">*</span>
+            </Label>
             <div className="flex gap-6">
-              <label className="flex items-center cursor-pointer group">
+              <label className="flex items-center gap-2.5 cursor-pointer group">
                 <input
                   type="radio"
                   name="returnOfferExtended"
                   checked={formData.returnOfferExtended === true}
                   onChange={() => handleReturnOfferChange(true)}
                   disabled={isSubmitting}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-4 w-4 text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <span className="ml-2.5 text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
+                <span className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors">
                   Yes
                 </span>
               </label>
-              <label className="flex items-center cursor-pointer group">
+              <label className="flex items-center gap-2.5 cursor-pointer group">
                 <input
                   type="radio"
                   name="returnOfferExtended"
                   checked={formData.returnOfferExtended === false}
                   onChange={() => handleReturnOfferChange(false)}
                   disabled={isSubmitting}
-                  className="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="h-4 w-4 text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 />
-                <span className="ml-2.5 text-gray-700 dark:text-gray-300 font-medium group-hover:text-gray-900 dark:group-hover:text-gray-100 transition-colors">
+                <span className="text-sm font-medium text-foreground group-hover:text-foreground/80 transition-colors">
                   No
                 </span>
               </label>
             </div>
             {errors.returnOfferExtended && (
-              <p className="mt-1.5 text-sm text-red-600 dark:text-red-400">
+              <p className="text-sm text-destructive">
                 {errors.returnOfferExtended}
               </p>
             )}
           </div>
 
           {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isSubmitting || !allRequiredFieldsFilled}
-            className="w-full px-6 py-3 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-blue-600 flex items-center justify-center gap-2"
-          >
-            {isSubmitting ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Submitting...
-              </>
-            ) : (
-              "Submit"
-            )}
-          </button>
+          <div className="pt-4">
+            <Button
+              type="submit"
+              disabled={isSubmitting || !allRequiredFieldsFilled}
+              className="w-full"
+              size="lg"
+            >
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit"
+              )}
+            </Button>
+          </div>
         </form>
       </div>
     </div>

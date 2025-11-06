@@ -2,6 +2,8 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import Image from "next/image";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 export interface Company {
   name: string;
@@ -57,18 +59,16 @@ export default function CompanySearch({
 
       try {
         const response = await fetch(
-          `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(
-            query
-          )}`
+          `/api/companies/search?query=${encodeURIComponent(query)}`
         );
 
         if (!response.ok) {
           throw new Error("Failed to fetch company suggestions");
         }
 
-        const data: ClearbitSuggestion[] = await response.json();
+        const result = await response.json();
+        const data: ClearbitSuggestion[] = result.data || [];
 
-        // Deduplicate companies by name (case-insensitive)
         const seenNames = new Set<string>();
         const uniqueSuggestions = data.filter((company) => {
           const normalizedName = company.name.toLowerCase().trim();
@@ -205,7 +205,7 @@ export default function CompanySearch({
   return (
     <div ref={containerRef} className={`relative w-full ${className}`}>
       <div className="relative">
-        <input
+        <Input
           ref={inputRef}
           id="company-search"
           type="text"
@@ -229,7 +229,7 @@ export default function CompanySearch({
           }}
           onKeyDown={handleKeyDown}
           placeholder="Search for a company..."
-          className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 transition-colors"
+          className={cn("w-full", className)}
           aria-haspopup="listbox"
           aria-controls="company-suggestions"
         />

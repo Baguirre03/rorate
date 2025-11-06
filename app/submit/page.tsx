@@ -8,9 +8,5 @@ export const metadata: Metadata = {
 };
 
 export default function SubmitPage() {
-  return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-black py-12 px-4">
-      <SubmissionForm />
-    </div>
-  );
+  return <SubmissionForm />;
 }

@@ -218,34 +218,7 @@ export const Constants = {
   },
 } as const;
 
-// Frontend Types
-// ==============
-
-/**
- * Type for submission database insert operations
- */
-export type SubmissionInsert = TablesInsert<"submissions">;
-
-/**
- * Type for submission database row (read from database)
- */
-export type SubmissionRow = Tables<"submissions">;
-
-/**
- * Request body for creating a submission via API
- */
-export interface SubmissionRequestBody {
-  linkedinUrl?: string;
-  companyName: string;
-  year: number;
-  term: string;
-  internType?: string;
-  returnOfferExtended: boolean;
-}
-
-/**
- * Form data structure for submission form component
- */
+// Submission form types
 export interface SubmissionFormData {
   linkedinUrl: string;
   companyName: string;
@@ -255,17 +228,19 @@ export interface SubmissionFormData {
   returnOfferExtended: boolean | null;
 }
 
-/**
- * API response for submission creation
- */
-export interface SubmissionResponse {
-  success: boolean;
-  data: SubmissionRow;
+export interface SubmissionRequestBody {
+  linkedinUrl?: string;
+  companyName: string;
+  year: number;
+  term: string;
+  internType?: string;
+  returnOfferExtended: boolean;
 }
 
-/**
- * API error response
- */
-export interface ApiErrorResponse {
-  error: string;
+export type SubmissionInsert =
+  Database["public"]["Tables"]["submissions"]["Insert"];
+
+export interface SubmissionResponse {
+  success: boolean;
+  data: Database["public"]["Tables"]["submissions"]["Row"];
 }
