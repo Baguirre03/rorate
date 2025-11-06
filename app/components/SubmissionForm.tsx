@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, ArrowLeft } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import CompanySearch, { Company } from "./CompanySearch";
 import { SubmissionFormData, SubmissionRequestBody } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
@@ -264,20 +264,6 @@ export default function SubmissionForm() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header with Back Button */}
-      <div className="border-b border-border">
-        <div className="max-w-4xl mx-auto px-6 py-4">
-          <Button
-            variant="ghost"
-            onClick={() => router.push("/")}
-            className="px-3 py-2 font-normal text-muted-foreground hover:text-foreground hover:bg-accent"
-          >
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Home
-          </Button>
-        </div>
-      </div>
-
       <div className="max-w-2xl mx-auto px-6 py-12">
         {/* Header Section - Similar to levels.fyi */}
         <div className="text-center mb-12">

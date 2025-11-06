@@ -16,6 +16,7 @@ interface CompanySearchProps {
   value?: string;
   className?: string;
   onInputChange?: (value: string) => void;
+  clearOnSelect?: boolean; // If true, clear input after selection
 }
 
 interface ClearbitSuggestion {
@@ -29,6 +30,7 @@ export default function CompanySearch({
   value = "",
   className = "",
   onInputChange,
+  clearOnSelect = false,
 }: CompanySearchProps) {
   const [searchQuery, setSearchQuery] = useState(value);
   const [suggestions, setSuggestions] = useState<ClearbitSuggestion[]>([]);
@@ -132,13 +134,18 @@ export default function CompanySearch({
           : null,
       };
       setSelectedCompany(selected);
-      setSearchQuery(company.name);
+      if (clearOnSelect) {
+        setSearchQuery("");
+        setSelectedCompany(null);
+      } else {
+        setSearchQuery(company.name);
+      }
       setIsOpen(false);
       setSuggestions([]);
       onCompanySelect(selected);
       inputRef.current?.blur();
     },
-    [onCompanySelect]
+    [onCompanySelect, clearOnSelect]
   );
 
   // Click outside handler
@@ -248,49 +255,46 @@ export default function CompanySearch({
           role="listbox"
           className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-auto"
         >
-          {suggestions.map((company, index) => (
-            <button
-              key={`${company.domain}-${index}`}
-              type="button"
-              role="option"
-              aria-selected={selectedIndex === index}
-              onClick={() => handleSelectCompany(company)}
-              onMouseEnter={() => setSelectedIndex(index)}
-              className={`w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
-                selectedIndex === index ? "bg-gray-100 dark:bg-gray-700" : ""
-              }`}
-            >
-              <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                {company.name}
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Selected company info (optional, for display purposes) */}
-      {selectedCompany && !isOpen && (
-        <div className="mt-2 flex items-center gap-3 text-sm">
-          {selectedCompany.logoUrl && (
-            <Image
-              src={selectedCompany.logoUrl}
-              alt={`${selectedCompany.name} logo`}
-              width={32}
-              height={32}
-              className="w-8 h-8 rounded object-contain shrink-0"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
-            />
-          )}
-          <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
-            <span>Selected: {selectedCompany.name}</span>
-            {selectedCompany.domain && (
-              <span className="text-gray-400 dark:text-gray-500">
-                ({selectedCompany.domain})
-              </span>
-            )}
-          </div>
+          {suggestions.map((company, index) => {
+            const logoUrl = company.domain
+              ? `/api/logo?domain=${encodeURIComponent(company.domain)}`
+              : null;
+            return (
+              <button
+                key={`${company.domain}-${index}`}
+                type="button"
+                role="option"
+                aria-selected={selectedIndex === index}
+                onClick={() => handleSelectCompany(company)}
+                onMouseEnter={() => setSelectedIndex(index)}
+                className={`w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
+                  selectedIndex === index ? "bg-gray-100 dark:bg-gray-700" : ""
+                }`}
+              >
+                {logoUrl ? (
+                  <div className="relative w-8 h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
+                    <Image
+                      src={logoUrl}
+                      alt={`${company.name} logo`}
+                      width={32}
+                      height={32}
+                      className="w-full h-full object-contain rounded"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
+                    <div className="w-4 h-4 rounded bg-muted-foreground/20" />
+                  </div>
+                )}
+                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                  {company.name}
+                </span>
+              </button>
+            );
+          })}
         </div>
       )}
     </div>

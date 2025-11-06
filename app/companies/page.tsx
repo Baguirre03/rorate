@@ -298,16 +298,6 @@ export default function TopCompaniesPage() {
   return (
     <div className="min-h-screen bg-background py-12 px-6">
       <div className="max-w-6xl mx-auto">
-        {/* Back Button */}
-        <Button
-          variant="ghost"
-          onClick={() => router.push("/")}
-          className="mb-8 -ml-2"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Home
-        </Button>
-
         {/* Header */}
         <div className="mb-12">
           <div className="flex items-center gap-4 mb-4">

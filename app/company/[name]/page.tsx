@@ -4,14 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import {
-  ArrowLeft,
-  Building2,
-  TrendingUp,
-  Calendar,
-  Loader2,
-  Filter,
-} from "lucide-react";
+import { Building2, TrendingUp, Calendar, Loader2, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -187,21 +180,6 @@ export default function CompanyPage() {
   return (
     <div className="min-h-screen bg-background py-12 px-6">
       <div className="max-w-6xl mx-auto">
-        <Button
-          variant="ghost"
-          onClick={() => {
-            trackClick("click_back_button", {
-              page: "company_detail",
-              company: companyName,
-            });
-            router.push("/");
-          }}
-          className="mb-8 -ml-2"
-        >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Home
-        </Button>
-
         {/* Company Header */}
         <div className="mb-10">
           <div className="flex items-center gap-4 mb-3">
