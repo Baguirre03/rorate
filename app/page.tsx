@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { TrendingUp, Plus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CompanySearch from "@/components/CompanySearch";
@@ -11,9 +11,14 @@ import Link from "next/link";
 export default function Home() {
   const { handleCompanySelect } = useCompanySearch();
   const { trackClick, trackPageView } = useAnalytics();
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     trackPageView("home");
+    // Trigger animation after component mounts using requestAnimationFrame for smooth animation
+    requestAnimationFrame(() => {
+      setMounted(true);
+    });
   }, [trackPageView]);
 
   return (
@@ -21,16 +26,37 @@ export default function Home() {
       <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-12 sm:pb-20 md:pb-32 w-full">
         {/* Hero Section - Search Focused */}
         <div className="text-center">
-          <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold mb-4 sm:mb-6 tracking-tight text-foreground">
+          <h1
+            className={`text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold mb-4 sm:mb-6 tracking-tight text-foreground transition-all duration-700 ease-out ${
+              mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            }`}
+            style={{
+              transitionDelay: mounted ? "0ms" : "0ms",
+            }}
+          >
             Return Offer Rates.fyi
           </h1>
-          <p className="text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-12 md:mb-16 max-w-2xl mx-auto leading-relaxed px-2">
+          <p
+            className={`text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-12 md:mb-16 max-w-2xl mx-auto leading-relaxed px-2 transition-all duration-700 ease-out ${
+              mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            }`}
+            style={{
+              transitionDelay: mounted ? "150ms" : "0ms",
+            }}
+          >
             Discover return offer rates for tech companies. Search by company
             name to see detailed statistics and trends.
           </p>
 
           {/* Search Section */}
-          <div className="mb-8 sm:mb-12 md:mb-16 flex justify-center px-2">
+          <div
+            className={`mb-8 sm:mb-12 md:mb-16 flex justify-center px-2 transition-all duration-700 ease-out ${
+              mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            }`}
+            style={{
+              transitionDelay: mounted ? "300ms" : "0ms",
+            }}
+          >
             <div className="max-w-2xl w-full">
               <CompanySearch
                 onCompanySelect={handleCompanySelect}
@@ -40,7 +66,14 @@ export default function Home() {
           </div>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center px-2">
+          <div
+            className={`flex flex-col sm:flex-row gap-3 justify-center items-center px-2 transition-all duration-700 ease-out ${
+              mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            }`}
+            style={{
+              transitionDelay: mounted ? "450ms" : "0ms",
+            }}
+          >
             <Link
               href="/companies"
               className="w-full sm:w-auto max-w-xs sm:max-w-none"
