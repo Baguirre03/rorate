@@ -18,7 +18,6 @@ export async function POST(request: NextRequest) {
       returnOfferExtended,
     } = body;
 
-    // Validate required fields
     if (!companyName || !year || !term || returnOfferExtended === undefined) {
       return NextResponse.json(
         { error: "Missing required fields" },
@@ -82,6 +81,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const companyName = searchParams.get("company");
     const year = searchParams.get("year");
+    const all = searchParams.get("all") === "true"; // For admin view
 
     let query = supabase
       .from("submissions")
@@ -94,8 +94,12 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .eq("status", "accepted")
       .order("submitted_at", { ascending: false });
+
+    // Only show accepted submissions for public view
+    if (!all) {
+      query = query.eq("status", "accepted");
+    }
 
     if (companyName) {
       query = query.eq("companies.name", companyName);
