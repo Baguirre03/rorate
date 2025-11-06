@@ -26,7 +26,7 @@ export default function TopNav() {
   return (
     <div className="border-b border-border/50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-6 py-4">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <Button
             variant="ghost"
             onClick={() => router.push(backButtonPath)}
@@ -42,12 +42,12 @@ export default function TopNav() {
               clearOnSelect={true}
             />
           </div>
-          <div className="shrink-0">
+          <div className="shrink-0 ml-auto">
             <Link
               href="/"
               className="text-sm font-semibold text-foreground hover:text-foreground/80 transition-colors"
             >
-              rorates.com
+              rorates.fyi
             </Link>
           </div>
         </div>

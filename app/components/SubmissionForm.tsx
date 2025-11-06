@@ -266,7 +266,7 @@ export default function SubmissionForm() {
     <div className="min-h-screen bg-background">
       <div className="max-w-2xl mx-auto px-6 py-12">
         {/* Header Section - Similar to levels.fyi */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-8">
           <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-foreground tracking-tight">
             Submit Your Return Offer
           </h1>
@@ -288,10 +288,10 @@ export default function SubmissionForm() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-4">
           {/* Section Header */}
-          <div className="mb-6">
-            <h2 className="text-lg font-semibold text-foreground mb-1">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">
               Submission Information
             </h2>
           </div>
@@ -434,32 +434,30 @@ export default function SubmissionForm() {
               Return Offer Extended? <span className="text-destructive">*</span>
             </Label>
             <div className="flex gap-4">
-              <label className="flex items-center gap-3 cursor-pointer px-6 py-3 rounded-md border border-input hover:bg-accent hover:border-ring transition-colors min-w-[120px] justify-center group">
-                <input
-                  type="radio"
-                  name="returnOfferExtended"
-                  checked={formData.returnOfferExtended === true}
-                  onChange={() => handleReturnOfferChange(true)}
-                  disabled={isSubmitting}
-                  className="h-5 w-5 text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-                <span className="text-sm font-medium text-foreground group-hover:text-foreground transition-colors">
-                  Yes
-                </span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer px-6 py-3 rounded-md border border-input hover:bg-accent hover:border-ring transition-colors min-w-[120px] justify-center group">
-                <input
-                  type="radio"
-                  name="returnOfferExtended"
-                  checked={formData.returnOfferExtended === false}
-                  onChange={() => handleReturnOfferChange(false)}
-                  disabled={isSubmitting}
-                  className="h-5 w-5 text-foreground border-input focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                />
-                <span className="text-sm font-medium text-foreground group-hover:text-foreground transition-colors">
-                  No
-                </span>
-              </label>
+              <button
+                type="button"
+                onClick={() => handleReturnOfferChange(true)}
+                disabled={isSubmitting}
+                className={`px-6 py-3 rounded-md border transition-colors min-w-[120px] font-medium text-sm cursor-pointer ${
+                  formData.returnOfferExtended === true
+                    ? "bg-green-500 text-white border-green-500 dark:bg-green-600 dark:border-green-600"
+                    : "border-input hover:bg-accent hover:border-ring text-foreground"
+                } disabled:cursor-not-allowed disabled:opacity-50`}
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                onClick={() => handleReturnOfferChange(false)}
+                disabled={isSubmitting}
+                className={`px-6 py-3 rounded-md border transition-colors min-w-[120px] cursor-pointer font-medium text-sm ${
+                  formData.returnOfferExtended === false
+                    ? "bg-red-500 text-white border-red-500 dark:bg-red-600 dark:border-red-600"
+                    : "border-input hover:bg-accent hover:border-ring text-foreground"
+                } disabled:cursor-not-allowed disabled:opacity-50`}
+              >
+                No
+              </button>
             </div>
             {errors.returnOfferExtended && (
               <p className="text-sm text-destructive">
