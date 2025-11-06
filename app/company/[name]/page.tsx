@@ -87,7 +87,7 @@ export default function CompanyPage() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-black py-12 px-4">
+      <div className="min-h-screen bg-zinc-50 dark:bg-black py-6 sm:py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -99,21 +99,21 @@ export default function CompanyPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-zinc-50 dark:bg-black py-12 px-4">
+      <div className="min-h-screen bg-zinc-50 dark:bg-black py-6 sm:py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <Button
             variant="ghost"
             onClick={() => router.push("/")}
-            className="mb-6"
+            className="mb-4 sm:mb-6"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Home
           </Button>
           <Card>
-            <CardContent className="py-16 text-center">
-              <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-2xl font-semibold mb-2">Error</h2>
-              <p className="text-muted-foreground">
+            <CardContent className="py-12 sm:py-16 text-center px-4">
+              <Building2 className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground" />
+              <h2 className="text-xl sm:text-2xl font-semibold mb-2">Error</h2>
+              <p className="text-sm sm:text-base text-muted-foreground">
                 Failed to load company data. Please try again.
               </p>
             </CardContent>
@@ -185,13 +185,13 @@ export default function CompanyPage() {
     selectedTerm !== "all";
 
   return (
-    <div className="min-h-screen bg-background py-12 px-6">
+    <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         {/* Company Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-4 mb-3">
+        <div className="mb-6 sm:mb-10">
+          <div className="flex items-center gap-3 sm:gap-4 mb-3">
             {company?.logoUrl ? (
-              <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center shrink-0">
+              <div className="relative w-12 h-12 sm:w-16 sm:h-16 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center shrink-0">
                 <Image
                   src={company.logoUrl}
                   alt={`${company.name} logo`}
@@ -204,15 +204,15 @@ export default function CompanyPage() {
                 />
               </div>
             ) : (
-              <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
-                <Building2 className="h-8 w-8 text-muted-foreground" />
+              <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
+                <Building2 className="h-6 w-6 sm:h-8 sm:w-8 text-muted-foreground" />
               </div>
             )}
-            <div>
-              <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground">
+            <div className="min-w-0 flex-1">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight text-foreground truncate">
                 {company?.name || companyName}
               </h1>
-              <p className="text-base text-muted-foreground mt-1">
+              <p className="text-sm sm:text-base text-muted-foreground mt-1">
                 Return Offer Statistics
               </p>
             </div>
@@ -221,14 +221,14 @@ export default function CompanyPage() {
 
         {/* Filters */}
         {submissions.length > 0 && (
-          <div className="mb-12">
-            <div className="flex items-center gap-3 mb-6">
+          <div className="mb-6 sm:mb-12">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
               <Filter className="h-4 w-4 text-muted-foreground" />
-              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+              <h3 className="text-xs sm:text-sm font-semibold text-foreground uppercase tracking-wide">
                 Filter Data
               </h3>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
               {/* Year Filter */}
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-2 block uppercase tracking-wide">
@@ -307,10 +307,12 @@ export default function CompanyPage() {
 
         {/* No Data Message */}
         {hasNoData && (
-          <div className="mb-12 py-16 text-center">
-            <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-2xl font-semibold mb-2">Nothing there yet</h2>
-            <p className="text-muted-foreground">
+          <div className="mb-6 sm:mb-12 py-12 sm:py-16 text-center px-4">
+            <Building2 className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-xl sm:text-2xl font-semibold mb-2">
+              Nothing there yet
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
               No submission data available for {company?.name || companyName}{" "}
               {selectedInternType !== "all" && selectedTerm !== "all"
                 ? `for ${selectedInternType} in ${selectedTerm}`
@@ -326,10 +328,12 @@ export default function CompanyPage() {
 
         {/* No Data for Selected Filters */}
         {!hasNoData && filteredStats.total === 0 && hasActiveFilters && (
-          <div className="mb-12 py-16 text-center">
-            <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-2xl font-semibold mb-2">No Data Available</h2>
-            <p className="text-muted-foreground">
+          <div className="mb-6 sm:mb-12 py-12 sm:py-16 text-center px-4">
+            <Building2 className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-xl sm:text-2xl font-semibold mb-2">
+              No Data Available
+            </h2>
+            <p className="text-sm sm:text-base text-muted-foreground">
               No submission data available for {company?.name || companyName}{" "}
               {selectedInternType !== "all" && selectedTerm !== "all"
                 ? `for ${selectedInternType} in ${selectedTerm}`
@@ -345,42 +349,42 @@ export default function CompanyPage() {
 
         {/* Overall Stats */}
         {!hasNoData && filteredStats.total > 0 && (
-          <div className="mb-12 pb-12 border-b border-border/50">
-            <div className="mb-6">
-              <h2 className="text-2xl font-semibold mb-2">
+          <div className="mb-6 sm:mb-12 pb-6 sm:pb-12 border-b border-border/50">
+            <div className="mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl font-semibold mb-2">
                 {selectedYear === "all"
                   ? "Overall Statistics"
                   : `${selectedYear} Statistics`}
               </h2>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {selectedYear === "all"
                   ? "Return offer rate across all submissions"
                   : `Return offer rate for ${selectedYear}`}
               </p>
             </div>
             <div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6 md:gap-8 mb-4 sm:mb-8">
                 <div>
-                  <div className="text-5xl font-semibold mb-2 tracking-tight text-foreground">
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-semibold mb-2 tracking-tight text-foreground">
                     {filteredStats.percentage}%
                   </div>
-                  <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                  <div className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">
                     Return Offer Rate
                   </div>
                 </div>
                 <div>
-                  <div className="text-5xl font-semibold mb-2 tracking-tight text-foreground">
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-semibold mb-2 tracking-tight text-foreground">
                     {filteredStats.offers}
                   </div>
-                  <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                  <div className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">
                     Offers Extended
                   </div>
                 </div>
                 <div>
-                  <div className="text-5xl font-semibold mb-2 tracking-tight text-foreground">
+                  <div className="text-3xl sm:text-4xl md:text-5xl font-semibold mb-2 tracking-tight text-foreground">
                     {filteredStats.total}
                   </div>
-                  <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
+                  <div className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">
                     Total Submissions
                   </div>
                 </div>
@@ -399,33 +403,38 @@ export default function CompanyPage() {
 
         {/* Year Breakdown */}
         {byYear.length > 0 && filteredStats.total > 0 && (
-          <div className="mb-12 pb-12 border-b border-border/50">
-            <div className="flex items-center gap-3 mb-6">
-              <Calendar className="h-5 w-5 text-muted-foreground" />
-              <h2 className="text-2xl font-semibold">Year Breakdown</h2>
+          <div className="mb-6 sm:mb-12 pb-6 sm:pb-12 border-b border-border/50">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <Calendar className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+              <h2 className="text-xl sm:text-2xl font-semibold">
+                Year Breakdown
+              </h2>
             </div>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">
               Return offer rates by year
             </p>
             <div>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {byYear.map((yearData) => (
                   <div
                     key={yearData.year}
-                    className="border-b border-border last:border-0 pb-6 last:pb-0"
+                    className="border-b border-border last:border-0 pb-4 sm:pb-6 last:pb-0"
                   >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center gap-4">
-                        <span className="text-xl font-semibold tracking-tight text-foreground">
+                    <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                      <div className="flex items-center gap-2 sm:gap-4 flex-wrap">
+                        <span className="text-lg sm:text-xl font-semibold tracking-tight text-foreground">
                           {yearData.year}
                         </span>
-                        <Badge variant="secondary" className="font-medium">
+                        <Badge
+                          variant="secondary"
+                          className="font-medium text-xs"
+                        >
                           {yearData.total} submission
                           {yearData.total !== 1 ? "s" : ""}
                         </Badge>
                       </div>
                       <div className="text-right">
-                        <div className="text-3xl font-semibold tracking-tight text-foreground">
+                        <div className="text-2xl sm:text-3xl font-semibold tracking-tight text-foreground">
                           {yearData.percentage}%
                         </div>
                         <div className="text-xs font-medium text-muted-foreground mt-1">
@@ -448,12 +457,12 @@ export default function CompanyPage() {
 
         {/* Recent Submissions */}
         {filteredSubmissions.length > 0 && (
-          <div className="mb-12 pb-12 border-b border-border/50">
-            <div className="flex items-center gap-3 mb-6">
-              <TrendingUp className="h-5 w-5 text-muted-foreground" />
-              <h2 className="text-2xl font-semibold">Submissions</h2>
+          <div className="mb-6 sm:mb-12 pb-6 sm:pb-12 border-b border-border/50">
+            <div className="flex items-center gap-2 sm:gap-3 mb-4 sm:mb-6">
+              <TrendingUp className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+              <h2 className="text-xl sm:text-2xl font-semibold">Submissions</h2>
             </div>
-            <p className="text-sm text-muted-foreground mb-6">
+            <p className="text-xs sm:text-sm text-muted-foreground mb-4 sm:mb-6">
               {selectedYear === "all"
                 ? `Recent submissions for ${company?.name}`
                 : `${selectedYear} submissions for ${company?.name}`}
@@ -464,32 +473,32 @@ export default function CompanyPage() {
               )}
             </p>
             <div>
-              <div className="space-y-3">
+              <div className="space-y-2 sm:space-y-3">
                 {filteredSubmissions.slice(0, 10).map((submission) => (
                   <div
                     key={submission.id}
-                    className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-all"
+                    className="border border-border rounded-lg p-3 sm:p-4 hover:bg-accent/50 transition-all"
                   >
                     <div className="flex items-center justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2 flex-wrap">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 sm:gap-3 mb-2 flex-wrap">
                           <Badge
                             variant={
                               submission.return_offer_extended
                                 ? "success"
                                 : "secondary"
                             }
-                            className="font-medium"
+                            className="font-medium text-xs"
                           >
                             {submission.return_offer_extended
                               ? "Offer Extended"
                               : "No Offer"}
                           </Badge>
-                          <span className="text-sm font-medium text-muted-foreground">
+                          <span className="text-xs sm:text-sm font-medium text-muted-foreground">
                             {submission.year} • {submission.term}
                           </span>
                           {submission.intern_type && (
-                            <span className="text-sm font-medium text-muted-foreground">
+                            <span className="text-xs sm:text-sm font-medium text-muted-foreground">
                               • {submission.intern_type}
                             </span>
                           )}
@@ -507,7 +516,7 @@ export default function CompanyPage() {
                   </div>
                 ))}
                 {filteredSubmissions.length > 10 && (
-                  <div className="text-center text-sm font-medium text-muted-foreground pt-4">
+                  <div className="text-center text-xs sm:text-sm font-medium text-muted-foreground pt-2 sm:pt-4">
                     Showing 10 of {filteredSubmissions.length} submissions
                   </div>
                 )}

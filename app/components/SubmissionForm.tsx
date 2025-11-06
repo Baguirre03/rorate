@@ -261,13 +261,13 @@ export default function SubmissionForm() {
 
   return (
     <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-6 py-12">
+      <div className="max-w-2xl mx-auto px-4 sm:px-6 py-6 sm:py-12">
         {/* Header Section - Similar to levels.fyi */}
-        <div className="text-center mb-8">
-          <h1 className="text-4xl sm:text-5xl font-bold mb-4 text-foreground tracking-tight">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-3 sm:mb-4 text-foreground tracking-tight">
             Submit Your Return Offer
           </h1>
-          <p className="text-base text-muted-foreground">
+          <p className="text-sm sm:text-base text-muted-foreground px-2">
             Help others by sharing your internship return offer experience. All
             submissions are reviewed before being published.
           </p>
@@ -345,7 +345,7 @@ export default function SubmissionForm() {
           </div>
 
           {/* Year and Term */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <div className="space-y-2">
               <Label htmlFor="term" className="text-sm font-medium">
                 Term <span className="text-destructive">*</span>
@@ -430,12 +430,12 @@ export default function SubmissionForm() {
             <Label className="text-sm font-medium">
               Return Offer Extended? <span className="text-destructive">*</span>
             </Label>
-            <div className="flex gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <button
                 type="button"
                 onClick={() => handleReturnOfferChange(true)}
                 disabled={isSubmitting}
-                className={`px-6 py-3 rounded-md border transition-colors min-w-[120px] font-medium text-sm cursor-pointer ${
+                className={`px-6 py-3 rounded-md border transition-colors w-full sm:min-w-[120px] font-medium text-sm cursor-pointer ${
                   formData.returnOfferExtended === true
                     ? "bg-green-500 text-white border-green-500 dark:bg-green-600 dark:border-green-600"
                     : "border-input hover:bg-accent hover:border-ring text-foreground"
@@ -447,7 +447,7 @@ export default function SubmissionForm() {
                 type="button"
                 onClick={() => handleReturnOfferChange(false)}
                 disabled={isSubmitting}
-                className={`px-6 py-3 rounded-md border transition-colors min-w-[120px] cursor-pointer font-medium text-sm ${
+                className={`px-6 py-3 rounded-md border transition-colors w-full sm:min-w-[120px] cursor-pointer font-medium text-sm ${
                   formData.returnOfferExtended === false
                     ? "bg-red-500 text-white border-red-500 dark:bg-red-600 dark:border-red-600"
                     : "border-input hover:bg-accent hover:border-ring text-foreground"

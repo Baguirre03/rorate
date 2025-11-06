@@ -126,7 +126,7 @@ export default function SubmissionsPage() {
 
   if (isLoading) {
     return (
-      <div className="bg-background py-12 px-4">
+      <div className="bg-background py-6 sm:py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
@@ -138,12 +138,12 @@ export default function SubmissionsPage() {
 
   if (error) {
     return (
-      <div className="bg-background py-12 px-4">
+      <div className="bg-background py-6 sm:py-12 px-4">
         <div className="max-w-6xl mx-auto">
           <Card>
-            <CardHeader>
-              <CardTitle>Error</CardTitle>
-              <CardDescription>
+            <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
+              <CardTitle className="text-lg sm:text-xl">Error</CardTitle>
+              <CardDescription className="text-xs sm:text-sm">
                 Failed to load submissions. Please try again.
               </CardDescription>
             </CardHeader>
@@ -156,7 +156,7 @@ export default function SubmissionsPage() {
   const submissions = data?.data || [];
 
   return (
-    <div className="bg-background py-8 px-6">
+    <div className="bg-background py-4 sm:py-8 px-4 sm:px-6">
       <div className="max-w-7xl mx-auto">
         <div className="mb-4">
           <Button
@@ -172,28 +172,28 @@ export default function SubmissionsPage() {
           </Button>
         </div>
         <Card>
-          <CardHeader className="pb-4">
-            <CardTitle className="text-xl">Submissions</CardTitle>
-            <CardDescription className="text-sm">
+          <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
+            <CardTitle className="text-lg sm:text-xl">Submissions</CardTitle>
+            <CardDescription className="text-xs sm:text-sm">
               Review and manage all submissions ({submissions.length} total)
             </CardDescription>
           </CardHeader>
-          <CardContent className="p-4">
+          <CardContent className="p-3 sm:p-4 md:p-6">
             {submissions.length === 0 ? (
-              <div className="text-center py-12 text-muted-foreground text-sm">
+              <div className="text-center py-8 sm:py-12 text-muted-foreground text-xs sm:text-sm">
                 No submissions found
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-2 sm:space-y-3">
                 {submissions.map((submission) => (
                   <div
                     key={submission.id}
-                    className="border rounded-md p-3 hover:bg-accent/50 transition-colors"
+                    className="border rounded-md p-3 sm:p-4 hover:bg-accent/50 transition-colors"
                   >
-                    <div className="flex items-center justify-between gap-4">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-sm font-semibold truncate">
+                        <div className="flex items-center gap-2 mb-2 flex-wrap">
+                          <h3 className="text-sm sm:text-base font-semibold truncate">
                             {submission.companies.name}
                           </h3>
                           <Badge
@@ -203,7 +203,7 @@ export default function SubmissionsPage() {
                             {submission.status}
                           </Badge>
                         </div>
-                        <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                        <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 text-xs text-muted-foreground">
                           <span>
                             <span className="font-medium">Year:</span>{" "}
                             {submission.year}
@@ -244,12 +244,12 @@ export default function SubmissionsPage() {
                         </div>
                       </div>
                       {submission.status === "waiting" && (
-                        <div className="flex gap-1.5 shrink-0">
+                        <div className="flex gap-1.5 shrink-0 sm:flex-row flex-col">
                           <Button
                             size="sm"
                             onClick={() => handleAccept(submission.id)}
                             disabled={updateStatusMutation.isPending}
-                            className="h-7 px-2 text-xs bg-foreground text-background hover:bg-foreground/90"
+                            className="h-7 px-2 text-xs bg-foreground text-background hover:bg-foreground/90 w-full sm:w-auto"
                           >
                             <CheckCircle2 className="h-3 w-3 mr-1" />
                             Accept
@@ -259,7 +259,7 @@ export default function SubmissionsPage() {
                             variant="destructive"
                             onClick={() => handleDecline(submission.id)}
                             disabled={updateStatusMutation.isPending}
-                            className="h-7 px-2 text-xs"
+                            className="h-7 px-2 text-xs w-full sm:w-auto"
                           >
                             <XCircle className="h-3 w-3 mr-1" />
                             Decline

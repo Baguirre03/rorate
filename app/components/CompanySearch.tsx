@@ -254,6 +254,7 @@ export default function CompanySearch({
           id="company-suggestions"
           role="listbox"
           className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-auto"
+          style={{ maxHeight: "16rem" }}
         >
           {suggestions.map((company, index) => {
             const logoUrl = company.domain
@@ -267,12 +268,12 @@ export default function CompanySearch({
                 aria-selected={selectedIndex === index}
                 onClick={() => handleSelectCompany(company)}
                 onMouseEnter={() => setSelectedIndex(index)}
-                className={`w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
+                className={`w-full px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
                   selectedIndex === index ? "bg-gray-100 dark:bg-gray-700" : ""
                 }`}
               >
                 {logoUrl ? (
-                  <div className="relative w-8 h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
+                  <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
                     <Image
                       src={logoUrl}
                       alt={`${company.name} logo`}
@@ -285,11 +286,11 @@ export default function CompanySearch({
                     />
                   </div>
                 ) : (
-                  <div className="w-8 h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
-                    <div className="w-4 h-4 rounded bg-muted-foreground/20" />
+                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
+                    <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-muted-foreground/20" />
                   </div>
                 )}
-                <span className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
                   {company.name}
                 </span>
               </button>
