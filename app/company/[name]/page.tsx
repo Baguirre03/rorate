@@ -502,6 +502,12 @@ export default function CompanyPage() {
                               • {submission.intern_type}
                             </span>
                           )}
+                          {submission.return_offer_extended &&
+                            submission.position_type && (
+                              <span className="text-xs sm:text-sm font-medium text-muted-foreground">
+                                • {submission.position_type}
+                              </span>
+                            )}
                         </div>
                         {submission.submitted_at && (
                           <div className="text-xs text-muted-foreground">

@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       term,
       internType,
       returnOfferExtended,
+      positionType,
     } = body;
 
     if (!companyName || !year || !term || returnOfferExtended === undefined) {
@@ -25,7 +26,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Step 1: Get or create company
     let { data: company } = await supabase
       .from("companies")
       .select("id")
@@ -51,6 +51,7 @@ export async function POST(request: NextRequest) {
       status: "waiting",
       intern_type: internType || null,
       linkedin_url: linkedinUrl || null,
+      position_type: positionType || null,
     };
 
     const { data: submission, error: submissionError } = await supabase

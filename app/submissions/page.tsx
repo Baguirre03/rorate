@@ -30,6 +30,7 @@ type SubmissionWithCompany = {
   year: number;
   term: string;
   intern_type: string | null;
+  position_type: string | null;
   linkedin_url: string | null;
   return_offer_extended: boolean;
   status: string;
@@ -222,6 +223,13 @@ export default function SubmissionsPage() {
                             <span className="font-medium">Return Offer:</span>{" "}
                             {submission.return_offer_extended ? "Yes" : "No"}
                           </span>
+                          {submission.return_offer_extended &&
+                            submission.position_type && (
+                              <span>
+                                <span className="font-medium">Position:</span>{" "}
+                                {submission.position_type}
+                              </span>
+                            )}
                           {submission.linkedin_url && (
                             <a
                               href={submission.linkedin_url}

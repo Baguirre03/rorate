@@ -38,6 +38,7 @@ export type Database = {
           id: number;
           intern_type: string | null;
           linkedin_url: string | null;
+          position_type: string | null;
           return_offer_extended: boolean;
           status: string;
           submitted_at: string | null;
@@ -49,6 +50,7 @@ export type Database = {
           id?: number;
           intern_type?: string | null;
           linkedin_url?: string | null;
+          position_type?: string | null;
           return_offer_extended: boolean;
           status: string;
           submitted_at?: string | null;
@@ -60,6 +62,7 @@ export type Database = {
           id?: number;
           intern_type?: string | null;
           linkedin_url?: string | null;
+          position_type?: string | null;
           return_offer_extended?: boolean;
           status?: string;
           submitted_at?: string | null;
@@ -218,29 +221,30 @@ export const Constants = {
   },
 } as const;
 
-// Submission form types
-export interface SubmissionFormData {
+// Form and API Types
+export type SubmissionInsert = TablesInsert<"submissions">;
+
+export type SubmissionResponse = {
+  success: boolean;
+  data: Tables<"submissions">;
+};
+
+export type SubmissionFormData = {
   linkedinUrl: string;
   companyName: string;
   year: number;
   term: string;
   internType: string;
   returnOfferExtended: boolean | null;
-}
+  positionType: string | null;
+};
 
-export interface SubmissionRequestBody {
+export type SubmissionRequestBody = {
   linkedinUrl?: string;
   companyName: string;
   year: number;
   term: string;
   internType?: string;
   returnOfferExtended: boolean;
-}
-
-export type SubmissionInsert =
-  Database["public"]["Tables"]["submissions"]["Insert"];
-
-export interface SubmissionResponse {
-  success: boolean;
-  data: Database["public"]["Tables"]["submissions"]["Row"];
-}
+  positionType?: string;
+};

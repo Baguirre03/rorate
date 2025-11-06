@@ -17,6 +17,7 @@ interface FormErrors {
   term?: string;
   internType?: string;
   returnOfferExtended?: string;
+  positionType?: string;
 }
 
 // Normalize LinkedIn URL - add https:// if missing
@@ -43,6 +44,10 @@ function createSubmissionPayload(
     term: formData.term,
     internType: formData.internType || undefined,
     returnOfferExtended: formData.returnOfferExtended === true,
+    positionType:
+      formData.returnOfferExtended === true
+        ? formData.positionType || "Full Time"
+        : undefined,
   };
 }
 
@@ -69,6 +74,7 @@ export default function SubmissionForm() {
     term: "",
     internType: "",
     returnOfferExtended: null,
+    positionType: null,
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -111,6 +117,8 @@ export default function SubmissionForm() {
       newErrors.returnOfferExtended =
         "Please select whether a return offer was extended";
     }
+
+    // Position type is optional (can be null)
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -160,11 +168,35 @@ export default function SubmissionForm() {
     setFormData((prev: SubmissionFormData) => ({
       ...prev,
       returnOfferExtended: value,
+      // Set default to "Full Time" if offer was extended, clear if not
+      positionType: value ? prev.positionType || "Full Time" : null,
     }));
     if (errors.returnOfferExtended) {
       setErrors((prev: FormErrors) => ({
         ...prev,
         returnOfferExtended: undefined,
+      }));
+    }
+    if (errors.positionType) {
+      setErrors((prev: FormErrors) => ({
+        ...prev,
+        positionType: undefined,
+      }));
+    }
+  };
+
+  const handlePositionTypeChange = (
+    e: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const value = e.target.value;
+    setFormData((prev: SubmissionFormData) => ({
+      ...prev,
+      positionType: value || "Full Time",
+    }));
+    if (errors.positionType) {
+      setErrors((prev: FormErrors) => ({
+        ...prev,
+        positionType: undefined,
       }));
     }
   };
@@ -462,6 +494,37 @@ export default function SubmissionForm() {
               </p>
             )}
           </div>
+
+          {/* Position Type - Only show if offer was extended */}
+          {formData.returnOfferExtended === true && (
+            <div className="space-y-2">
+              <Label htmlFor="positionType" className="text-sm font-medium">
+                Return Offer Position Type
+              </Label>
+              <select
+                id="positionType"
+                name="positionType"
+                value={formData.positionType || "Full Time"}
+                onChange={handlePositionTypeChange}
+                disabled={isSubmitting}
+                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                  errors.positionType ? "border-destructive" : ""
+                }`}
+              >
+                <option value="Full Time">Full Time</option>
+                <option value="Intern">Intern</option>
+              </select>
+              {errors.positionType && (
+                <p className="text-sm text-destructive">
+                  {errors.positionType}
+                </p>
+              )}
+              <p className="text-xs text-muted-foreground">
+                Was the return offer for another internship or a full-time
+                position?
+              </p>
+            </div>
+          )}
 
           {/* Submit Button */}
           <div className="pt-4">
