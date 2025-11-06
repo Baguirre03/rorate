@@ -11,12 +11,9 @@ import {
   Loader2,
   ArrowRight,
   ArrowLeft,
-  Users,
-  CheckCircle2,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useTopCompanies } from "@/hooks/useTopCompanies";
 import { useAnalytics } from "@/hooks/useAnalytics";
@@ -43,112 +40,145 @@ function CompanyCard({
   return (
     <Link
       href={`/company/${encodeURIComponent(company.name)}`}
-      className="block mb-4 sm:mb-6 last:mb-0 cursor-pointer"
+      className="block last:mb-0 cursor-pointer"
       onClick={() =>
         trackClick("click_company_card", { company: company.name, rank })
       }
     >
-      <div className="p-4 sm:p-6 hover:bg-accent/50 transition-colors duration-150 cursor-pointer group rounded-lg">
-        <div className="flex items-center gap-3 sm:gap-6">
-          {/* Company Info */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 sm:gap-3 mb-3">
+      <div className="border-b border-border/50 hover:bg-accent/30 transition-all duration-200 cursor-pointer group">
+        <div className="py-4 sm:py-5">
+          {/* Desktop Grid Layout - Matches Header */}
+          <div className="hidden md:grid md:grid-cols-[40px_48px_1fr_80px_80px_100px_32px] gap-4 sm:gap-6 px-4 sm:px-6 items-center">
+            {/* Rank Number */}
+            <div className="text-center">
+              <span className="text-sm sm:text-base font-medium text-muted-foreground">
+                {rank}
+              </span>
+            </div>
+
+            {/* Company Logo */}
+            <div>
               {company.logoUrl ? (
-                <div className="relative w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center shrink-0">
+                <div className="relative w-10 h-10 sm:w-12 sm:h-12 rounded-md overflow-hidden border border-border/50 bg-muted flex items-center justify-center">
                   <Image
                     src={company.logoUrl}
                     alt={`${company.name} logo`}
-                    width={40}
-                    height={40}
-                    className="w-full h-full object-contain"
+                    width={48}
+                    height={48}
+                    className="w-full h-full object-contain p-1"
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = "none";
                     }}
                   />
                 </div>
               ) : (
-                <div className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
-                  <Building2 className="h-4 w-4 sm:h-5 sm:w-5 text-muted-foreground" />
+                <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-md bg-muted border border-border/50 flex items-center justify-center">
+                  <Building2 className="h-5 w-5 sm:h-6 sm:w-6 text-muted-foreground" />
                 </div>
               )}
-              <h3 className="text-lg sm:text-xl md:text-2xl font-semibold tracking-tight text-foreground truncate">
+            </div>
+
+            {/* Company Name */}
+            <div className="min-w-0">
+              <h3 className="text-base sm:text-lg font-semibold tracking-tight text-foreground truncate">
                 {company.name}
               </h3>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-3 sm:mb-4">
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1 sm:gap-2 mb-1">
-                  <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                  <span className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                    Submissions
-                  </span>
-                </div>
-                <span className="text-xl sm:text-2xl font-semibold text-foreground">
-                  {company.total}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1 sm:gap-2 mb-1">
-                  <CheckCircle2 className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                  <span className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                    Offers
-                  </span>
-                </div>
-                <span className="text-xl sm:text-2xl font-semibold text-foreground">
-                  {company.offers}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <div className="flex items-center gap-1 sm:gap-2 mb-1">
-                  <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-                  <span className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                    RO Rate
-                  </span>
-                </div>
-                <div className="flex items-center gap-1 sm:gap-2 flex-wrap">
-                  <span className="text-xl sm:text-2xl font-semibold text-foreground">
-                    {company.percentage}%
-                  </span>
-                  <Badge
-                    variant={
-                      company.percentage >= 70
-                        ? "success"
-                        : company.percentage >= 50
-                        ? "warning"
-                        : "secondary"
-                    }
-                    className="text-xs font-medium"
-                  >
-                    {company.percentage >= 70
-                      ? "Excellent"
-                      : company.percentage >= 50
-                      ? "Good"
-                      : "Low"}
-                  </Badge>
-                </div>
+            {/* Submissions */}
+            <div className="text-right">
+              <div className="text-base font-semibold text-foreground">
+                {company.total}
               </div>
             </div>
 
-            {/* Progress Bar */}
-            <div className="w-full bg-muted rounded-full h-2 sm:h-2.5 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all ${
-                  company.percentage >= 70
-                    ? "bg-green-500"
-                    : company.percentage >= 50
-                    ? "bg-yellow-500"
-                    : "bg-foreground"
-                }`}
-                style={{ width: `${company.percentage}%` }}
-              />
+            {/* Offers */}
+            <div className="text-right">
+              <div className="text-base font-semibold text-foreground">
+                {company.offers}
+              </div>
+            </div>
+
+            {/* RO Rate */}
+            <div className="text-right">
+              <div className="text-base font-semibold text-foreground">
+                {company.percentage}%
+              </div>
+            </div>
+
+            {/* Arrow */}
+            <div>
+              <ArrowRight className="h-4 w-4 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all duration-200" />
             </div>
           </div>
 
-          {/* Arrow */}
-          <div className="shrink-0 hidden sm:block">
-            <ArrowRight className="h-5 w-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-1 transition-all duration-150" />
+          {/* Mobile Layout */}
+          <div className="md:hidden px-4">
+            <div className="flex items-center gap-3 sm:gap-4 mb-3">
+              {/* Rank Number */}
+              <div className="shrink-0 w-8 text-center">
+                <span className="text-sm font-medium text-muted-foreground">
+                  {rank}
+                </span>
+              </div>
+
+              {/* Company Logo */}
+              <div className="shrink-0">
+                {company.logoUrl ? (
+                  <div className="relative w-10 h-10 rounded-md overflow-hidden border border-border/50 bg-muted flex items-center justify-center">
+                    <Image
+                      src={company.logoUrl}
+                      alt={`${company.name} logo`}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-contain p-1"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 rounded-md bg-muted border border-border/50 flex items-center justify-center">
+                    <Building2 className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                )}
+              </div>
+
+              {/* Company Name */}
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold tracking-tight text-foreground truncate mb-1">
+                  {company.name}
+                </h3>
+              </div>
+            </div>
+
+            {/* Stats - Mobile Layout */}
+            <div className="flex items-center gap-4">
+              <div className="text-right flex-1">
+                <div className="text-xs text-muted-foreground mb-0.5">
+                  Submissions
+                </div>
+                <div className="text-sm font-semibold text-foreground">
+                  {company.total}
+                </div>
+              </div>
+              <div className="text-right flex-1">
+                <div className="text-xs text-muted-foreground mb-0.5">
+                  Offers
+                </div>
+                <div className="text-sm font-semibold text-foreground">
+                  {company.offers}
+                </div>
+              </div>
+              <div className="text-right flex-1">
+                <div className="text-xs text-muted-foreground mb-0.5">
+                  RO Rate
+                </div>
+                <div className="text-sm font-semibold text-foreground">
+                  {company.percentage}%
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -180,7 +210,25 @@ function TabContent({
   }
 
   return (
-    <div>
+    <div className="border border-border/50 rounded-lg overflow-hidden bg-card">
+      {/* Table Header - Desktop Only */}
+      <div className="hidden md:grid md:grid-cols-[40px_48px_1fr_80px_80px_100px_32px] gap-4 sm:gap-6 px-4 sm:px-6 py-3 bg-muted/30 border-b border-border/50">
+        <div></div>
+        <div></div>
+        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+          Company
+        </div>
+        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
+          Submissions
+        </div>
+        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
+          Offers
+        </div>
+        <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
+          RO Rate
+        </div>
+        <div></div>
+      </div>
       {companies.map((company, index) => (
         <CompanyCard
           key={`${company.name}-${index}`}
@@ -262,7 +310,7 @@ export default function TopCompaniesPage() {
     <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="mb-6 sm:mb-12">
+        <div className="mb-8 sm:mb-12">
           <div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-tight text-foreground mb-2">
               Top Companies
@@ -302,9 +350,9 @@ export default function TopCompaniesPage() {
             </TabsTrigger>
           </TabsList>
 
-          <TabsContent value="most-submissions" className="mt-4 sm:mt-6">
-            <div className="mb-4 sm:mb-6">
-              <p className="text-xs sm:text-sm text-muted-foreground">
+          <TabsContent value="most-submissions" className="mt-6 sm:mt-8">
+            <div className="mb-6">
+              <p className="text-sm text-muted-foreground">
                 Companies ranked by total number of submissions in {year}
               </p>
             </div>
@@ -315,9 +363,9 @@ export default function TopCompaniesPage() {
             />
           </TabsContent>
 
-          <TabsContent value="best-rates" className="mt-4 sm:mt-6">
-            <div className="mb-4 sm:mb-6">
-              <p className="text-xs sm:text-sm text-muted-foreground">
+          <TabsContent value="best-rates" className="mt-6 sm:mt-8">
+            <div className="mb-6">
+              <p className="text-sm text-muted-foreground">
                 Companies with the highest return offer rates in {year} (minimum
                 3 submissions required)
               </p>
@@ -329,9 +377,9 @@ export default function TopCompaniesPage() {
             />
           </TabsContent>
 
-          <TabsContent value="worst-rates" className="mt-4 sm:mt-6">
-            <div className="mb-4 sm:mb-6">
-              <p className="text-xs sm:text-sm text-muted-foreground">
+          <TabsContent value="worst-rates" className="mt-6 sm:mt-8">
+            <div className="mb-6">
+              <p className="text-sm text-muted-foreground">
                 Companies with the lowest return offer rates in {year} (minimum
                 3 submissions required)
               </p>
