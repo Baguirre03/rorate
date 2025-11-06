@@ -17,10 +17,10 @@ export default function Home() {
   }, [trackPageView]);
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-5xl mx-auto px-6 py-20 sm:py-32">
+    <div className="min-h-screen bg-background flex items-start justify-center pt-20 sm:pt-32">
+      <div className="max-w-5xl mx-auto px-6 pb-20 sm:pb-32 w-full">
         {/* Hero Section - Search Focused */}
-        <div className="text-center mb-20">
+        <div className="text-center">
           <h1 className="text-5xl sm:text-6xl md:text-7xl font-semibold mb-6 tracking-tight text-foreground">
             Return Offer Rates.fyi
           </h1>
@@ -30,8 +30,8 @@ export default function Home() {
           </p>
 
           {/* Search Section */}
-          <div className="mb-16">
-            <div className="max-w-2xl mx-auto">
+          <div className="mb-16 flex justify-center">
+            <div className="max-w-2xl w-full">
               <CompanySearch
                 onCompanySelect={handleCompanySelect}
                 className="w-full"
@@ -40,7 +40,7 @@ export default function Home() {
           </div>
 
           {/* CTAs */}
-          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center max-w-2xl mx-auto">
+          <div className="flex flex-col sm:flex-row gap-3 justify-center items-center">
             <Link href="/companies" className="w-full sm:w-auto">
               <Button
                 size="lg"
