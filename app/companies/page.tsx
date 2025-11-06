@@ -22,7 +22,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { useTopCompanies } from "@/hooks/useTopCompanies";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import SubmitCTA from "@/components/SubmitCTA";
+import { useEffect } from "react";
 
 type CompanyStats = {
   name: string;
@@ -40,6 +42,7 @@ function CompanyCard({
   rank: number;
   showRank?: boolean;
 }) {
+  const { trackClick } = useAnalytics();
   const getRankDisplay = (rank: number) => {
     if (rank === 1)
       return (
@@ -69,7 +72,10 @@ function CompanyCard({
   return (
     <Link
       href={`/company/${encodeURIComponent(company.name)}`}
-      className="block mb-6 last:mb-0"
+      className="block mb-6 last:mb-0 cursor-pointer"
+      onClick={() =>
+        trackClick("click_company_card", { company: company.name, rank })
+      }
     >
       <Card className="border shadow-sm hover:bg-accent/50 transition-colors duration-150 cursor-pointer group">
         <CardContent className="p-6">
@@ -206,10 +212,19 @@ export default function TopCompaniesPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("most-submissions");
   const { data, isLoading, error } = useTopCompanies();
+  const { trackClick, trackPageView } = useAnalytics();
 
-  const handleTabChange = useCallback((value: string) => {
-    setActiveTab(value);
-  }, []);
+  useEffect(() => {
+    trackPageView("top_companies", { tab: activeTab });
+  }, [trackPageView, activeTab]);
+
+  const handleTabChange = useCallback(
+    (value: string) => {
+      setActiveTab(value);
+      trackClick("click_tab", { tab: value, page: "top_companies" });
+    },
+    [trackClick]
+  );
 
   if (isLoading) {
     return (
@@ -229,7 +244,10 @@ export default function TopCompaniesPage() {
         <div className="max-w-6xl mx-auto">
           <Button
             variant="ghost"
-            onClick={() => router.push("/")}
+            onClick={() => {
+              trackClick("click_back_button", { page: "top_companies" });
+              router.push("/");
+            }}
             className="mb-6 -ml-2"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

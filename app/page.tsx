@@ -1,13 +1,20 @@
 "use client";
 
+import { useEffect } from "react";
 import { TrendingUp, Plus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CompanySearch from "@/components/CompanySearch";
 import { useCompanySearch } from "@/hooks/useCompanySearch";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import Link from "next/link";
 
 export default function Home() {
   const { handleCompanySelect } = useCompanySearch();
+  const { trackClick, trackPageView } = useAnalytics();
+
+  useEffect(() => {
+    trackPageView("home");
+  }, [trackPageView]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -38,6 +45,9 @@ export default function Home() {
               <Button
                 size="lg"
                 className="w-full sm:w-auto text-base px-7 py-5 h-auto font-medium"
+                onClick={() =>
+                  trackClick("click_top_companies_button", { page: "home" })
+                }
               >
                 <TrendingUp className="h-4 w-4 mr-2" />
                 Top Companies
@@ -49,6 +59,9 @@ export default function Home() {
                 size="lg"
                 variant="outline"
                 className="w-full sm:w-auto text-base px-7 py-5 h-auto font-medium"
+                onClick={() =>
+                  trackClick("click_submit_button", { page: "home" })
+                }
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Submit Your Return Offer

@@ -20,7 +20,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import SubmitCTA from "@/components/SubmitCTA";
+import { useEffect } from "react";
 
 type SubmissionWithCompany = {
   id: number;
@@ -54,6 +56,11 @@ const getStatusBadgeVariant = (status: string) => {
 export default function SubmissionsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { trackClick, trackPageView } = useAnalytics();
+
+  useEffect(() => {
+    trackPageView("submissions");
+  }, [trackPageView]);
 
   const { data, isLoading, error } = useQuery<{
     data: SubmissionWithCompany[];
@@ -154,7 +161,10 @@ export default function SubmissionsPage() {
         <div className="mb-4">
           <Button
             variant="ghost"
-            onClick={() => router.push("/")}
+            onClick={() => {
+              trackClick("click_back_button", { page: "submissions" });
+              router.push("/");
+            }}
             className="mb-4"
           >
             <ArrowLeft className="h-4 w-4 mr-2" />

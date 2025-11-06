@@ -1,10 +1,15 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAnalytics } from "@/hooks/useAnalytics";
 
 export default function SubmitCTA() {
+  const pathname = usePathname();
+  const { trackClick } = useAnalytics();
+
   return (
     <div className="mt-12 pt-12 border-t border-border">
       <div className="text-center">
@@ -16,7 +21,14 @@ export default function SubmitCTA() {
           submissions are reviewed before being published.
         </p>
         <Link href="/submit">
-          <Button size="lg" variant="outline" className="font-medium">
+          <Button
+            size="lg"
+            variant="outline"
+            className="font-medium"
+            onClick={() =>
+              trackClick("click_submit_cta", { page: pathname || "" })
+            }
+          >
             <Plus className="h-4 w-4 mr-2" />
             Submit Your Return Offer
           </Button>

@@ -19,7 +19,9 @@ import {
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Tables } from "@/types/supabase";
+import { useAnalytics } from "@/hooks/useAnalytics";
 import SubmitCTA from "@/components/SubmitCTA";
+import { useEffect } from "react";
 
 type SubmissionWithCompany = Tables<"submissions"> & {
   companies: Pick<Tables<"companies">, "id" | "name"> | null;
@@ -45,6 +47,11 @@ export default function CompanyPage() {
   const params = useParams();
   const router = useRouter();
   const companyName = decodeURIComponent(params.name as string);
+  const { trackClick, trackPageView } = useAnalytics();
+
+  useEffect(() => {
+    trackPageView("company_detail", { company: companyName });
+  }, [trackPageView, companyName]);
 
   const { data, isLoading, error } = useQuery<CompanyData>({
     queryKey: ["company", companyName],
@@ -114,7 +121,13 @@ export default function CompanyPage() {
       <div className="max-w-6xl mx-auto">
         <Button
           variant="ghost"
-          onClick={() => router.push("/")}
+          onClick={() => {
+            trackClick("click_back_button", {
+              page: "company_detail",
+              company: companyName,
+            });
+            router.push("/");
+          }}
           className="mb-8 -ml-2"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />

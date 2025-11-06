@@ -256,7 +256,7 @@ export default function CompanySearch({
               aria-selected={selectedIndex === index}
               onClick={() => handleSelectCompany(company)}
               onMouseEnter={() => setSelectedIndex(index)}
-              className={`w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+              className={`w-full px-4 py-3 flex items-center gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
                 selectedIndex === index ? "bg-gray-100 dark:bg-gray-700" : ""
               }`}
             >

@@ -227,15 +227,15 @@ export default function SubmissionForm() {
         throw new Error(data.error || "Failed to submit");
       }
 
-      // Success - show toast and redirect to homepage
+      // Success - show toast and redirect to top companies page
       toast.success("Submission successful!", {
         description:
           "Your submission is pending review and will appear on the site after moderation.",
       });
 
-      // Redirect to homepage after a short delay to allow toast to show
+      // Redirect to top companies page after a short delay to allow toast to show
       setTimeout(() => {
-        router.push("/");
+        router.push("/companies");
       }, 500);
     } catch (error) {
       console.error("Submission error:", error);
