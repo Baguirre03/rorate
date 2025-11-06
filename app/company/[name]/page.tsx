@@ -4,7 +4,14 @@ import { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
-import { Building2, TrendingUp, Calendar, Loader2, Filter } from "lucide-react";
+import {
+  Building2,
+  TrendingUp,
+  Calendar,
+  Loader2,
+  Filter,
+  ArrowLeft,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
