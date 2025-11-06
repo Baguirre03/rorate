@@ -25,11 +25,15 @@ export async function middleware(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  if (!user && req.nextUrl.pathname.startsWith("/submissions")) {
-    console.log("Redirecting to login");
+  if (!user) {
     const redirectUrl = req.nextUrl.clone();
-    redirectUrl.pathname = "/login";
-    redirectUrl.searchParams.set("redirectedFrom", req.nextUrl.pathname);
+    redirectUrl.pathname = "/";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (user?.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL!) {
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.pathname = "/";
     return NextResponse.redirect(redirectUrl);
   }
 

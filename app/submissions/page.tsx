@@ -72,6 +72,7 @@ export default function SubmissionsPage() {
         headers: {
           "Content-Type": "application/json",
         },
+        credentials: "include",
         body: JSON.stringify({ status }),
       });
 
