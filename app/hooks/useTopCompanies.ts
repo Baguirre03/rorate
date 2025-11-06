@@ -5,6 +5,7 @@ type CompanyStats = {
   total: number;
   offers: number;
   percentage: number;
+  logoUrl?: string | null;
 };
 
 type TopCompaniesData = {

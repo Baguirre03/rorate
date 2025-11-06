@@ -1,34 +1,36 @@
 "use client";
 
+import { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   ArrowLeft,
   Building2,
   TrendingUp,
   Calendar,
   Loader2,
+  Filter,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Tables } from "@/types/supabase";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import SubmitCTA from "@/components/SubmitCTA";
-import { useEffect } from "react";
 
 type SubmissionWithCompany = Tables<"submissions"> & {
   companies: Pick<Tables<"companies">, "id" | "name"> | null;
 };
 
 type CompanyData = {
-  company: Pick<Tables<"companies">, "id" | "name"> | null;
+  company:
+    | (Pick<Tables<"companies">, "id" | "name"> & {
+        domain?: string | null;
+        logoUrl?: string | null;
+      })
+    | null;
   stats: {
     total: number;
     offers: number;
@@ -48,6 +50,20 @@ export default function CompanyPage() {
   const router = useRouter();
   const companyName = decodeURIComponent(params.name as string);
   const { trackClick, trackPageView } = useAnalytics();
+  const [selectedYear, setSelectedYear] = useState<string>("all");
+  const [selectedInternType, setSelectedInternType] = useState<string>("all");
+  const [selectedTerm, setSelectedTerm] = useState<string>("all");
+
+  const handleYearChange = useCallback(
+    (value: string) => {
+      setSelectedYear(value);
+      trackClick("click_year_filter", {
+        company: companyName,
+        year: value,
+      });
+    },
+    [trackClick, companyName]
+  );
 
   useEffect(() => {
     trackPageView("company_detail", { company: companyName });
@@ -116,6 +132,58 @@ export default function CompanyPage() {
 
   const hasNoData = !data || stats.total === 0;
 
+  // Always show all intern types, even if no data
+  const INTERN_TYPES = [
+    "Software Engineering",
+    "Product Management",
+    "Data Science",
+    "Design",
+    "Marketing",
+    "Finance",
+    "Other",
+  ];
+
+  // Get available terms from submissions
+  const availableTerms = Array.from(
+    new Set(submissions.map((s) => s.term))
+  ).sort();
+
+  const availableYears = Array.from(
+    new Set(submissions.map((s) => s.year))
+  ).sort((a, b) => b - a);
+
+  // Filter submissions and stats by selected filters
+  const filteredSubmissions = submissions.filter((s) => {
+    if (selectedYear !== "all" && s.year !== parseInt(selectedYear)) {
+      return false;
+    }
+    if (selectedInternType !== "all" && s.intern_type !== selectedInternType) {
+      return false;
+    }
+    if (selectedTerm !== "all" && s.term !== selectedTerm) {
+      return false;
+    }
+    return true;
+  });
+
+  // Calculate filtered stats
+  const filteredStats = (() => {
+    if (filteredSubmissions.length === 0) {
+      return { total: 0, offers: 0, percentage: 0 };
+    }
+    const total = filteredSubmissions.length;
+    const offers = filteredSubmissions.filter(
+      (s) => s.return_offer_extended === true
+    ).length;
+    const percentage = total > 0 ? Math.round((offers / total) * 100) : 0;
+    return { total, offers, percentage };
+  })();
+
+  const hasActiveFilters =
+    selectedYear !== "all" ||
+    selectedInternType !== "all" ||
+    selectedTerm !== "all";
+
   return (
     <div className="min-h-screen bg-background py-12 px-6">
       <div className="max-w-6xl mx-auto">
@@ -137,46 +205,179 @@ export default function CompanyPage() {
         {/* Company Header */}
         <div className="mb-10">
           <div className="flex items-center gap-4 mb-3">
-            <Building2 className="h-10 w-10 text-muted-foreground" />
-            <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground">
-              {company?.name || companyName}
-            </h1>
+            {company?.logoUrl ? (
+              <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center shrink-0">
+                <Image
+                  src={company.logoUrl}
+                  alt={`${company.name} logo`}
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-contain"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="w-16 h-16 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
+                <Building2 className="h-8 w-8 text-muted-foreground" />
+              </div>
+            )}
+            <div>
+              <h1 className="text-4xl sm:text-5xl font-semibold tracking-tight text-foreground">
+                {company?.name || companyName}
+              </h1>
+              <p className="text-base text-muted-foreground mt-1">
+                Return Offer Statistics
+              </p>
+            </div>
           </div>
-          <p className="text-base text-muted-foreground ml-14">
-            Return Offer Statistics
-          </p>
         </div>
+
+        {/* Filters */}
+        {submissions.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center gap-3 mb-6">
+              <Filter className="h-4 w-4 text-muted-foreground" />
+              <h3 className="text-sm font-semibold text-foreground uppercase tracking-wide">
+                Filter Data
+              </h3>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Year Filter */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-2 block uppercase tracking-wide">
+                  Year
+                </label>
+                <Tabs value={selectedYear} onValueChange={handleYearChange}>
+                  <TabsList className="w-full grid grid-cols-4 h-auto p-1">
+                    <TabsTrigger value="all" className="text-xs py-1.5">
+                      All
+                    </TabsTrigger>
+                    {availableYears.slice(0, 3).map((year) => (
+                      <TabsTrigger
+                        key={year}
+                        value={year.toString()}
+                        className="text-xs py-1.5"
+                      >
+                        {year}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                </Tabs>
+              </div>
+
+              {/* Intern Type Filter */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-2 block uppercase tracking-wide">
+                  Intern Type
+                </label>
+                <select
+                  value={selectedInternType}
+                  onChange={(e) => {
+                    setSelectedInternType(e.target.value);
+                    trackClick("click_intern_type_filter", {
+                      company: companyName,
+                      internType: e.target.value,
+                    });
+                  }}
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+                >
+                  <option value="all">All Types</option>
+                  {INTERN_TYPES.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Term Filter */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-2 block uppercase tracking-wide">
+                  Term
+                </label>
+                <select
+                  value={selectedTerm}
+                  onChange={(e) => {
+                    setSelectedTerm(e.target.value);
+                    trackClick("click_term_filter", {
+                      company: companyName,
+                      term: e.target.value,
+                    });
+                  }}
+                  className="flex h-9 w-full rounded-md border border-input bg-background px-3 py-1.5 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 cursor-pointer"
+                >
+                  <option value="all">All Terms</option>
+                  {availableTerms.map((term) => (
+                    <option key={term} value={term}>
+                      {term}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* No Data Message */}
         {hasNoData && (
-          <Card className="mb-8">
-            <CardContent className="py-16 text-center">
-              <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-              <h2 className="text-2xl font-semibold mb-2">Nothing there yet</h2>
-              <p className="text-muted-foreground">
-                No submission data available for {company?.name || companyName}{" "}
-                at this time.
-              </p>
-            </CardContent>
-          </Card>
+          <div className="mb-12 py-16 text-center">
+            <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-2">Nothing there yet</h2>
+            <p className="text-muted-foreground">
+              No submission data available for {company?.name || companyName}{" "}
+              {selectedInternType !== "all" && selectedTerm !== "all"
+                ? `for ${selectedInternType} in ${selectedTerm}`
+                : selectedInternType !== "all"
+                ? `for ${selectedInternType}`
+                : selectedTerm !== "all"
+                ? `for ${selectedTerm}`
+                : ""}{" "}
+              at this time.
+            </p>
+          </div>
+        )}
+
+        {/* No Data for Selected Filters */}
+        {!hasNoData && filteredStats.total === 0 && hasActiveFilters && (
+          <div className="mb-12 py-16 text-center">
+            <Building2 className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-semibold mb-2">No Data Available</h2>
+            <p className="text-muted-foreground">
+              No submission data available for {company?.name || companyName}{" "}
+              {selectedInternType !== "all" && selectedTerm !== "all"
+                ? `for ${selectedInternType} in ${selectedTerm}`
+                : selectedInternType !== "all"
+                ? `for ${selectedInternType}`
+                : selectedTerm !== "all"
+                ? `for ${selectedTerm}`
+                : ""}{" "}
+              with the current filters.
+            </p>
+          </div>
         )}
 
         {/* Overall Stats */}
-        {!hasNoData && (
-          <Card className="mb-8 border shadow-sm">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-semibold">
-                Overall Statistics
-              </CardTitle>
-              <CardDescription className="text-sm">
-                Return offer rate across all submissions
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+        {!hasNoData && filteredStats.total > 0 && (
+          <div className="mb-12 pb-12 border-b border-border/50">
+            <div className="mb-6">
+              <h2 className="text-2xl font-semibold mb-2">
+                {selectedYear === "all"
+                  ? "Overall Statistics"
+                  : `${selectedYear} Statistics`}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {selectedYear === "all"
+                  ? "Return offer rate across all submissions"
+                  : `Return offer rate for ${selectedYear}`}
+              </p>
+            </div>
+            <div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
                 <div>
                   <div className="text-5xl font-semibold mb-2 tracking-tight text-foreground">
-                    {stats.percentage}%
+                    {filteredStats.percentage}%
                   </div>
                   <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                     Return Offer Rate
@@ -184,7 +385,7 @@ export default function CompanyPage() {
                 </div>
                 <div>
                   <div className="text-5xl font-semibold mb-2 tracking-tight text-foreground">
-                    {stats.offers}
+                    {filteredStats.offers}
                   </div>
                   <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                     Offers Extended
@@ -192,7 +393,7 @@ export default function CompanyPage() {
                 </div>
                 <div>
                   <div className="text-5xl font-semibold mb-2 tracking-tight text-foreground">
-                    {stats.total}
+                    {filteredStats.total}
                   </div>
                   <div className="text-sm font-medium text-muted-foreground uppercase tracking-wide">
                     Total Submissions
@@ -200,32 +401,28 @@ export default function CompanyPage() {
                 </div>
               </div>
               <div className="mt-6">
-                <div className="w-full bg-muted rounded-full h-2.5">
+                <div className="w-full bg-muted rounded-full h-3 overflow-hidden">
                   <div
-                    className="bg-foreground h-2.5 rounded-full transition-all"
-                    style={{ width: `${stats.percentage}%` }}
+                    className="h-full rounded-full transition-all bg-green-500 dark:bg-green-400"
+                    style={{ width: `${filteredStats.percentage}%` }}
                   />
                 </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Year Breakdown */}
-        {byYear.length > 0 && (
-          <Card className="mb-8 border shadow-sm">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-3">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <CardTitle className="text-xl font-semibold">
-                  Year Breakdown
-                </CardTitle>
-              </div>
-              <CardDescription className="text-sm">
-                Return offer rates by year
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+        {byYear.length > 0 && filteredStats.total > 0 && (
+          <div className="mb-12 pb-12 border-b border-border/50">
+            <div className="flex items-center gap-3 mb-6">
+              <Calendar className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-2xl font-semibold">Year Breakdown</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              Return offer rates by year
+            </p>
+            <div>
               <div className="space-y-6">
                 {byYear.map((yearData) => (
                   <div
@@ -251,39 +448,42 @@ export default function CompanyPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="w-full bg-muted rounded-full h-2 mt-2">
+                    <div className="w-full bg-muted rounded-full h-2.5 mt-2 overflow-hidden">
                       <div
-                        className="bg-foreground h-2 rounded-full transition-all"
+                        className="h-full rounded-full transition-all bg-green-500 dark:bg-green-400"
                         style={{ width: `${yearData.percentage}%` }}
                       />
                     </div>
                   </div>
                 ))}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Recent Submissions */}
-        {submissions.length > 0 && (
-          <Card className="border shadow-sm">
-            <CardHeader className="pb-4">
-              <div className="flex items-center gap-3">
-                <TrendingUp className="h-5 w-5 text-muted-foreground" />
-                <CardTitle className="text-xl font-semibold">
-                  Submissions
-                </CardTitle>
-              </div>
-              <CardDescription className="text-sm">
-                Recent submissions for {company?.name}
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
+        {filteredSubmissions.length > 0 && (
+          <div className="mb-12 pb-12 border-b border-border/50">
+            <div className="flex items-center gap-3 mb-6">
+              <TrendingUp className="h-5 w-5 text-muted-foreground" />
+              <h2 className="text-2xl font-semibold">Submissions</h2>
+            </div>
+            <p className="text-sm text-muted-foreground mb-6">
+              {selectedYear === "all"
+                ? `Recent submissions for ${company?.name}`
+                : `${selectedYear} submissions for ${company?.name}`}
+              {hasActiveFilters && (
+                <span className="ml-2 text-xs text-muted-foreground">
+                  (filtered)
+                </span>
+              )}
+            </p>
+            <div>
               <div className="space-y-3">
-                {submissions.slice(0, 10).map((submission) => (
+                {filteredSubmissions.slice(0, 10).map((submission) => (
                   <div
                     key={submission.id}
-                    className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-colors"
+                    className="border border-border rounded-lg p-4 hover:bg-accent/50 transition-all"
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">
@@ -321,14 +521,14 @@ export default function CompanyPage() {
                     </div>
                   </div>
                 ))}
-                {submissions.length > 10 && (
+                {filteredSubmissions.length > 10 && (
                   <div className="text-center text-sm font-medium text-muted-foreground pt-4">
-                    Showing 10 of {submissions.length} submissions
+                    Showing 10 of {filteredSubmissions.length} submissions
                   </div>
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
         )}
 
         {/* Submit CTA */}

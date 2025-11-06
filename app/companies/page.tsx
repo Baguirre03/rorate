@@ -17,6 +17,7 @@ import {
   Users,
   CheckCircle2,
 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -31,6 +32,7 @@ type CompanyStats = {
   total: number;
   offers: number;
   percentage: number;
+  logoUrl?: string | null;
 };
 
 function CompanyCard({
@@ -86,7 +88,24 @@ function CompanyCard({
             {/* Company Info */}
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-3">
-                <Building2 className="h-5 w-5 text-muted-foreground shrink-0" />
+                {company.logoUrl ? (
+                  <div className="relative w-10 h-10 rounded-lg overflow-hidden border border-border bg-muted flex items-center justify-center shrink-0">
+                    <Image
+                      src={company.logoUrl}
+                      alt={`${company.name} logo`}
+                      width={40}
+                      height={40}
+                      className="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <div className="w-10 h-10 rounded-lg bg-muted border border-border flex items-center justify-center shrink-0">
+                    <Building2 className="h-5 w-5 text-muted-foreground" />
+                  </div>
+                )}
                 <h3 className="text-2xl font-semibold tracking-tight text-foreground truncate">
                   {company.name}
                 </h3>

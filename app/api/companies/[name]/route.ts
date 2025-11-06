@@ -21,9 +21,13 @@ export async function GET(
   try {
     const resolvedParams = await Promise.resolve(params);
     const companyName = decodeURIComponent(resolvedParams.name);
+    const searchParams = request.nextUrl.searchParams;
+    const internType = searchParams.get("internType");
+    const term = searchParams.get("term");
+    const year = searchParams.get("year");
 
     // Get all accepted submissions for this company
-    const { data: submissions, error } = await supabase
+    let query = supabase
       .from("submissions")
       .select(
         `
@@ -35,11 +39,52 @@ export async function GET(
       `
       )
       .eq("status", "accepted")
-      .eq("companies.name", companyName)
+      .eq("companies.name", companyName);
+
+    // Apply filters if provided
+    if (internType) {
+      query = query.eq("intern_type", internType);
+    }
+    if (term) {
+      query = query.eq("term", term);
+    }
+    if (year) {
+      query = query.eq("year", parseInt(year));
+    }
+
+    const { data: submissions, error } = await query
       .order("year", { ascending: false })
       .order("submitted_at", { ascending: false });
 
     if (error) throw error;
+
+    // Try to get company domain from Clearbit
+    let companyDomain: string | null = null;
+    try {
+      const clearbitResponse = await fetch(
+        `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(
+          companyName
+        )}`,
+        {
+          headers: {
+            "User-Agent": "Mozilla/5.0 (compatible; CompanySearch/1.0)",
+          },
+        }
+      );
+      if (clearbitResponse.ok) {
+        const suggestions = await clearbitResponse.json();
+        const match = suggestions.find(
+          (s: { name: string }) =>
+            s.name.toLowerCase() === companyName.toLowerCase()
+        );
+        if (match && match.domain) {
+          companyDomain = match.domain;
+        }
+      }
+    } catch (err) {
+      // Silently fail if Clearbit lookup fails
+      console.error("Failed to fetch company domain:", err);
+    }
 
     if (!submissions || submissions.length === 0) {
       return NextResponse.json({
@@ -91,7 +136,13 @@ export async function GET(
     );
 
     return NextResponse.json({
-      company: submissions[0].companies,
+      company: {
+        ...submissions[0].companies,
+        domain: companyDomain,
+        logoUrl: companyDomain
+          ? `/api/logo?domain=${encodeURIComponent(companyDomain)}`
+          : null,
+      },
       stats: {
         total,
         offers,

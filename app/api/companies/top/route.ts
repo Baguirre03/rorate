@@ -6,6 +6,7 @@ type CompanyStats = {
   total: number;
   offers: number;
   percentage: number;
+  logoUrl?: string | null;
 };
 
 export async function GET(request: NextRequest) {
@@ -62,6 +63,7 @@ export async function GET(request: NextRequest) {
 
     // Calculate company statistics
     const companyStats = new Map<string, CompanyStats>();
+    const companyDomains = new Map<string, string>();
 
     submissions.forEach((submission) => {
       // Handle Supabase's response structure
@@ -90,15 +92,50 @@ export async function GET(request: NextRequest) {
       }
     });
 
+    // Fetch company domains for all companies
+    const uniqueCompanyNames = Array.from(companyStats.keys());
+    for (const companyName of uniqueCompanyNames) {
+      try {
+        const clearbitResponse = await fetch(
+          `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(
+            companyName
+          )}`,
+          {
+            headers: {
+              "User-Agent": "Mozilla/5.0 (compatible; CompanySearch/1.0)",
+            },
+          }
+        );
+        if (clearbitResponse.ok) {
+          const suggestions = await clearbitResponse.json();
+          const match = suggestions.find(
+            (s: { name: string }) =>
+              s.name.toLowerCase() === companyName.toLowerCase()
+          );
+          if (match && match.domain) {
+            companyDomains.set(companyName, match.domain);
+          }
+        }
+      } catch (err) {
+        // Silently fail if Clearbit lookup fails
+      }
+    }
+
     // Calculate percentages and convert to array
     const companies = Array.from(companyStats.values())
-      .map((company) => ({
-        ...company,
-        percentage:
-          company.total > 0
-            ? Math.round((company.offers / company.total) * 100)
-            : 0,
-      }))
+      .map((company) => {
+        const domain = companyDomains.get(company.name);
+        return {
+          ...company,
+          percentage:
+            company.total > 0
+              ? Math.round((company.offers / company.total) * 100)
+              : 0,
+          logoUrl: domain
+            ? `/api/logo?domain=${encodeURIComponent(domain)}`
+            : null,
+        };
+      })
       .filter((company) => company.total > 0); // Only include companies with submissions
 
     // Sort by different criteria
