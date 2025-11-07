@@ -240,7 +240,7 @@ export type SubmissionFormData = {
 };
 
 export type SubmissionRequestBody = {
-  linkedinUrl?: string;
+  linkedinUrl: string;
   companyName: string;
   year: number;
   term: string;

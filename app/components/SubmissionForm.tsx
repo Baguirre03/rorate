@@ -20,6 +20,27 @@ interface FormErrors {
   positionType?: string;
 }
 
+// Validate LinkedIn URL format
+// First normalizes the URL (adds https:// if missing), then validates
+function isValidLinkedInUrl(url: string): boolean {
+  const trimmed = url.trim();
+  if (!trimmed) return false;
+
+  // Normalize the URL first - add https:// if missing
+  const normalized = normalizeLinkedInUrl(trimmed);
+
+  // LinkedIn URL patterns (now checking normalized URL with https://):
+  // - https://www.linkedin.com/in/username
+  // - https://linkedin.com/in/username
+  // - https://www.linkedin.com/pub/username
+  // - https://linkedin.com/pub/username
+  // - https://www.linkedin.com/profile/view?id=...
+  // Allows trailing slashes and query parameters
+  const linkedInPattern =
+    /^https?:\/\/(www\.)?linkedin\.com\/(in|pub|profile\/view)\/[^\/\s]+/i;
+  return linkedInPattern.test(normalized);
+}
+
 // Normalize LinkedIn URL - add https:// if missing
 function normalizeLinkedInUrl(url: string): string {
   const trimmed = url.trim();
@@ -36,9 +57,7 @@ function createSubmissionPayload(
   formData: SubmissionFormData
 ): SubmissionRequestBody {
   return {
-    linkedinUrl: formData.linkedinUrl.trim()
-      ? normalizeLinkedInUrl(formData.linkedinUrl)
-      : undefined,
+    linkedinUrl: normalizeLinkedInUrl(formData.linkedinUrl),
     companyName: formData.companyName.trim(),
     year: formData.year,
     term: formData.term,
@@ -71,10 +90,10 @@ export default function SubmissionForm() {
     linkedinUrl: "",
     companyName: "",
     year: currentYear,
-    term: "",
+    term: "Summer",
     internType: "",
     returnOfferExtended: null,
-    positionType: null,
+    positionType: "Full Time",
   });
 
   const [errors, setErrors] = useState<FormErrors>({});
@@ -87,6 +106,14 @@ export default function SubmissionForm() {
 
   const validateForm = useCallback((): boolean => {
     const newErrors: FormErrors = {};
+
+    // LinkedIn URL validation
+    if (!formData.linkedinUrl.trim()) {
+      newErrors.linkedinUrl = "LinkedIn profile URL is required";
+    } else if (!isValidLinkedInUrl(formData.linkedinUrl)) {
+      newErrors.linkedinUrl =
+        "Please enter a valid LinkedIn profile URL (e.g., linkedin.com/in/yourprofile, www.linkedin.com/in/yourprofile)";
+    }
 
     // Company name validation
     if (!formData.companyName.trim()) {
@@ -168,8 +195,10 @@ export default function SubmissionForm() {
     setFormData((prev: SubmissionFormData) => ({
       ...prev,
       returnOfferExtended: value,
-      // Set default to "Full Time" if offer was extended, clear if not
-      positionType: value ? prev.positionType || "Full Time" : null,
+      // Set default to "Full Time" if offer was extended, keep current value if not
+      positionType: value
+        ? prev.positionType || "Full Time"
+        : prev.positionType || "Full Time",
     }));
     if (errors.returnOfferExtended) {
       setErrors((prev: FormErrors) => ({
@@ -285,6 +314,7 @@ export default function SubmissionForm() {
   };
 
   const allRequiredFieldsFilled =
+    formData.linkedinUrl.trim() &&
     formData.companyName.trim() &&
     formData.year &&
     formData.term &&
@@ -328,16 +358,17 @@ export default function SubmissionForm() {
           {/* LinkedIn Profile URL */}
           <div className="space-y-2">
             <Label htmlFor="linkedinUrl" className="text-sm font-medium">
-              LinkedIn Profile URL
+              LinkedIn Profile URL <span className="text-destructive">*</span>
             </Label>
             <Input
-              type="url"
+              type="text"
               id="linkedinUrl"
               name="linkedinUrl"
               value={formData.linkedinUrl}
               onChange={handleInputChange}
-              placeholder="https://linkedin.com/in/yourprofile"
+              placeholder="linkedin.com/in/yourprofile"
               disabled={isSubmitting}
+              required
               className={errors.linkedinUrl ? "border-destructive" : ""}
             />
             {errors.linkedinUrl && (
@@ -495,36 +526,31 @@ export default function SubmissionForm() {
             )}
           </div>
 
-          {/* Position Type - Only show if offer was extended */}
-          {formData.returnOfferExtended === true && (
-            <div className="space-y-2">
-              <Label htmlFor="positionType" className="text-sm font-medium">
-                Return Offer Position Type
-              </Label>
-              <select
-                id="positionType"
-                name="positionType"
-                value={formData.positionType || "Full Time"}
-                onChange={handlePositionTypeChange}
-                disabled={isSubmitting}
-                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
-                  errors.positionType ? "border-destructive" : ""
-                }`}
-              >
-                <option value="Full Time">Full Time</option>
-                <option value="Intern">Intern</option>
-              </select>
-              {errors.positionType && (
-                <p className="text-sm text-destructive">
-                  {errors.positionType}
-                </p>
-              )}
-              <p className="text-xs text-muted-foreground">
-                Was the return offer for another internship or a full-time
-                position?
-              </p>
-            </div>
-          )}
+          {/* Position Type */}
+          <div className="space-y-2">
+            <Label htmlFor="positionType" className="text-sm font-medium">
+              Return Offer Position Type
+            </Label>
+            <select
+              id="positionType"
+              name="positionType"
+              value={formData.positionType || "Full Time"}
+              onChange={handlePositionTypeChange}
+              disabled={isSubmitting}
+              className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                errors.positionType ? "border-destructive" : ""
+              }`}
+            >
+              <option value="Full Time">Full Time</option>
+              <option value="Intern">Intern</option>
+            </select>
+            {errors.positionType && (
+              <p className="text-sm text-destructive">{errors.positionType}</p>
+            )}
+            <p className="text-xs text-muted-foreground">
+              If a return offer was extended, what type of position was it for?
+            </p>
+          </div>
 
           {/* Submit Button */}
           <div className="pt-4">

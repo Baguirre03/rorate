@@ -19,7 +19,13 @@ export async function POST(request: NextRequest) {
       positionType,
     } = body;
 
-    if (!companyName || !year || !term || returnOfferExtended === undefined) {
+    if (
+      !linkedinUrl ||
+      !companyName ||
+      !year ||
+      !term ||
+      returnOfferExtended === undefined
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 }
@@ -50,7 +56,7 @@ export async function POST(request: NextRequest) {
       return_offer_extended: returnOfferExtended,
       status: "waiting",
       intern_type: internType || null,
-      linkedin_url: linkedinUrl || null,
+      linkedin_url: linkedinUrl,
       position_type: positionType || null,
     };
 
