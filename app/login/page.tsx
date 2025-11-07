@@ -17,6 +17,8 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 
+const IS_PRODUCTION = process.env.ENVIRONMENT === "prod";
+
 function LoginForm() {
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -25,7 +27,9 @@ function LoginForm() {
   const loginMutation = useMutation({
     mutationFn: async ({ email }: { email: string }) => {
       const redirectTo = searchParams.get("redirectedFrom") || "/";
-      const siteUrl = window.location.origin;
+      const siteUrl = IS_PRODUCTION
+        ? process.env.NEXT_PUBLIC_SITE_URL
+        : "http://localhost:3000";
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
