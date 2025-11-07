@@ -16,9 +16,61 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Return Offer Rates.fyi",
+  title: {
+    default: "Return Offer Rates.fyi - Company Return Offer Statistics",
+    template: "%s | Return Offer Rates.fyi",
+  },
   description:
-    "Discover return offer rates for all companies. Search by company name to see detailed statistics and trends.",
+    "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns. Search by company name to see detailed statistics and trends.",
+  keywords: [
+    "return offer rate",
+    "internship return offer",
+    "company return offer statistics",
+    "tech internship return offers",
+    "return offer data",
+    "internship conversion rate",
+  ],
+  authors: [{ name: "Return Offer Rates.fyi" }],
+  creator: "Return Offer Rates.fyi",
+  publisher: "Return Offer Rates.fyi",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL || "https://rorates.fyi"
+  ),
+  alternates: {
+    canonical: "/",
+  },
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    title: "Return Offer Rates.fyi - Company Return Offer Statistics",
+    description:
+      "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns.",
+    siteName: "Return Offer Rates.fyi",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Return Offer Rates.fyi - Company Return Offer Statistics",
+    description:
+      "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns.",
+    creator: "@roratesfyi",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
 };
 
 export default function RootLayout({
