@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
+import { createPortal } from "react-dom";
 import Image from "next/image";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -43,6 +44,12 @@ export default function CompanySearch({
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [dropdownPosition, setDropdownPosition] = useState<{
+    top: number;
+    left: number;
+    width: number;
+  } | null>(null);
+  const [mounted, setMounted] = useState(false);
 
   const searchCompanies = useCallback(
     async (query: string, shouldOpen = true) => {
@@ -97,6 +104,41 @@ export default function CompanySearch({
     },
     [selectedCompany]
   );
+
+  // Set mounted state for portal
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Calculate dropdown position
+  const updateDropdownPosition = useCallback(() => {
+    if (inputRef.current) {
+      const rect = inputRef.current.getBoundingClientRect();
+      setDropdownPosition({
+        top: rect.bottom + window.scrollY + 8, // 8px for mt-2 (0.5rem)
+        left: rect.left + window.scrollX,
+        width: rect.width,
+      });
+    }
+  }, []);
+
+  // Update position when dropdown opens or window resizes
+  useEffect(() => {
+    if (isOpen && suggestions.length > 0) {
+      updateDropdownPosition();
+      const handleResize = () => updateDropdownPosition();
+      const handleScroll = () => updateDropdownPosition();
+      window.addEventListener("resize", handleResize);
+      window.addEventListener("scroll", handleScroll, true);
+      return () => {
+        window.removeEventListener("resize", handleResize);
+        window.removeEventListener("scroll", handleScroll, true);
+      };
+    } else if (!isOpen) {
+      // Clear position when dropdown closes
+      setDropdownPosition(null);
+    }
+  }, [isOpen, suggestions.length, updateDropdownPosition]);
 
   // Sync value prop with internal state
   useEffect(() => {
@@ -153,7 +195,9 @@ export default function CompanySearch({
     const handleClickOutside = (event: MouseEvent) => {
       if (
         containerRef.current &&
-        !containerRef.current.contains(event.target as Node)
+        !containerRef.current.contains(event.target as Node) &&
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
       ) {
         setIsOpen(false);
       }
@@ -232,6 +276,10 @@ export default function CompanySearch({
               (!selectedCompany || searchQuery !== selectedCompany.name)
             ) {
               setIsOpen(true);
+              // Update position when focusing
+              requestAnimationFrame(() => {
+                updateDropdownPosition();
+              });
             }
           }}
           onKeyDown={handleKeyDown}
@@ -247,57 +295,69 @@ export default function CompanySearch({
         )}
       </div>
 
-      {/* Dropdown */}
-      {isOpen && (suggestions.length > 0 || error) && (
-        <div
-          ref={dropdownRef}
-          id="company-suggestions"
-          role="listbox"
-          className="absolute z-9999 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-auto"
-          style={{ maxHeight: "16rem" }}
-        >
-          {suggestions.map((company, index) => {
-            const logoUrl = company.domain
-              ? `/api/logo?domain=${encodeURIComponent(company.domain)}`
-              : null;
-            return (
-              <button
-                key={`${company.domain}-${index}`}
-                type="button"
-                role="option"
-                aria-selected={selectedIndex === index}
-                onClick={() => handleSelectCompany(company)}
-                onMouseEnter={() => setSelectedIndex(index)}
-                className={`w-full px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
-                  selectedIndex === index ? "bg-gray-100 dark:bg-gray-700" : ""
-                }`}
-              >
-                {logoUrl ? (
-                  <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
-                    <Image
-                      src={logoUrl}
-                      alt={`${company.name} logo`}
-                      width={32}
-                      height={32}
-                      className="w-full h-full object-contain rounded"
-                      onError={(e) => {
-                        (e.target as HTMLImageElement).style.display = "none";
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
-                    <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-muted-foreground/20" />
-                  </div>
-                )}
-                <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
-                  {company.name}
-                </span>
-              </button>
-            );
-          })}
-        </div>
-      )}
+      {/* Dropdown - Rendered via Portal */}
+      {mounted &&
+        isOpen &&
+        (suggestions.length > 0 || error) &&
+        dropdownPosition &&
+        createPortal(
+          <div
+            ref={dropdownRef}
+            id="company-suggestions"
+            role="listbox"
+            className="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-auto"
+            style={{
+              top: `${dropdownPosition.top}px`,
+              left: `${dropdownPosition.left}px`,
+              width: `${dropdownPosition.width}px`,
+              maxHeight: "16rem",
+            }}
+          >
+            {suggestions.map((company, index) => {
+              const logoUrl = company.domain
+                ? `/api/logo?domain=${encodeURIComponent(company.domain)}`
+                : null;
+              return (
+                <button
+                  key={`${company.domain}-${index}`}
+                  type="button"
+                  role="option"
+                  aria-selected={selectedIndex === index}
+                  onClick={() => handleSelectCompany(company)}
+                  onMouseEnter={() => setSelectedIndex(index)}
+                  className={`w-full px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3 text-left hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors cursor-pointer ${
+                    selectedIndex === index
+                      ? "bg-gray-100 dark:bg-gray-700"
+                      : ""
+                  }`}
+                >
+                  {logoUrl ? (
+                    <div className="relative w-7 h-7 sm:w-8 sm:h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
+                      <Image
+                        src={logoUrl}
+                        alt={`${company.name} logo`}
+                        width={32}
+                        height={32}
+                        className="w-full h-full object-contain rounded"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div className="w-7 h-7 sm:w-8 sm:h-8 rounded border border-border bg-muted flex items-center justify-center shrink-0">
+                      <div className="w-3.5 h-3.5 sm:w-4 sm:h-4 rounded bg-muted-foreground/20" />
+                    </div>
+                  )}
+                  <span className="text-xs sm:text-sm font-medium text-gray-900 dark:text-gray-100 truncate">
+                    {company.name}
+                  </span>
+                </button>
+              );
+            })}
+          </div>,
+          document.body
+        )}
     </div>
   );
 }
