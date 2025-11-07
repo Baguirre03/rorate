@@ -25,22 +25,27 @@ function LoginForm() {
   const loginMutation = useMutation({
     mutationFn: async ({ email }: { email: string }) => {
       const redirectTo = searchParams.get("redirectedFrom") || "/";
-      // Use window.location.origin to dynamically get the current site URL
-      // This works in both development and production without needing env vars
-      const siteUrl =
-        process.env.NEXT_PUBLIC_ENVIRONMENT === "prod"
-          ? process.env.NEXT_PUBLIC_SITE_URL
-          : "http://localhost:3000";
+      const siteUrl = window.location.origin;
+      const callbackUrl = `${siteUrl}/auth/callback?redirectTo=${encodeURIComponent(
+        redirectTo
+      )}`;
+
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${siteUrl}/auth/callback?redirectTo=${encodeURIComponent(
-            redirectTo
-          )}`,
+          emailRedirectTo: callbackUrl,
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error("[Auth Error]", error);
+        throw error;
+      }
+
+      console.log(
+        "[Auth Success] Magic link sent with redirect URL:",
+        callbackUrl
+      );
       return data;
     },
     onSuccess: () => {
