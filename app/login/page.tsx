@@ -28,9 +28,9 @@ function LoginForm() {
       // Use window.location.origin to dynamically get the current site URL
       // This works in both development and production without needing env vars
       const siteUrl =
-        typeof window !== "undefined"
-          ? window.location.origin
-          : process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
+        process.env.NEXT_PUBLIC_ENVIRONMENT === "prod"
+          ? process.env.NEXT_PUBLIC_SITE_URL
+          : "http://localhost:3000";
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
