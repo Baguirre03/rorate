@@ -25,8 +25,7 @@ function LoginForm() {
   const loginMutation = useMutation({
     mutationFn: async ({ email }: { email: string }) => {
       const redirectTo = searchParams.get("redirectedFrom") || "/";
-      const siteUrl =
-        process.env.NEXT_PUBLIC_SITE_URL || window.location.origin;
+      const siteUrl = window.location.origin;
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {

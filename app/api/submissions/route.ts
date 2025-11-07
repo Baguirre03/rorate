@@ -6,6 +6,47 @@ import {
   SubmissionResponse,
 } from "@/types/supabase";
 
+// Extract LinkedIn profile identifier from URL
+// Handles formats like: linkedin.com/in/username, www.linkedin.com/in/username, etc.
+function extractLinkedInProfileId(url: string): string | null {
+  try {
+    const trimmed = url.trim().toLowerCase();
+    // Normalize URL
+    let normalized = trimmed;
+    if (!normalized.startsWith("http")) {
+      normalized = `https://${normalized}`;
+    }
+
+    // Extract profile identifier from various LinkedIn URL formats
+    const patterns = [
+      /linkedin\.com\/in\/([^\/\?&#]+)/i,
+      /linkedin\.com\/pub\/([^\/\?&#]+)/i,
+      /linkedin\.com\/profile\/view\?id=([^&]+)/i,
+    ];
+
+    for (const pattern of patterns) {
+      const match = normalized.match(pattern);
+      if (match && match[1]) {
+        return match[1].toLowerCase();
+      }
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+// Normalize LinkedIn URL - add https:// if missing
+function normalizeLinkedInUrl(url: string): string {
+  const trimmed = url.trim();
+  if (!trimmed) return trimmed;
+  if (!trimmed.match(/^https?:\/\//i)) {
+    return `https://${trimmed}`;
+  }
+  return trimmed;
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: SubmissionRequestBody = await request.json();
@@ -32,6 +73,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Normalize LinkedIn URL
+    const normalizedLinkedInUrl = normalizeLinkedInUrl(linkedinUrl);
+    const linkedInProfileId = extractLinkedInProfileId(linkedinUrl);
+
+    if (!linkedInProfileId) {
+      return NextResponse.json(
+        { error: "Invalid LinkedIn URL format" },
+        { status: 400 }
+      );
+    }
+
+    // Check for duplicate submission
+    // Match by: LinkedIn profile ID, position_type, term, and year
+    const { data: existingSubmissions, error: checkError } = await supabase
+      .from("submissions")
+      .select("id, linkedin_url, position_type, term, year")
+      .eq("year", year)
+      .eq("term", term);
+
+    if (checkError) {
+      console.error("Error checking for duplicates:", checkError);
+      // Continue with submission if check fails (don't block submission)
+    } else if (existingSubmissions && existingSubmissions.length > 0) {
+      // Check if any existing submission matches LinkedIn profile and position_type
+      const duplicate = existingSubmissions.find((sub) => {
+        if (!sub.linkedin_url) return false;
+
+        const existingProfileId = extractLinkedInProfileId(sub.linkedin_url);
+        const profileMatches = existingProfileId === linkedInProfileId;
+
+        const positionMatches =
+          (sub.position_type || null) === (positionType || null);
+
+        return profileMatches && positionMatches;
+      });
+
+      if (duplicate) {
+        return NextResponse.json(
+          {
+            error: "Duplicate submission found",
+            duplicate: true,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     let { data: company } = await supabase
       .from("companies")
       .select("id")
@@ -56,7 +144,7 @@ export async function POST(request: NextRequest) {
       return_offer_extended: returnOfferExtended,
       status: "waiting",
       intern_type: internType || null,
-      linkedin_url: linkedinUrl,
+      linkedin_url: normalizedLinkedInUrl,
       position_type: positionType || null,
     };
 

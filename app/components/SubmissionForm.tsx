@@ -283,6 +283,33 @@ export default function SubmissionForm() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Handle duplicate submission error
+        if (response.status === 409 && data.duplicate) {
+          setIsSubmitting(false);
+          setErrors((prev) => ({
+            ...prev,
+            linkedinUrl: data.error || "This submission already exists.",
+          }));
+          setSubmitStatus({
+            type: "error",
+            message: data.error || "A duplicate submission was found.",
+          });
+          toast.error("Duplicate submission", {
+            description:
+              data.error ||
+              "A submission with this information already exists.",
+          });
+          // Scroll to LinkedIn URL field
+          setTimeout(() => {
+            const linkedInField =
+              document.querySelector(`[name="linkedinUrl"]`);
+            linkedInField?.scrollIntoView({
+              behavior: "smooth",
+              block: "center",
+            });
+          }, 100);
+          return;
+        }
         throw new Error(data.error || "Failed to submit");
       }
 
