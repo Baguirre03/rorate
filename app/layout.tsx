@@ -46,10 +46,10 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: "/trend.png", type: "image/png" },
+      { url: "/icon.svg", type: "image/svg+xml" },
       { url: "/favicon.ico", sizes: "any" },
     ],
-    apple: [{ url: "/trend.png", type: "image/png" }],
+    apple: "/favicon.ico",
   },
   openGraph: {
     type: "website",
