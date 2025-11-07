@@ -29,7 +29,6 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Copy cookies to the redirect response
       const redirectResponse = NextResponse.redirect(
         new URL(redirectTo, request.url)
       );
