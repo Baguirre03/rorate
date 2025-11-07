@@ -53,6 +53,8 @@ export default function CompanyPage() {
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedInternType, setSelectedInternType] = useState<string>("all");
   const [selectedTerm, setSelectedTerm] = useState<string>("all");
+  const [selectedPositionType, setSelectedPositionType] =
+    useState<string>("all");
 
   const handleYearChange = useCallback(
     (value: string) => {
@@ -60,6 +62,17 @@ export default function CompanyPage() {
       trackClick("click_year_filter", {
         company: companyName,
         year: value,
+      });
+    },
+    [trackClick, companyName]
+  );
+
+  const handlePositionTypeChange = useCallback(
+    (value: string) => {
+      setSelectedPositionType(value);
+      trackClick("click_position_type_filter", {
+        company: companyName,
+        positionType: value,
       });
     },
     [trackClick, companyName]
@@ -163,6 +176,17 @@ export default function CompanyPage() {
     if (selectedTerm !== "all" && s.term !== selectedTerm) {
       return false;
     }
+    if (selectedPositionType !== "all") {
+      // Only filter by position type for return offers
+      if (s.return_offer_extended === true) {
+        if (s.position_type !== selectedPositionType) {
+          return false;
+        }
+      } else {
+        // If filtering for a specific position type but no return offer, exclude it
+        return false;
+      }
+    }
     return true;
   });
 
@@ -182,7 +206,8 @@ export default function CompanyPage() {
   const hasActiveFilters =
     selectedYear !== "all" ||
     selectedInternType !== "all" ||
-    selectedTerm !== "all";
+    selectedTerm !== "all" ||
+    selectedPositionType !== "all";
 
   return (
     <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
@@ -228,7 +253,7 @@ export default function CompanyPage() {
                 Filter Data
               </h3>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 sm:gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 sm:gap-4">
               {/* Year Filter */}
               <div>
                 <label className="text-xs font-medium text-muted-foreground mb-2 block uppercase tracking-wide">
@@ -300,6 +325,29 @@ export default function CompanyPage() {
                     </option>
                   ))}
                 </select>
+              </div>
+
+              {/* Position Type Filter */}
+              <div>
+                <label className="text-xs font-medium text-muted-foreground mb-2 block uppercase tracking-wide">
+                  Return Offer Type
+                </label>
+                <Tabs
+                  value={selectedPositionType}
+                  onValueChange={handlePositionTypeChange}
+                >
+                  <TabsList className="w-full grid grid-cols-3 h-auto p-1">
+                    <TabsTrigger value="all" className="text-xs py-1.5">
+                      All
+                    </TabsTrigger>
+                    <TabsTrigger value="Full Time" className="text-xs py-1.5">
+                      Full Time
+                    </TabsTrigger>
+                    <TabsTrigger value="Intern" className="text-xs py-1.5">
+                      Intern
+                    </TabsTrigger>
+                  </TabsList>
+                </Tabs>
               </div>
             </div>
           </div>
