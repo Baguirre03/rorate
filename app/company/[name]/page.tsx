@@ -148,6 +148,7 @@ export default function CompanyPage() {
   // Always show all intern types, even if no data
   const INTERN_TYPES = [
     "Software Engineering",
+    "Machine Learning Engineer",
     "Product Management",
     "Data Science",
     "Design",

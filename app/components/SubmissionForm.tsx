@@ -73,6 +73,7 @@ function createSubmissionPayload(
 
 const INTERN_TYPES = [
   "Software Engineering",
+  "Machine Learning Engineer",
   "Product Management",
   "Data Science",
   "Design",
