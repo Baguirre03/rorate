@@ -44,6 +44,13 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  icons: {
+    icon: [
+      { url: "/trend.png", type: "image/png" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/trend.png", type: "image/png" }],
+  },
   openGraph: {
     type: "website",
     locale: "en_US",
@@ -52,6 +59,14 @@ export const metadata: Metadata = {
     description:
       "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns.",
     siteName: "Return Offer Rates.fyi",
+    images: [
+      {
+        url: "/trend.png",
+        width: 1200,
+        height: 630,
+        alt: "Return Offer Rates.fyi - Company Return Offer Statistics",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -59,6 +74,7 @@ export const metadata: Metadata = {
     description:
       "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns.",
     creator: "@roratesfyi",
+    images: ["/trend.png"],
   },
   robots: {
     index: true,

@@ -33,11 +33,20 @@ export async function generateMetadata({
       title: `${companyName} Return Offer Rate - Statistics & Data`,
       description: `Find ${companyName}'s return offer rate, statistics, and data. See how many interns receive return offers from ${companyName}.`,
       siteName: "Return Offer Rates.fyi",
+      images: [
+        {
+          url: "/trend.png",
+          width: 1200,
+          height: 630,
+          alt: `${companyName} Return Offer Rate`,
+        },
+      ],
     },
     twitter: {
       card: "summary_large_image",
       title: `${companyName} Return Offer Rate - Statistics & Data`,
       description: `Find ${companyName}'s return offer rate, statistics, and data. See how many interns receive return offers from ${companyName}.`,
+      images: ["/trend.png"],
     },
   };
 }
