@@ -253,7 +253,7 @@ export default function CompanySearch({
           ref={dropdownRef}
           id="company-suggestions"
           role="listbox"
-          className="absolute z-50 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-auto"
+          className="absolute z-9999 w-full mt-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-auto"
           style={{ maxHeight: "16rem" }}
         >
           {suggestions.map((company, index) => {
