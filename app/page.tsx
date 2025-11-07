@@ -23,12 +23,12 @@ export default function Home() {
   }, [trackPageView]);
 
   return (
-    <div className="min-h-screen bg-background flex items-start justify-center pt-12 sm:pt-20 md:pt-32">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-12 sm:pb-20 md:pb-32 w-full">
+    <div className="min-h-screen bg-background flex items-start justify-center pt-12 sm:pt-20 md:pt-32 relative">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-12 sm:pb-20 md:pb-32 w-full relative z-10">
         {/* Hero Section - Search Focused */}
         <div className="text-center">
           <h1
-            className={`text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold mb-4 sm:mb-6 tracking-tight text-foreground transition-all duration-700 ease-out ${
+            className={`text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-semibold mb-6 sm:mb-8 tracking-tight text-foreground transition-all duration-700 ease-out ${
               mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
             }`}
             style={{
@@ -38,7 +38,7 @@ export default function Home() {
             Return Offer Rates.fyi
           </h1>
           <p
-            className={`text-base sm:text-lg md:text-xl text-muted-foreground mb-8 sm:mb-12 md:mb-16 max-w-2xl mx-auto leading-relaxed px-2 transition-all duration-700 ease-out ${
+            className={`text-base sm:text-lg md:text-xl text-muted-foreground mb-10 sm:mb-14 md:mb-18 max-w-2xl mx-auto leading-relaxed px-2 transition-all duration-700 ease-out ${
               mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
             }`}
             style={{
@@ -51,24 +51,27 @@ export default function Home() {
 
           {/* Search Section */}
           <div
-            className={`mb-8 sm:mb-12 md:mb-16 flex justify-center px-2 transition-all duration-700 ease-out ${
+            className={`mb-10 sm:mb-14 md:mb-18 flex justify-center px-2 transition-all duration-700 ease-out ${
               mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
             }`}
             style={{
               transitionDelay: mounted ? "300ms" : "0ms",
             }}
           >
-            <div className="max-w-2xl w-full">
-              <CompanySearch
-                onCompanySelect={handleCompanySelect}
-                className="w-full"
-              />
+            <div className="max-w-2xl w-full relative">
+              <div className="absolute -inset-1 bg-border/30 rounded-lg blur opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
+              <div className="relative bg-card border border-border/50 rounded-lg p-1 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <CompanySearch
+                  onCompanySelect={handleCompanySelect}
+                  className="w-full"
+                />
+              </div>
             </div>
           </div>
 
           {/* CTAs */}
           <div
-            className={`flex flex-col sm:flex-row gap-3 justify-center items-center px-2 transition-all duration-700 ease-out ${
+            className={`flex flex-col sm:flex-row gap-4 justify-center items-center px-2 transition-all duration-700 ease-out ${
               mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
             }`}
             style={{
@@ -77,33 +80,33 @@ export default function Home() {
           >
             <Link
               href="/companies"
-              className="w-full sm:w-auto max-w-xs sm:max-w-none"
+              className="w-full sm:w-auto max-w-xs sm:max-w-none group"
             >
               <Button
                 size="lg"
-                className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-7 py-4 sm:py-5 h-auto font-medium"
+                className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-7 py-4 sm:py-5 h-auto font-medium shadow-sm hover:shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
                 onClick={() =>
                   trackClick("click_top_companies_button", { page: "home" })
                 }
               >
-                <TrendingUp className="h-4 w-4 mr-2" />
+                <TrendingUp className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:scale-110" />
                 Top Companies
-                <ArrowRight className="h-4 w-4 ml-2" />
+                <ArrowRight className="h-4 w-4 ml-2 transition-transform duration-200 group-hover:translate-x-0.5" />
               </Button>
             </Link>
             <Link
               href="/submit"
-              className="w-full sm:w-auto max-w-xs sm:max-w-none"
+              className="w-full sm:w-auto max-w-xs sm:max-w-none group"
             >
               <Button
                 size="lg"
                 variant="outline"
-                className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-7 py-4 sm:py-5 h-auto font-medium"
+                className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-7 py-4 sm:py-5 h-auto font-medium border-2 hover:border-foreground/20 transition-all duration-200 group-hover:-translate-y-0.5 hover:shadow-sm"
                 onClick={() =>
                   trackClick("click_submit_button", { page: "home" })
                 }
               >
-                <Plus className="h-4 w-4 mr-2" />
+                <Plus className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-90" />
                 Submit Your Return Offer
               </Button>
             </Link>
@@ -111,14 +114,17 @@ export default function Home() {
 
           {/* Submission Counter - Temporarily on homepage */}
           <div
-            className={`mt-12 sm:mt-16 transition-all duration-700 ease-out ${
+            className={`mt-16 sm:mt-20 transition-all duration-700 ease-out ${
               mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
             }`}
             style={{
               transitionDelay: mounted ? "600ms" : "0ms",
             }}
           >
-            <SubmissionCounter />
+            <div className="relative">
+              <div className="absolute inset-x-0 top-0 h-px bg-border/50"></div>
+              <SubmissionCounter />
+            </div>
           </div>
         </div>
       </div>
