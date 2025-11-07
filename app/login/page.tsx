@@ -42,10 +42,6 @@ function LoginForm() {
         throw error;
       }
 
-      console.log(
-        "[Auth Success] Magic link sent with redirect URL:",
-        callbackUrl
-      );
       return data;
     },
     onSuccess: () => {

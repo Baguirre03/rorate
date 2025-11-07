@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Return Offer Rates.fyi",
   description:
-    "Discover return offer rates for tech companies. Search by company name to see detailed statistics and trends.",
+    "Discover return offer rates for all companies. Search by company name to see detailed statistics and trends.",
 };
 
 export default function RootLayout({
