@@ -57,6 +57,19 @@ function normalizeLinkedInUrl(url: string): string {
 function createSubmissionPayload(
   formData: SubmissionFormData
 ): SubmissionRequestBody {
+  // Always send positionType - it's always required
+  // Ensure it's a valid value (not null, not empty string)
+  const getPositionType = (): string => {
+    const positionType = formData.positionType?.trim();
+    if (
+      positionType &&
+      (positionType === "Full Time" || positionType === "Intern")
+    ) {
+      return positionType;
+    }
+    return "Full Time";
+  };
+
   return {
     linkedinUrl: normalizeLinkedInUrl(formData.linkedinUrl),
     companyName: formData.companyName.trim(),
@@ -64,10 +77,7 @@ function createSubmissionPayload(
     term: formData.term,
     internType: formData.internType || undefined,
     returnOfferExtended: formData.returnOfferExtended === true,
-    positionType:
-      formData.returnOfferExtended === true
-        ? formData.positionType || "Full Time"
-        : undefined,
+    positionType: getPositionType(),
   };
 }
 
@@ -147,7 +157,14 @@ export default function SubmissionForm() {
         "Please select whether a return offer was extended";
     }
 
-    // Position type is optional (can be null)
+    // Position type validation - always required
+    const positionType = formData.positionType?.trim();
+    if (
+      !positionType ||
+      (positionType !== "Full Time" && positionType !== "Intern")
+    ) {
+      newErrors.positionType = "Please select a position type";
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -194,14 +211,22 @@ export default function SubmissionForm() {
   };
 
   const handleReturnOfferChange = (value: boolean) => {
-    setFormData((prev: SubmissionFormData) => ({
-      ...prev,
-      returnOfferExtended: value,
-      // Set default to "Full Time" if offer was extended, keep current value if not
-      positionType: value
-        ? prev.positionType || "Full Time"
-        : prev.positionType || "Full Time",
-    }));
+    setFormData((prev: SubmissionFormData) => {
+      // Ensure positionType always has a valid value (always required)
+      const trimmed = prev.positionType?.trim();
+      let positionType = prev.positionType;
+      if (!trimmed || (trimmed !== "Full Time" && trimmed !== "Intern")) {
+        positionType = "Full Time";
+      } else {
+        positionType = trimmed;
+      }
+
+      return {
+        ...prev,
+        returnOfferExtended: value,
+        positionType,
+      };
+    });
     if (errors.returnOfferExtended) {
       setErrors((prev: FormErrors) => ({
         ...prev,
@@ -219,10 +244,13 @@ export default function SubmissionForm() {
   const handlePositionTypeChange = (
     e: React.ChangeEvent<HTMLSelectElement>
   ) => {
-    const value = e.target.value;
+    const value = e.target.value.trim();
+    // Ensure we always have a valid position type
+    const positionType =
+      value === "Full Time" || value === "Intern" ? value : "Full Time";
     setFormData((prev: SubmissionFormData) => ({
       ...prev,
-      positionType: value || "Full Time",
+      positionType,
     }));
     if (errors.positionType) {
       setErrors((prev: FormErrors) => ({
@@ -348,7 +376,10 @@ export default function SubmissionForm() {
     formData.year &&
     formData.term &&
     formData.internType &&
-    formData.returnOfferExtended !== null;
+    formData.returnOfferExtended !== null &&
+    formData.positionType &&
+    (formData.positionType === "Full Time" ||
+      formData.positionType === "Intern");
 
   return (
     <div className="min-h-screen bg-background">
@@ -563,7 +594,7 @@ export default function SubmissionForm() {
           {/* Position Type */}
           <div className="space-y-2">
             <Label htmlFor="positionType" className="text-sm font-medium">
-              Return Offer Position Type
+              Position Type <span className="text-destructive">*</span>
             </Label>
             <select
               id="positionType"
@@ -571,6 +602,7 @@ export default function SubmissionForm() {
               value={formData.positionType || "Full Time"}
               onChange={handlePositionTypeChange}
               disabled={isSubmitting}
+              required
               className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                 errors.positionType ? "border-destructive" : ""
               }`}
@@ -582,7 +614,7 @@ export default function SubmissionForm() {
               <p className="text-sm text-destructive">{errors.positionType}</p>
             )}
             <p className="text-xs text-muted-foreground">
-              If a return offer was extended, what type of position was it for?
+              Was this for a full time or intern return offer?
             </p>
           </div>
 

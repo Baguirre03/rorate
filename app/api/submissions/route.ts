@@ -73,6 +73,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Validate positionType - always required
+    if (
+      !positionType ||
+      (positionType !== "Full Time" && positionType !== "Intern")
+    ) {
+      return NextResponse.json(
+        {
+          error:
+            "Position type is required and must be 'Full Time' or 'Intern'",
+        },
+        { status: 400 }
+      );
+    }
+
     // Normalize LinkedIn URL
     const normalizedLinkedInUrl = normalizeLinkedInUrl(linkedinUrl);
     const linkedInProfileId = extractLinkedInProfileId(linkedinUrl);
@@ -84,42 +98,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Check for duplicate submission
-    // Match by: LinkedIn profile ID, position_type, term, and year
-    const { data: existingSubmissions, error: checkError } = await supabase
-      .from("submissions")
-      .select("id, linkedin_url, position_type, term, year")
-      .eq("year", year)
-      .eq("term", term);
-
-    if (checkError) {
-      console.error("Error checking for duplicates:", checkError);
-      // Continue with submission if check fails (don't block submission)
-    } else if (existingSubmissions && existingSubmissions.length > 0) {
-      // Check if any existing submission matches LinkedIn profile and position_type
-      const duplicate = existingSubmissions.find((sub) => {
-        if (!sub.linkedin_url) return false;
-
-        const existingProfileId = extractLinkedInProfileId(sub.linkedin_url);
-        const profileMatches = existingProfileId === linkedInProfileId;
-
-        const positionMatches =
-          (sub.position_type || null) === (positionType || null);
-
-        return profileMatches && positionMatches;
-      });
-
-      if (duplicate) {
-        return NextResponse.json(
-          {
-            error: "Duplicate submission found",
-            duplicate: true,
-          },
-          { status: 409 }
-        );
-      }
-    }
-
+    // Get or create company first (needed for duplicate check)
     let { data: company } = await supabase
       .from("companies")
       .select("id")
@@ -137,6 +116,39 @@ export async function POST(request: NextRequest) {
       company = newCompany;
     }
 
+    // Check for duplicate submission
+    // Match by: LinkedIn profile ID + company_id + year + term
+    const { data: existingSubmissions, error: checkError } = await supabase
+      .from("submissions")
+      .select("id, linkedin_url, company_id, term, year")
+      .eq("company_id", company.id)
+      .eq("year", year)
+      .eq("term", term);
+
+    if (checkError) {
+      console.error("Error checking for duplicates:", checkError);
+      // Continue with submission if check fails (don't block submission)
+    } else if (existingSubmissions && existingSubmissions.length > 0) {
+      // Check if any existing submission matches LinkedIn profile
+      // (company, year, and term are already filtered in the query)
+      const duplicate = existingSubmissions.find((sub) => {
+        if (!sub.linkedin_url) return false;
+
+        const existingProfileId = extractLinkedInProfileId(sub.linkedin_url);
+        return existingProfileId === linkedInProfileId;
+      });
+
+      if (duplicate) {
+        return NextResponse.json(
+          {
+            error: "Duplicate submission found",
+            duplicate: true,
+          },
+          { status: 409 }
+        );
+      }
+    }
+
     const submissionData: SubmissionInsert = {
       company_id: company.id,
       year,
@@ -145,7 +157,8 @@ export async function POST(request: NextRequest) {
       status: "waiting",
       intern_type: internType || null,
       linkedin_url: normalizedLinkedInUrl,
-      position_type: positionType || null,
+      // Position type is always required (validated above)
+      position_type: positionType,
     };
 
     const { data: submission, error: submissionError } = await supabase

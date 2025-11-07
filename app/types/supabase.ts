@@ -246,5 +246,5 @@ export type SubmissionRequestBody = {
   term: string;
   internType?: string;
   returnOfferExtended: boolean;
-  positionType?: string;
+  positionType: string;
 };

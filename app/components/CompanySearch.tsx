@@ -114,25 +114,46 @@ export default function CompanySearch({
   const updateDropdownPosition = useCallback(() => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect();
+      // For fixed positioning, getBoundingClientRect() already gives viewport coordinates
+      // Don't add scroll offsets - fixed positioning is relative to viewport, not document
       setDropdownPosition({
-        top: rect.bottom + window.scrollY + 8, // 8px for mt-2 (0.5rem)
-        left: rect.left + window.scrollX,
+        top: rect.bottom + 8, // 8px spacing below input
+        left: rect.left,
         width: rect.width,
       });
     }
   }, []);
 
-  // Update position when dropdown opens or window resizes
+  // Update position when dropdown opens or window resizes/scrolls
   useEffect(() => {
     if (isOpen && suggestions.length > 0) {
+      // Initial position update
       updateDropdownPosition();
-      const handleResize = () => updateDropdownPosition();
-      const handleScroll = () => updateDropdownPosition();
-      window.addEventListener("resize", handleResize);
-      window.addEventListener("scroll", handleScroll, true);
+
+      const handleResize = () => {
+        updateDropdownPosition();
+      };
+
+      // Handle scroll events - update position on any scroll
+      const handleScroll = () => {
+        updateDropdownPosition();
+      };
+
+      // Listen to scroll on window and document with capture to catch all scroll events
+      window.addEventListener("resize", handleResize, { passive: true });
+      window.addEventListener("scroll", handleScroll, {
+        passive: true,
+        capture: true,
+      });
+      document.addEventListener("scroll", handleScroll, {
+        passive: true,
+        capture: true,
+      });
+
       return () => {
         window.removeEventListener("resize", handleResize);
-        window.removeEventListener("scroll", handleScroll, true);
+        window.removeEventListener("scroll", handleScroll, { capture: true });
+        document.removeEventListener("scroll", handleScroll, { capture: true });
       };
     } else if (!isOpen) {
       // Clear position when dropdown closes
