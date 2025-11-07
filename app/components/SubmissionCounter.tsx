@@ -49,7 +49,7 @@ export default function SubmissionCounter() {
         </div>
         <p className="text-sm text-foreground leading-relaxed max-w-md">
           <span className="font-medium">
-            $20 giveaway every 100 submissions!
+            $15 giveaway every 100 submissions!
           </span>{" "}
           <span className="text-muted-foreground">
             Winner selected randomly -- Reached out via LinkedIn.
@@ -58,7 +58,7 @@ export default function SubmissionCounter() {
         <div className="w-full max-w-xs space-y-2 pt-1">
           <div className="flex items-center justify-between text-xs">
             <span className="text-muted-foreground">
-              {submissionsNeeded} more to next $20 giveaway
+              {submissionsNeeded} more to next $15 giveaway
             </span>
             <span className="font-medium text-foreground">{progress}/100</span>
           </div>
