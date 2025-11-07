@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { TrendingUp, Plus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CompanySearch from "@/components/CompanySearch";
+import SubmissionCounter from "@/components/SubmissionCounter";
 import { useCompanySearch } from "@/hooks/useCompanySearch";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Link from "next/link";
@@ -106,6 +107,18 @@ export default function Home() {
                 Submit Your Return Offer
               </Button>
             </Link>
+          </div>
+
+          {/* Submission Counter - Temporarily on homepage */}
+          <div
+            className={`mt-12 sm:mt-16 transition-all duration-700 ease-out ${
+              mounted ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-4"
+            }`}
+            style={{
+              transitionDelay: mounted ? "600ms" : "0ms",
+            }}
+          >
+            <SubmissionCounter />
           </div>
         </div>
       </div>

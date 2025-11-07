@@ -1,0 +1,22 @@
+import { NextResponse } from "next/server";
+import { supabase } from "@/lib/supabaseClient";
+
+export async function GET() {
+  try {
+    const { count, error } = await supabase
+      .from("submissions")
+      .select("*", { count: "exact", head: true })
+      .eq("status", "accepted");
+
+    if (error) throw error;
+
+    return NextResponse.json({ count: count || 0 });
+  } catch (error) {
+    console.error("Error fetching submission count:", error);
+    return NextResponse.json(
+      { error: "Failed to fetch submission count" },
+      { status: 500 }
+    );
+  }
+}
+

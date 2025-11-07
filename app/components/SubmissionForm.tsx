@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import CompanySearch, { Company } from "./CompanySearch";
+import SubmissionCounter from "./SubmissionCounter";
 import { SubmissionFormData, SubmissionRequestBody } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -373,6 +374,11 @@ export default function SubmissionForm() {
             {submitStatus.message}
           </div>
         )}
+
+        {/* Submission Counter */}
+        <div className="mb-8 -mx-4 sm:-mx-6">
+          <SubmissionCounter />
+        </div>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Section Header */}
