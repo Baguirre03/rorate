@@ -11,6 +11,11 @@ type CompanyStats = {
 
 export async function GET(request: NextRequest) {
   try {
+    const searchParams = request.nextUrl.searchParams;
+    const sort = searchParams.get("sort") || "most-submissions";
+    const limit = parseInt(searchParams.get("limit") || "15");
+    const offset = parseInt(searchParams.get("offset") || "0");
+
     // First, get the most recent year from submissions
     const { data: yearData, error: yearError } = await supabase
       .from("submissions")
@@ -22,11 +27,8 @@ export async function GET(request: NextRequest) {
 
     if (yearError || !yearData) {
       return NextResponse.json({
-        data: {
-          mostSubmissions: [],
-          bestRates: [],
-          worstRates: [],
-        },
+        data: [],
+        total: 0,
         year: new Date().getFullYear(),
       });
     }
@@ -52,18 +54,15 @@ export async function GET(request: NextRequest) {
 
     if (!submissions || submissions.length === 0) {
       return NextResponse.json({
-        data: {
-          mostSubmissions: [],
-          bestRates: [],
-          worstRates: [],
-        },
+        data: [],
+        total: 0,
+        hasMore: false,
         year: mostRecentYear,
       });
     }
 
     // Calculate company statistics
     const companyStats = new Map<string, CompanyStats>();
-    const companyDomains = new Map<string, string>();
 
     submissions.forEach((submission) => {
       // Handle Supabase's response structure
@@ -92,77 +91,102 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Fetch company domains for all companies
-    const uniqueCompanyNames = Array.from(companyStats.keys());
-    for (const companyName of uniqueCompanyNames) {
-      try {
-        const clearbitResponse = await fetch(
-          `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(
-            companyName
-          )}`,
-          {
-            headers: {
-              "User-Agent": "Mozilla/5.0 (compatible; CompanySearch/1.0)",
-            },
-          }
-        );
-        if (clearbitResponse.ok) {
-          const suggestions = await clearbitResponse.json();
-          const match = suggestions.find(
-            (s: { name: string }) =>
-              s.name.toLowerCase() === companyName.toLowerCase()
-          );
-          if (match && match.domain) {
-            companyDomains.set(companyName, match.domain);
-          }
-        }
-      } catch (err) {
-        // Silently fail if Clearbit lookup fails
-      }
-    }
+    // Company domains map (will be populated for paginated companies only)
+    const companyDomains = new Map<string, string>();
 
-    // Calculate percentages and convert to array
+    // Calculate percentages and convert to array (without logos first for faster sorting)
     const companies = Array.from(companyStats.values())
       .map((company) => {
-        const domain = companyDomains.get(company.name);
         return {
           ...company,
           percentage:
             company.total > 0
               ? Math.round((company.offers / company.total) * 100)
               : 0,
-          logoUrl: domain
-            ? `/api/logo?domain=${encodeURIComponent(domain)}`
-            : null,
         };
       })
       .filter((company) => company.total > 0); // Only include companies with submissions
 
-    // Sort by different criteria
-    const mostSubmissions = [...companies].sort((a, b) => b.total - a.total);
-    const bestRates = [...companies]
-      .filter((c) => c.total >= 3) // Only include companies with at least 3 submissions for rate rankings
-      .sort((a, b) => {
-        if (b.percentage !== a.percentage) {
-          return b.percentage - a.percentage;
+    // Sort by different criteria based on sort parameter
+    let sortedCompanies: CompanyStats[];
+
+    switch (sort) {
+      case "best-rates":
+        sortedCompanies = [...companies]
+          .filter((c) => c.total >= 3) // Only include companies with at least 3 submissions for rate rankings
+          .sort((a, b) => {
+            if (b.percentage !== a.percentage) {
+              return b.percentage - a.percentage;
+            }
+            return b.total - a.total; // Tie-breaker: more submissions
+          });
+        break;
+      case "worst-rates":
+        sortedCompanies = [...companies]
+          .filter((c) => c.total >= 3) // Only include companies with at least 3 submissions for rate rankings
+          .sort((a, b) => {
+            if (a.percentage !== b.percentage) {
+              return a.percentage - b.percentage;
+            }
+            return b.total - a.total; // Tie-breaker: more submissions
+          });
+        break;
+      case "most-submissions":
+      default:
+        sortedCompanies = [...companies].sort((a, b) => b.total - a.total);
+        break;
+    }
+
+    const total = sortedCompanies.length;
+    const paginatedCompanies = sortedCompanies.slice(offset, offset + limit);
+
+    // Fetch logos only for the paginated companies (more efficient)
+    const paginatedCompanyNames = paginatedCompanies.map((c) => c.name);
+    for (const companyName of paginatedCompanyNames) {
+      // Only fetch if we don't already have it
+      if (!companyDomains.has(companyName)) {
+        try {
+          const clearbitResponse = await fetch(
+            `https://autocomplete.clearbit.com/v1/companies/suggest?query=${encodeURIComponent(
+              companyName
+            )}`,
+            {
+              headers: {
+                "User-Agent": "Mozilla/5.0 (compatible; CompanySearch/1.0)",
+              },
+            }
+          );
+          if (clearbitResponse.ok) {
+            const suggestions = await clearbitResponse.json();
+            const match = suggestions.find(
+              (s: { name: string }) =>
+                s.name.toLowerCase() === companyName.toLowerCase()
+            );
+            if (match && match.domain) {
+              companyDomains.set(companyName, match.domain);
+            }
+          }
+        } catch {
+          // Silently fail if Clearbit lookup fails
         }
-        return b.total - a.total; // Tie-breaker: more submissions
-      });
-    const worstRates = [...companies]
-      .filter((c) => c.total >= 3) // Only include companies with at least 3 submissions for rate rankings
-      .sort((a, b) => {
-        if (a.percentage !== b.percentage) {
-          return a.percentage - b.percentage;
-        }
-        return b.total - a.total; // Tie-breaker: more submissions
-      });
+      }
+    }
+
+    // Add logo URLs to paginated companies
+    const companiesWithLogos = paginatedCompanies.map((company) => {
+      const domain = companyDomains.get(company.name);
+      return {
+        ...company,
+        logoUrl: domain
+          ? `/api/logo?domain=${encodeURIComponent(domain)}`
+          : null,
+      };
+    });
 
     return NextResponse.json({
-      data: {
-        mostSubmissions,
-        bestRates,
-        worstRates,
-      },
+      data: companiesWithLogos,
+      total,
+      hasMore: offset + limit < total,
       year: mostRecentYear,
     });
   } catch (error) {

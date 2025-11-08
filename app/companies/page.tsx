@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -13,22 +13,14 @@ import {
   ArrowLeft,
   Plus,
   Gift,
+  ChevronDown,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useTopCompanies } from "@/hooks/useTopCompanies";
+import { useTopCompanies, CompanyStats } from "@/hooks/useTopCompanies";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import SubmitCTA from "@/components/SubmitCTA";
-import { useEffect } from "react";
-
-type CompanyStats = {
-  name: string;
-  total: number;
-  offers: number;
-  percentage: number;
-  logoUrl?: string | null;
-};
 
 function CompanyCard({
   company,
@@ -188,29 +180,7 @@ function CompanyCard({
   );
 }
 
-function TabContent({
-  companies,
-  emptyMessage,
-  icon: Icon,
-}: {
-  companies: CompanyStats[];
-  emptyMessage: string;
-  icon: React.ElementType;
-}) {
-  if (companies.length === 0) {
-    return (
-      <div className="py-12 sm:py-16 text-center">
-        <Icon className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground" />
-        <h2 className="text-xl sm:text-2xl font-semibold mb-2">
-          No Data Available
-        </h2>
-        <p className="text-sm sm:text-base text-muted-foreground px-4">
-          {emptyMessage}
-        </p>
-      </div>
-    );
-  }
-
+function TableSkeleton() {
   return (
     <div className="border border-border/50 rounded-lg overflow-hidden bg-card">
       {/* Table Header - Desktop Only */}
@@ -231,55 +201,207 @@ function TabContent({
         </div>
         <div></div>
       </div>
-      {companies.map((company, index) => (
-        <CompanyCard
-          key={`${company.name}-${index}`}
-          company={company}
-          rank={index + 1}
-        />
+      {/* Skeleton rows */}
+      {Array.from({ length: 15 }).map((_, index) => (
+        <div
+          key={index}
+          className="border-b border-border/50 last:border-0 animate-pulse"
+        >
+          <div className="py-4 sm:py-5">
+            {/* Desktop Grid Layout */}
+            <div className="hidden md:grid md:grid-cols-[40px_48px_1fr_80px_80px_100px_32px] gap-4 sm:gap-6 px-4 sm:px-6 items-center">
+              <div className="text-center">
+                <div className="h-4 w-4 bg-muted rounded mx-auto blur-sm" />
+              </div>
+              <div>
+                <div className="w-10 h-10 sm:w-12 sm:h-12 bg-muted rounded-md blur-sm" />
+              </div>
+              <div className="min-w-0">
+                <div className="h-5 w-32 bg-muted rounded blur-sm" />
+              </div>
+              <div className="text-right">
+                <div className="h-5 w-8 bg-muted rounded blur-sm ml-auto" />
+              </div>
+              <div className="text-right">
+                <div className="h-5 w-8 bg-muted rounded blur-sm ml-auto" />
+              </div>
+              <div className="text-right">
+                <div className="h-5 w-12 bg-muted rounded blur-sm ml-auto" />
+              </div>
+              <div>
+                <div className="h-4 w-4 bg-muted rounded blur-sm" />
+              </div>
+            </div>
+            {/* Mobile Layout */}
+            <div className="md:hidden px-4">
+              <div className="flex items-center gap-3 sm:gap-4 mb-3">
+                <div className="shrink-0 w-8 text-center">
+                  <div className="h-4 w-4 bg-muted rounded blur-sm mx-auto" />
+                </div>
+                <div className="shrink-0">
+                  <div className="w-10 h-10 bg-muted rounded-md blur-sm" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="h-4 w-24 bg-muted rounded blur-sm mb-1" />
+                </div>
+              </div>
+              <div className="flex items-center gap-4">
+                <div className="text-right flex-1">
+                  <div className="h-3 w-16 bg-muted rounded blur-sm mb-0.5 ml-auto" />
+                  <div className="h-4 w-8 bg-muted rounded blur-sm ml-auto" />
+                </div>
+                <div className="text-right flex-1">
+                  <div className="h-3 w-12 bg-muted rounded blur-sm mb-0.5 ml-auto" />
+                  <div className="h-4 w-8 bg-muted rounded blur-sm ml-auto" />
+                </div>
+                <div className="text-right flex-1">
+                  <div className="h-3 w-16 bg-muted rounded blur-sm mb-0.5 ml-auto" />
+                  <div className="h-4 w-12 bg-muted rounded blur-sm ml-auto" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       ))}
+    </div>
+  );
+}
+
+function TabContent({
+  companies,
+  emptyMessage,
+  icon: Icon,
+  hasMore,
+  onLoadMore,
+  isLoadingMore,
+  isLoading,
+}: {
+  companies: CompanyStats[];
+  emptyMessage: string;
+  icon: React.ElementType;
+  hasMore?: boolean;
+  onLoadMore?: () => void;
+  isLoadingMore?: boolean;
+  isLoading?: boolean;
+}) {
+  if (isLoading) {
+    return <TableSkeleton />;
+  }
+
+  if (companies.length === 0) {
+    return (
+      <div className="py-12 sm:py-16 text-center">
+        <Icon className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground" />
+        <h2 className="text-xl sm:text-2xl font-semibold mb-2">
+          No Data Available
+        </h2>
+        <p className="text-sm sm:text-base text-muted-foreground px-4">
+          {emptyMessage}
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div className="border border-border/50 rounded-lg overflow-hidden bg-card">
+        {/* Table Header - Desktop Only */}
+        <div className="hidden md:grid md:grid-cols-[40px_48px_1fr_80px_80px_100px_32px] gap-4 sm:gap-6 px-4 sm:px-6 py-3 bg-muted/30 border-b border-border/50">
+          <div></div>
+          <div></div>
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider">
+            Company
+          </div>
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
+            Submissions
+          </div>
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
+            Offers
+          </div>
+          <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
+            RO Rate
+          </div>
+          <div></div>
+        </div>
+        {companies.map((company, index) => (
+          <CompanyCard
+            key={`${company.name}-${index}`}
+            company={company}
+            rank={index + 1}
+          />
+        ))}
+      </div>
+      {hasMore && onLoadMore && (
+        <div className="mt-8 flex justify-center">
+          <Button
+            onClick={onLoadMore}
+            variant="default"
+            disabled={isLoadingMore}
+            className="w-full sm:w-auto min-w-[140px] px-6 py-2.5 font-medium shadow-sm hover:shadow-md transition-all duration-200"
+          >
+            {isLoadingMore ? (
+              <>
+                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                Loading...
+              </>
+            ) : (
+              <>
+                <span>Load More Companies</span>
+                <ChevronDown className="h-4 w-4 ml-2" />
+              </>
+            )}
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
 
 export default function TopCompaniesPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState("most-submissions");
-  const { data, isLoading, error } = useTopCompanies();
+  const [activeTab, setActiveTab] = useState<
+    "most-submissions" | "best-rates" | "worst-rates"
+  >("most-submissions");
+  const [displayedCount, setDisplayedCount] = useState(15);
+  const { data, isLoading, error } = useTopCompanies(
+    activeTab,
+    displayedCount,
+    0
+  );
   const { trackClick, trackPageView } = useAnalytics();
 
   useEffect(() => {
     trackPageView("top_companies", { tab: activeTab });
   }, [trackPageView, activeTab]);
 
-  const { data: companiesData, year } = data || {
-    data: {
-      mostSubmissions: [],
-      bestRates: [],
-      worstRates: [],
-    },
+  const {
+    data: companies,
+    hasMore,
+    year,
+  } = data || {
+    data: [],
+    total: 0,
+    hasMore: false,
     year: new Date().getFullYear(),
   };
 
+  const handleLoadMore = useCallback(() => {
+    setDisplayedCount((prev) => prev + 15);
+    trackClick("click_load_more_companies", {
+      tab: activeTab,
+      count: displayedCount + 15,
+    });
+  }, [activeTab, displayedCount, trackClick]);
+
   const handleTabChange = useCallback(
     (value: string) => {
-      setActiveTab(value);
+      const newTab = value as "most-submissions" | "best-rates" | "worst-rates";
+      setActiveTab(newTab);
+      setDisplayedCount(15); // Reset to initial count when tab changes
       trackClick("click_tab", { tab: value, page: "top_companies" });
     },
     [trackClick]
   );
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex items-center justify-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   if (error) {
     return (
@@ -335,7 +457,8 @@ export default function TopCompaniesPage() {
                   </h2>
                 </div>
                 <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-                  Share your experience and enter our $15 giftcard giveaway. Every 100 submissions triggers a new giveaway!
+                  Share your experience and enter our $15 giftcard giveaway.
+                  Every 100 submissions triggers a new giveaway!
                 </p>
               </div>
               <Link href="/submit" className="shrink-0 w-full sm:w-auto">
@@ -343,7 +466,9 @@ export default function TopCompaniesPage() {
                   size="default"
                   className="w-full sm:w-auto text-sm px-4 sm:px-5 py-2.5 sm:py-3 h-auto font-medium shadow-sm hover:shadow transition-all duration-200"
                   onClick={() =>
-                    trackClick("click_submit_cta_top", { page: "top_companies" })
+                    trackClick("click_submit_cta_top", {
+                      page: "top_companies",
+                    })
                   }
                 >
                   <Plus className="h-4 w-4 mr-1.5" />
@@ -391,9 +516,13 @@ export default function TopCompaniesPage() {
               </p>
             </div>
             <TabContent
-              companies={companiesData.mostSubmissions}
+              companies={companies}
               emptyMessage="No submission data available for this category."
               icon={BarChart3}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              isLoadingMore={isLoading}
+              isLoading={isLoading}
             />
           </TabsContent>
 
@@ -405,9 +534,13 @@ export default function TopCompaniesPage() {
               </p>
             </div>
             <TabContent
-              companies={companiesData.bestRates}
+              companies={companies}
               emptyMessage="No companies meet the minimum submission threshold for rate rankings."
               icon={TrendingUp}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              isLoadingMore={isLoading}
+              isLoading={isLoading}
             />
           </TabsContent>
 
@@ -419,9 +552,13 @@ export default function TopCompaniesPage() {
               </p>
             </div>
             <TabContent
-              companies={companiesData.worstRates}
+              companies={companies}
               emptyMessage="No companies meet the minimum submission threshold for rate rankings."
               icon={TrendingDown}
+              hasMore={hasMore}
+              onLoadMore={handleLoadMore}
+              isLoadingMore={isLoading}
+              isLoading={isLoading}
             />
           </TabsContent>
         </Tabs>

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 
-type CompanyStats = {
+export type CompanyStats = {
   name: string;
   total: number;
   offers: number;
@@ -9,19 +9,26 @@ type CompanyStats = {
 };
 
 type TopCompaniesData = {
-  data: {
-    mostSubmissions: CompanyStats[];
-    bestRates: CompanyStats[];
-    worstRates: CompanyStats[];
-  };
+  data: CompanyStats[];
+  total: number;
+  hasMore: boolean;
   year: number;
 };
 
-export function useTopCompanies() {
+export function useTopCompanies(
+  sort: "most-submissions" | "best-rates" | "worst-rates" = "most-submissions",
+  limit: number = 15,
+  offset: number = 0
+) {
   return useQuery<TopCompaniesData>({
-    queryKey: ["topCompanies"],
+    queryKey: ["topCompanies", sort, limit, offset],
     queryFn: async () => {
-      const response = await fetch("/api/companies/top");
+      const params = new URLSearchParams({
+        sort,
+        limit: limit.toString(),
+        offset: offset.toString(),
+      });
+      const response = await fetch(`/api/companies/top?${params.toString()}`);
       if (!response.ok) {
         throw new Error("Failed to fetch top companies");
       }
