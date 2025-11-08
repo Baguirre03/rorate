@@ -2,6 +2,7 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CompanySearch from "./CompanySearch";
@@ -43,12 +44,19 @@ export default function TopNav() {
               clearOnSelect={true}
             />
           </div>
-          <div className="shrink-0 hidden sm:block">
+          <div className="shrink-0 hidden sm:flex items-center">
             <Link
               href="/"
-              className="text-sm font-semibold text-foreground hover:text-foreground/80 transition-colors"
+              className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-foreground/80 transition-colors h-5"
             >
-              rorates.fyi
+              <Image
+                src="/icon.svg"
+                alt="Return Offer Rates Logo"
+                width={20}
+                height={20}
+                className="w-5 h-5"
+              />
+              <span className="leading-5">rorates.fyi</span>
             </Link>
           </div>
         </div>
