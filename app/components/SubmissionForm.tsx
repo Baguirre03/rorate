@@ -55,10 +55,10 @@ function normalizeLinkedInUrl(url: string): string {
 
 // Type guard to ensure payload matches API expectations
 function createSubmissionPayload(
-  formData: SubmissionFormData
+  formData: SubmissionFormData,
+  schoolName?: string,
+  source?: string
 ): SubmissionRequestBody {
-  // Always send positionType - it's always required
-  // Ensure it's a valid value (not null, not empty string)
   const getPositionType = (): string => {
     const positionType = formData.positionType?.trim();
     if (
@@ -78,6 +78,8 @@ function createSubmissionPayload(
     internType: formData.internType || undefined,
     returnOfferExtended: formData.returnOfferExtended === true,
     positionType: getPositionType(),
+    schoolName: schoolName || undefined,
+    source: source || undefined,
   };
 }
 
@@ -96,7 +98,15 @@ const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 7 }, (_, i) => currentYear - i);
 const TERMS = ["Fall", "Spring", "Summer"];
 
-export default function SubmissionForm() {
+interface SubmissionFormProps {
+  schoolName?: string;
+  source?: string;
+}
+
+export default function SubmissionForm({
+  schoolName,
+  source,
+}: SubmissionFormProps = {}) {
   const router = useRouter();
   const [formData, setFormData] = useState<SubmissionFormData>({
     linkedinUrl: "",
@@ -300,7 +310,11 @@ export default function SubmissionForm() {
     setSubmitStatus({ type: null, message: "" });
 
     try {
-      const payload: SubmissionRequestBody = createSubmissionPayload(formData);
+      const payload: SubmissionRequestBody = createSubmissionPayload(
+        formData,
+        schoolName,
+        source
+      );
 
       const response = await fetch("/api/submissions", {
         method: "POST",

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import {
@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Loader2,
   ArrowLeft,
+  BarChart3,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -41,6 +42,17 @@ type SubmissionWithCompany = {
   };
 };
 
+type AnalyticsData = {
+  total: number;
+  bySource: Array<{ source: string; count: number }>;
+  bySchool: Array<{ school_name: string; count: number }>;
+  bySourceAndSchool: Array<{
+    source: string;
+    school_name: string;
+    count: number;
+  }>;
+};
+
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
     case "accepted":
@@ -58,6 +70,7 @@ export default function SubmissionsPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { trackClick, trackPageView } = useAnalytics();
+  const [showAnalytics, setShowAnalytics] = useState(false);
 
   useEffect(() => {
     trackPageView("submissions");
@@ -68,12 +81,37 @@ export default function SubmissionsPage() {
   }>({
     queryKey: ["submissions", "all"],
     queryFn: async () => {
-      const response = await fetch("/api/submissions?all=true");
+      const response = await fetch("/api/submissions?all=true", {
+        credentials: "include",
+      });
       if (!response.ok) {
         throw new Error("Failed to fetch submissions");
       }
       return response.json();
     },
+  });
+
+  const {
+    data: analyticsData,
+    isLoading: isLoadingAnalytics,
+    error: analyticsError,
+  } = useQuery<{
+    data: SubmissionWithCompany[];
+    analytics?: AnalyticsData;
+  }>({
+    queryKey: ["submissions", "analytics"],
+    queryFn: async () => {
+      const response = await fetch("/api/submissions?analytics=true&all=true", {
+        credentials: "include",
+      });
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to fetch analytics");
+      }
+      return response.json();
+    },
+    enabled: showAnalytics, // Only fetch when analytics is shown
+    retry: false, // Don't retry on auth errors
   });
 
   const updateStatusMutation = useMutation({
@@ -174,11 +212,137 @@ export default function SubmissionsPage() {
         </div>
         <Card>
           <CardHeader className="pb-3 sm:pb-4 px-4 sm:px-6 pt-4 sm:pt-6">
-            <CardTitle className="text-lg sm:text-xl">Submissions</CardTitle>
-            <CardDescription className="text-xs sm:text-sm">
-              Review and manage all submissions ({submissions.length} total)
-            </CardDescription>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <CardTitle className="text-lg sm:text-xl">
+                  Submissions
+                </CardTitle>
+                <CardDescription className="text-xs sm:text-sm">
+                  Review and manage all submissions ({submissions.length} total)
+                </CardDescription>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setShowAnalytics(!showAnalytics);
+                  trackClick("view_analytics", { page: "submissions" });
+                }}
+                className="shrink-0"
+              >
+                <BarChart3 className="h-4 w-4 mr-2" />
+                {showAnalytics ? "Hide" : "View"} Analytics
+              </Button>
+            </div>
           </CardHeader>
+          {showAnalytics && (
+            <CardContent className="px-4 sm:px-6 pb-4 border-b">
+              {isLoadingAnalytics ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                </div>
+              ) : analyticsError ? (
+                <div className="text-sm text-destructive py-4">
+                  {analyticsError instanceof Error
+                    ? analyticsError.message
+                    : "Failed to load analytics"}
+                </div>
+              ) : analyticsData?.analytics ? (
+                <div className="space-y-6">
+                  <div>
+                    <h3 className="text-sm font-semibold mb-3">
+                      Submission Analytics
+                    </h3>
+                    <div className="text-sm text-muted-foreground mb-4">
+                      Total submissions: {analyticsData.analytics.total}
+                    </div>
+
+                    {/* By Source */}
+                    {analyticsData.analytics.bySource.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-xs font-medium mb-2 text-muted-foreground uppercase">
+                          By Source
+                        </h4>
+                        <div className="space-y-2">
+                          {analyticsData.analytics.bySource.map((item) => (
+                            <div
+                              key={item.source}
+                              className="flex items-center justify-between text-sm p-2 rounded bg-muted/50"
+                            >
+                              <span className="font-medium">{item.source}</span>
+                              <span className="text-muted-foreground">
+                                {item.count}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* By School */}
+                    {analyticsData.analytics.bySchool.length > 0 && (
+                      <div className="mb-6">
+                        <h4 className="text-xs font-medium mb-2 text-muted-foreground uppercase">
+                          By School
+                        </h4>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {analyticsData.analytics.bySchool.map((item) => (
+                            <div
+                              key={item.school_name}
+                              className="flex items-center justify-between text-sm p-2 rounded bg-muted/50"
+                            >
+                              <span className="font-medium">
+                                {item.school_name}
+                              </span>
+                              <span className="text-muted-foreground">
+                                {item.count}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* By Source and School */}
+                    {analyticsData.analytics.bySourceAndSchool.length > 0 && (
+                      <div>
+                        <h4 className="text-xs font-medium mb-2 text-muted-foreground uppercase">
+                          By Source and School
+                        </h4>
+                        <div className="space-y-2 max-h-64 overflow-y-auto">
+                          {analyticsData.analytics.bySourceAndSchool.map(
+                            (item, idx) => (
+                              <div
+                                key={`${item.source}-${item.school_name}-${idx}`}
+                                className="flex items-center justify-between text-sm p-2 rounded bg-muted/50"
+                              >
+                                <span>
+                                  <span className="font-medium">
+                                    {item.source}
+                                  </span>
+                                  {" • "}
+                                  <span className="text-muted-foreground">
+                                    {item.school_name}
+                                  </span>
+                                </span>
+                                <span className="text-muted-foreground">
+                                  {item.count}
+                                </span>
+                              </div>
+                            )
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-sm text-muted-foreground py-4">
+                  No analytics data available
+                </div>
+              )}
+            </CardContent>
+          )}
           <CardContent className="p-3 sm:p-4 md:p-6">
             {submissions.length === 0 ? (
               <div className="text-center py-8 sm:py-12 text-muted-foreground text-xs sm:text-sm">

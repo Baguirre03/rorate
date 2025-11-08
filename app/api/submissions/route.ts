@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 import { supabase } from "@/lib/supabaseClient";
 import {
   SubmissionInsert,
   SubmissionRequestBody,
-  SubmissionResponse,
+  Tables,
 } from "@/types/supabase";
 
 // Extract LinkedIn profile identifier from URL
@@ -47,6 +48,36 @@ function normalizeLinkedInUrl(url: string): string {
   return trimmed;
 }
 
+// Remove analytics fields from submission data before sending to frontend
+// Always removes school_name and source (never exposed)
+// For admins: keeps linkedin_url; for regular users: removes it (but this endpoint is admin-only now)
+function sanitizeSubmission<
+  T extends {
+    school_name?: string | null;
+    source?: string | null;
+    linkedin_url?: string | null;
+  }
+>(submission: T): Omit<T, "school_name" | "source"> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const {
+    school_name: _school_name,
+    source: _source,
+    ...sanitized
+  } = submission;
+  return sanitized;
+}
+
+// Remove analytics fields from array of submissions
+function sanitizeSubmissions<
+  T extends {
+    school_name?: string | null;
+    source?: string | null;
+    linkedin_url?: string | null;
+  }
+>(submissions: T[]): Array<Omit<T, "school_name" | "source">> {
+  return submissions.map(sanitizeSubmission);
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body: SubmissionRequestBody = await request.json();
@@ -58,6 +89,8 @@ export async function POST(request: NextRequest) {
       internType,
       returnOfferExtended,
       positionType,
+      schoolName,
+      source,
     } = body;
 
     if (
@@ -127,10 +160,7 @@ export async function POST(request: NextRequest) {
 
     if (checkError) {
       console.error("Error checking for duplicates:", checkError);
-      // Continue with submission if check fails (don't block submission)
     } else if (existingSubmissions && existingSubmissions.length > 0) {
-      // Check if any existing submission matches LinkedIn profile
-      // (company, year, and term are already filtered in the query)
       const duplicate = existingSubmissions.find((sub) => {
         if (!sub.linkedin_url) return false;
 
@@ -159,6 +189,9 @@ export async function POST(request: NextRequest) {
       linkedin_url: normalizedLinkedInUrl,
       // Position type is always required (validated above)
       position_type: positionType,
+      // Analytics fields
+      school_name: schoolName?.trim() || null,
+      source: source?.trim() || null,
     };
 
     const { data: submission, error: submissionError } = await supabase
@@ -169,9 +202,13 @@ export async function POST(request: NextRequest) {
 
     if (submissionError) throw submissionError;
 
-    const response: SubmissionResponse = {
+    // Remove analytics fields before sending to frontend
+    const sanitizedSubmission = sanitizeSubmission(submission);
+
+    // Type assertion is safe here - we're just removing analytics fields
+    const response = {
       success: true,
-      data: submission,
+      data: sanitizedSubmission as Tables<"submissions">,
     };
 
     return NextResponse.json(response);
@@ -190,8 +227,48 @@ export async function GET(request: NextRequest) {
     const companyName = searchParams.get("company");
     const year = searchParams.get("year");
     const all = searchParams.get("all") === "true"; // For admin view
+    const includeAnalytics = searchParams.get("analytics") === "true";
 
-    let query = supabase
+    // Create server client for database queries
+    const client = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          getAll() {
+            return request.cookies.getAll();
+          },
+          setAll() {
+            // Not setting cookies in GET request
+          },
+        },
+      }
+    );
+
+    const {
+      data: { user },
+      error: authError,
+    } = await client.auth.getUser();
+
+    if (authError || !user) {
+      return NextResponse.json(
+        {
+          error: "Unauthorized - Authentication required",
+        },
+        { status: 401 }
+      );
+    }
+
+    if (user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+      return NextResponse.json(
+        { error: "Unauthorized - Admin access required" },
+        { status: 403 }
+      );
+    }
+
+    const isAdmin = true;
+
+    let query = client
       .from("submissions")
       .select(
         `
@@ -204,7 +281,6 @@ export async function GET(request: NextRequest) {
       )
       .order("submitted_at", { ascending: false });
 
-    // Only show accepted submissions for public view
     if (!all) {
       query = query.eq("status", "accepted");
     }
@@ -221,7 +297,67 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    return NextResponse.json({ data });
+    const sanitizedData = data ? sanitizeSubmissions(data) : [];
+
+    let analytics = null;
+    if (includeAnalytics && isAdmin) {
+      const analyticsQuery = client
+        .from("submissions")
+        .select("school_name, source, id, status");
+
+      const { data: analyticsData, error: analyticsError } =
+        await analyticsQuery;
+
+      if (!analyticsError && analyticsData) {
+        const bySource: Record<string, number> = {};
+        const bySchool: Record<string, number> = {};
+        const bySourceAndSchool: Record<string, number> = {};
+
+        analyticsData.forEach((submission) => {
+          const school = submission.school_name || "Unknown";
+          const src = submission.source || "Unknown";
+          const key = `${src}::${school}`;
+
+          // Count by source
+          bySource[src] = (bySource[src] || 0) + 1;
+
+          // Count by school
+          bySchool[school] = (bySchool[school] || 0) + 1;
+
+          // Count by source and school combination
+          bySourceAndSchool[key] = (bySourceAndSchool[key] || 0) + 1;
+        });
+
+        analytics = {
+          total: analyticsData.length,
+          bySource: Object.entries(bySource)
+            .map(([source, count]) => ({ source, count }))
+            .sort((a, b) => b.count - a.count),
+          bySchool: Object.entries(bySchool)
+            .map(([school_name, count]) => ({ school_name, count }))
+            .sort((a, b) => b.count - a.count),
+          bySourceAndSchool: Object.entries(bySourceAndSchool)
+            .map(([key, count]) => {
+              const [source, school_name] = key.split("::");
+              return { source, school_name, count };
+            })
+            .sort((a, b) => b.count - a.count),
+        };
+      }
+    }
+
+    const responseData: {
+      data: typeof sanitizedData;
+      analytics?: typeof analytics;
+    } = {
+      data: sanitizedData,
+    };
+
+    if (analytics) {
+      responseData.analytics = analytics;
+    }
+
+    return NextResponse.json(responseData);
   } catch (error) {
     console.error("Error fetching submissions:", error);
     return NextResponse.json(

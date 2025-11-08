@@ -61,20 +61,10 @@ export async function PATCH(
       );
     }
 
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from("submissions")
       .update({ status })
-      .eq("id", submissionId)
-      .select(
-        `
-        *,
-        companies (
-          id,
-          name
-        )
-      `
-      )
-      .single();
+      .eq("id", submissionId);
 
     if (error) {
       console.error("Supabase error:", error);
@@ -82,7 +72,10 @@ export async function PATCH(
     }
 
     // Return JSON response with updated cookies from Supabase
-    const jsonResponse = NextResponse.json({ success: true, data });
+    // We don't return the updated data since the frontend just invalidates queries anyway
+    const jsonResponse = NextResponse.json({
+      success: true,
+    });
 
     // Copy any cookies that Supabase set during the request
     response.cookies.getAll().forEach((cookie) => {

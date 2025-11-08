@@ -40,6 +40,8 @@ export type Database = {
           linkedin_url: string | null;
           position_type: string | null;
           return_offer_extended: boolean;
+          school_name: string | null;
+          source: string | null;
           status: string;
           submitted_at: string | null;
           term: string;
@@ -52,6 +54,8 @@ export type Database = {
           linkedin_url?: string | null;
           position_type?: string | null;
           return_offer_extended: boolean;
+          school_name?: string | null;
+          source?: string | null;
           status: string;
           submitted_at?: string | null;
           term: string;
@@ -64,6 +68,8 @@ export type Database = {
           linkedin_url?: string | null;
           position_type?: string | null;
           return_offer_extended?: boolean;
+          school_name?: string | null;
+          source?: string | null;
           status?: string;
           submitted_at?: string | null;
           term?: string;
@@ -247,4 +253,6 @@ export type SubmissionRequestBody = {
   internType?: string;
   returnOfferExtended: boolean;
   positionType: string;
+  schoolName?: string;
+  source?: string;
 };
