@@ -81,6 +81,8 @@ export const metadata: Metadata = {
   },
 };
 
+const IS_PROD = process.env.NEXT_PUBLIC_ENVIRONMENT === "prod";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -94,7 +96,7 @@ export default function RootLayout({
         <Providers>
           <TopNav />
           {children}
-          <Analytics />
+          {IS_PROD && <Analytics />}
         </Providers>
       </body>
     </html>
