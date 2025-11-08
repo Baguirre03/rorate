@@ -81,7 +81,7 @@ export const metadata: Metadata = {
   },
 };
 
-const IS_PROD = process.env.NEXT_PUBLIC_ENVIRONMENT === "prod";
+const IS_PROD = process.env.ENVIRONMENT === "production";
 
 export default function RootLayout({
   children,
