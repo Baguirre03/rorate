@@ -2,11 +2,11 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import Image from "next/image";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CompanySearch from "./CompanySearch";
 import { useCompanySearch } from "@/hooks/useCompanySearch";
+import Logo from "./Logo";
 
 export default function TopNav() {
   const pathname = usePathname();
@@ -49,13 +49,7 @@ export default function TopNav() {
               href="/"
               className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-foreground/80 transition-colors h-5"
             >
-              <Image
-                src="/icon.svg"
-                alt="Return Offer Rates Logo"
-                width={20}
-                height={20}
-                className="w-5 h-5"
-              />
+              <Logo className="w-5 h-5 text-foreground" />
               <span className="leading-5">rorates.fyi</span>
             </Link>
           </div>
