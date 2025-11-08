@@ -214,13 +214,7 @@ export default function CompanyPageClient({
       return false;
     }
     if (selectedPositionType !== "all") {
-      // Only filter by position type for return offers
-      if (s.return_offer_extended === true) {
-        if (s.position_type !== selectedPositionType) {
-          return false;
-        }
-      } else {
-        // If filtering for a specific position type but no return offer, exclude it
+      if (s.position_type !== selectedPositionType) {
         return false;
       }
     }
@@ -369,7 +363,7 @@ export default function CompanyPageClient({
                 {/* Position Type Filter */}
                 <div>
                   <label className="text-xs font-medium text-muted-foreground mb-2 block uppercase tracking-wide">
-                    Return Offer Type
+                    Position Type
                   </label>
                   <Tabs
                     value={selectedPositionType}
