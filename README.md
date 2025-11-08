@@ -7,7 +7,6 @@ A platform for tracking and sharing return offer statistics for tech companies. 
 - 🏢 **Company Search** - Search for companies and view their return offer rates
 - 📊 **Top Companies** - Browse companies ranked by submissions, best rates, and worst rates
 - 📝 **Submission Form** - Submit your return offer experience (data remains anonymous)
-- 🔒 **Admin Dashboard** - Review and manage submissions (admin only)
 
 ## Tech Stack
 
