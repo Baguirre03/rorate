@@ -18,7 +18,8 @@ import {
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { useTopCompanies, CompanyStats } from "@/hooks/useTopCompanies";
+import { CompanyStats } from "@/hooks/useTopCompanies";
+import { usePaginatedCompanies } from "@/hooks/usePaginatedCompanies";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import SubmitCTA from "@/components/SubmitCTA";
 
@@ -284,11 +285,12 @@ function TabContent({
   isLoadingMore?: boolean;
   isLoading?: boolean;
 }) {
-  if (isLoading) {
+  // Show skeleton only on initial load when we have no companies
+  if (isLoading && companies.length === 0) {
     return <TableSkeleton />;
   }
 
-  if (companies.length === 0) {
+  if (companies.length === 0 && !isLoading) {
     return (
       <div className="py-12 sm:py-16 text-center">
         <Icon className="h-12 w-12 sm:h-16 sm:w-16 mx-auto mb-4 text-muted-foreground" />
@@ -330,8 +332,16 @@ function TabContent({
             rank={index + 1}
           />
         ))}
+        {/* Show loader at bottom when loading more */}
+        {isLoadingMore && (
+          <div className="border-b border-border/50 last:border-0">
+            <div className="py-8 flex items-center justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          </div>
+        )}
       </div>
-      {hasMore && onLoadMore && (
+      {hasMore && onLoadMore && !isLoadingMore && (
         <div className="mt-8 flex justify-center">
           <Button
             onClick={onLoadMore}
@@ -339,17 +349,8 @@ function TabContent({
             disabled={isLoadingMore}
             className="w-full sm:w-auto min-w-[140px] px-6 py-2.5 font-medium shadow-sm hover:shadow-md transition-all duration-200"
           >
-            {isLoadingMore ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Loading...
-              </>
-            ) : (
-              <>
-                <span>Load More Companies</span>
-                <ChevronDown className="h-4 w-4 ml-2" />
-              </>
-            )}
+            <span>Load More Companies</span>
+            <ChevronDown className="h-4 w-4 ml-2" />
           </Button>
         </div>
       )}
@@ -362,42 +363,34 @@ export default function TopCompaniesPage() {
   const [activeTab, setActiveTab] = useState<
     "most-submissions" | "best-rates" | "worst-rates"
   >("most-submissions");
-  const [displayedCount, setDisplayedCount] = useState(15);
-  const { data, isLoading, error } = useTopCompanies(
-    activeTab,
-    displayedCount,
-    0
-  );
   const { trackClick, trackPageView } = useAnalytics();
+
+  const {
+    companies: accumulatedCompanies,
+    hasMore,
+    year,
+    isLoading,
+    isLoadingMore,
+    loadMore,
+    error,
+  } = usePaginatedCompanies(activeTab, 15);
 
   useEffect(() => {
     trackPageView("top_companies", { tab: activeTab });
   }, [trackPageView, activeTab]);
 
-  const {
-    data: companies,
-    hasMore,
-    year,
-  } = data || {
-    data: [],
-    total: 0,
-    hasMore: false,
-    year: new Date().getFullYear(),
-  };
-
   const handleLoadMore = useCallback(() => {
-    setDisplayedCount((prev) => prev + 15);
+    loadMore();
     trackClick("click_load_more_companies", {
       tab: activeTab,
-      count: displayedCount + 15,
+      count: accumulatedCompanies.length + 15,
     });
-  }, [activeTab, displayedCount, trackClick]);
+  }, [activeTab, accumulatedCompanies.length, loadMore, trackClick]);
 
   const handleTabChange = useCallback(
     (value: string) => {
       const newTab = value as "most-submissions" | "best-rates" | "worst-rates";
       setActiveTab(newTab);
-      setDisplayedCount(15); // Reset to initial count when tab changes
       trackClick("click_tab", { tab: value, page: "top_companies" });
     },
     [trackClick]
@@ -516,12 +509,12 @@ export default function TopCompaniesPage() {
               </p>
             </div>
             <TabContent
-              companies={companies}
+              companies={accumulatedCompanies}
               emptyMessage="No submission data available for this category."
               icon={BarChart3}
               hasMore={hasMore}
               onLoadMore={handleLoadMore}
-              isLoadingMore={isLoading}
+              isLoadingMore={isLoadingMore}
               isLoading={isLoading}
             />
           </TabsContent>
@@ -534,12 +527,12 @@ export default function TopCompaniesPage() {
               </p>
             </div>
             <TabContent
-              companies={companies}
+              companies={accumulatedCompanies}
               emptyMessage="No companies meet the minimum submission threshold for rate rankings."
               icon={TrendingUp}
               hasMore={hasMore}
               onLoadMore={handleLoadMore}
-              isLoadingMore={isLoading}
+              isLoadingMore={isLoadingMore}
               isLoading={isLoading}
             />
           </TabsContent>
@@ -552,12 +545,12 @@ export default function TopCompaniesPage() {
               </p>
             </div>
             <TabContent
-              companies={companies}
+              companies={accumulatedCompanies}
               emptyMessage="No companies meet the minimum submission threshold for rate rankings."
               icon={TrendingDown}
               hasMore={hasMore}
               onLoadMore={handleLoadMore}
-              isLoadingMore={isLoading}
+              isLoadingMore={isLoadingMore}
               isLoading={isLoading}
             />
           </TabsContent>

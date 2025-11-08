@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery, InfiniteData } from "@tanstack/react-query";
 
 export type CompanyStats = {
   name: string;
@@ -15,18 +15,25 @@ type TopCompaniesData = {
   year: number;
 };
 
+type sortType = "most-submissions" | "best-rates" | "worst-rates";
+
 export function useTopCompanies(
-  sort: "most-submissions" | "best-rates" | "worst-rates" = "most-submissions",
-  limit: number = 15,
-  offset: number = 0
+  sort: sortType = "most-submissions",
+  limit: number = 15
 ) {
-  return useQuery<TopCompaniesData>({
-    queryKey: ["topCompanies", sort, limit, offset],
-    queryFn: async () => {
+  return useInfiniteQuery<
+    TopCompaniesData,
+    Error,
+    InfiniteData<TopCompaniesData>,
+    (string | number)[],
+    number
+  >({
+    queryKey: ["topCompanies", sort, limit],
+    queryFn: async ({ pageParam }): Promise<TopCompaniesData> => {
       const params = new URLSearchParams({
         sort,
         limit: limit.toString(),
-        offset: offset.toString(),
+        offset: pageParam.toString(),
       });
       const response = await fetch(`/api/companies/top?${params.toString()}`);
       if (!response.ok) {
@@ -34,6 +41,11 @@ export function useTopCompanies(
       }
       return response.json();
     },
+    getNextPageParam: (lastPage, allPages) => {
+      const nextOffset = allPages.length * limit;
+      return lastPage.hasMore ? nextOffset : undefined;
+    },
+    initialPageParam: 0,
     staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 }
