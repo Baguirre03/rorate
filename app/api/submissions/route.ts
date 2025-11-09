@@ -11,6 +11,7 @@ import {
   checkSubmissionLimit,
   incrementSubmissionCount,
 } from "@/lib/submissionLimit";
+import { validateUserAgent } from "@/lib/userAgentValidation";
 
 // Extract LinkedIn profile identifier from URL
 // Handles formats like: linkedin.com/in/username, www.linkedin.com/in/username, etc.
@@ -84,7 +85,13 @@ function sanitizeSubmissions<
 }
 
 export async function POST(request: NextRequest) {
-  // Layer 1: Rate limiting - 5 requests per minute per IP for DDoS protection
+  // Layer 1: User Agent Validation - Block curl, wget, and other automated tools
+  const userAgentCheck = validateUserAgent(request);
+  if (!userAgentCheck.allowed && userAgentCheck.response) {
+    return userAgentCheck.response;
+  }
+
+  // Layer 2: Rate limiting - 5 requests per minute per IP for DDoS protection
   const rateLimitResult = rateLimit(request, {
     maxRequests: 5,
     windowMs: 60 * 1000, // 1 minute
@@ -94,7 +101,7 @@ export async function POST(request: NextRequest) {
     return rateLimitResult.response;
   }
 
-  // Layer 2: Submission limit - Maximum 10 submissions per IP
+  // Layer 3: Submission limit - Maximum 10 submissions per IP
   const submissionLimitCheck = checkSubmissionLimit(request, 10);
   if (!submissionLimitCheck.allowed && submissionLimitCheck.response) {
     return submissionLimitCheck.response;
