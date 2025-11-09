@@ -1,15 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
-import { supabase } from "@/lib/supabaseClient";
-import {
+import type {
   SubmissionInsert,
   SubmissionRequestBody,
   Tables,
 } from "@/types/supabase";
-import {
-  checkSubmissionLimit,
-  incrementSubmissionCount,
-} from "@/lib/submissionLimit";
 import { validateUserAgent } from "@/lib/userAgentValidation";
 import {
   sanitizeCompanyName,
@@ -20,13 +14,13 @@ import {
   validateInternType,
   validatePositionType,
 } from "@/lib/inputSanitization";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 // Extract LinkedIn profile identifier from URL
 // Handles formats like: linkedin.com/in/username, www.linkedin.com/in/username, etc.
 function extractLinkedInProfileId(url: string): string | null {
   try {
     const trimmed = url.trim().toLowerCase();
-    // Normalize URL
     let normalized = trimmed;
     if (!normalized.startsWith("http")) {
       normalized = `https://${normalized}`;
@@ -52,7 +46,6 @@ function extractLinkedInProfileId(url: string): string | null {
   }
 }
 
-// Normalize LinkedIn URL - add https:// if missing
 function normalizeLinkedInUrl(url: string): string {
   const trimmed = url.trim();
   if (!trimmed) return trimmed;
@@ -62,9 +55,6 @@ function normalizeLinkedInUrl(url: string): string {
   return trimmed;
 }
 
-// Remove analytics fields from submission data before sending to frontend
-// Always removes school_name and source (never exposed)
-// For admins: keeps linkedin_url; for regular users: removes it (but this endpoint is admin-only now)
 function sanitizeSubmission<
   T extends {
     school_name?: string | null;
@@ -72,16 +62,16 @@ function sanitizeSubmission<
     linkedin_url?: string | null;
   }
 >(submission: T): Omit<T, "school_name" | "source"> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const {
     school_name: _school_name,
     source: _source,
     ...sanitized
   } = submission;
-  return sanitized;
+  return {
+    ...sanitized,
+  };
 }
 
-// Remove analytics fields from array of submissions
 function sanitizeSubmissions<
   T extends {
     school_name?: string | null;
@@ -93,19 +83,11 @@ function sanitizeSubmissions<
 }
 
 export async function POST(request: NextRequest) {
-  // Layer 1: User Agent Validation - Block curl, wget, and other automated tools
   const userAgentCheck = validateUserAgent(request);
   if (!userAgentCheck.allowed && userAgentCheck.response) {
     return userAgentCheck.response;
   }
 
-  // Layer 2: Submission limit - Maximum 10 submissions per IP
-  const submissionLimitCheck = checkSubmissionLimit(request, 10);
-  if (!submissionLimitCheck.allowed && submissionLimitCheck.response) {
-    return submissionLimitCheck.response;
-  }
-
-  // Layer 4: Request size validation
   const contentLength = request.headers.get("content-length");
   const MAX_REQUEST_SIZE = 10 * 1024; // 10KB limit
   if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
@@ -114,6 +96,8 @@ export async function POST(request: NextRequest) {
       { status: 413 }
     );
   }
+
+  const supabase = await createServerSupabaseClient();
 
   try {
     const body: SubmissionRequestBody = await request.json();
@@ -129,7 +113,6 @@ export async function POST(request: NextRequest) {
       source,
     } = body;
 
-    // Validate required fields
     if (
       !linkedinUrl ||
       !companyName ||
@@ -143,7 +126,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sanitize and validate inputs
     const sanitizedCompanyName = sanitizeCompanyName(companyName);
     if (!sanitizedCompanyName) {
       return NextResponse.json(
@@ -165,7 +147,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Invalid term" }, { status: 400 });
     }
 
-    // Validate positionType - always required
     const validatedPositionType = validatePositionType(positionType);
     if (!validatedPositionType) {
       return NextResponse.json(
@@ -177,7 +158,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Sanitize optional fields
     const sanitizedSchoolName = schoolName
       ? sanitizeSchoolName(schoolName)
       : null;
@@ -186,7 +166,6 @@ export async function POST(request: NextRequest) {
       ? validateInternType(internType)
       : null;
 
-    // Normalize LinkedIn URL
     const normalizedLinkedInUrl = normalizeLinkedInUrl(linkedinUrl);
     const linkedInProfileId = extractLinkedInProfileId(linkedinUrl);
 
@@ -197,7 +176,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get or create company first (needed for duplicate check)
     let { data: company } = await supabase
       .from("companies")
       .select("id")
@@ -215,24 +193,22 @@ export async function POST(request: NextRequest) {
       company = newCompany;
     }
 
-    // Check for duplicate submission
-    // Match by: LinkedIn profile ID + company_id + year + term
-    const { data: existingSubmissions, error: checkError } = await supabase
+    const { data: existingSubmissions } = await supabase
       .from("submissions")
       .select("id, linkedin_url, company_id, term, year")
       .eq("company_id", company.id)
       .eq("year", validatedYear)
       .eq("term", validatedTerm);
 
-    if (checkError) {
-      console.error("Error checking for duplicates:", checkError);
-    } else if (existingSubmissions && existingSubmissions.length > 0) {
-      const duplicate = existingSubmissions.find((sub) => {
-        if (!sub.linkedin_url) return false;
+    if (existingSubmissions && existingSubmissions.length > 0) {
+      const duplicate = existingSubmissions.find(
+        (sub: { linkedin_url: string | null }) => {
+          if (!sub.linkedin_url) return false;
 
-        const existingProfileId = extractLinkedInProfileId(sub.linkedin_url);
-        return existingProfileId === linkedInProfileId;
-      });
+          const existingProfileId = extractLinkedInProfileId(sub.linkedin_url);
+          return existingProfileId === linkedInProfileId;
+        }
+      );
 
       if (duplicate) {
         return NextResponse.json(
@@ -253,9 +229,7 @@ export async function POST(request: NextRequest) {
       status: "waiting",
       intern_type: validatedInternType,
       linkedin_url: normalizedLinkedInUrl,
-      // Position type is always required (validated above)
       position_type: validatedPositionType,
-      // Analytics fields (sanitized)
       school_name: sanitizedSchoolName,
       source: sanitizedSource,
     };
@@ -266,38 +240,18 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
-    if (submissionError) throw submissionError;
+    if (submissionError) {
+      throw submissionError;
+    }
 
-    // Increment submission count for this IP after successful submission
-    incrementSubmissionCount(request);
-
-    // Remove analytics fields before sending to frontend
     const sanitizedSubmission = sanitizeSubmission(submission);
 
-    // Type assertion is safe here - we're just removing analytics fields
     const response = {
       success: true,
       data: sanitizedSubmission as Tables<"submissions">,
     };
 
-    // Add submission limit headers to response
-    const headers = new Headers();
-    // Add submission limit headers
-    if (submissionLimitCheck.currentCount !== undefined) {
-      headers.set(
-        "X-Submission-Count",
-        (submissionLimitCheck.currentCount + 1).toString()
-      );
-    }
-    if (submissionLimitCheck.remaining !== undefined) {
-      headers.set(
-        "X-Submission-Remaining",
-        (submissionLimitCheck.remaining - 1).toString()
-      );
-    }
-    headers.set("X-Submission-Limit", "10");
-
-    return NextResponse.json(response, { headers });
+    return NextResponse.json(response);
   } catch (error) {
     console.error("Error creating submission:", error);
     return NextResponse.json(
@@ -308,33 +262,19 @@ export async function POST(request: NextRequest) {
 }
 
 export async function GET(request: NextRequest) {
+  const supabase = await createServerSupabaseClient();
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const companyName = searchParams.get("company");
     const year = searchParams.get("year");
-    const all = searchParams.get("all") === "true"; // For admin view
+    const all = searchParams.get("all") === "true";
     const includeAnalytics = searchParams.get("analytics") === "true";
-
-    // Create server client for database queries
-    const client = createServerClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll() {
-            // Not setting cookies in GET request
-          },
-        },
-      }
-    );
 
     const {
       data: { user },
       error: authError,
-    } = await client.auth.getUser();
+    } = await supabase.auth.getUser();
 
     if (authError || !user) {
       return NextResponse.json(
@@ -354,7 +294,7 @@ export async function GET(request: NextRequest) {
 
     const isAdmin = true;
 
-    let query = client
+    let query = supabase
       .from("submissions")
       .select(
         `
@@ -387,7 +327,7 @@ export async function GET(request: NextRequest) {
 
     let analytics = null;
     if (includeAnalytics && isAdmin) {
-      const analyticsQuery = client
+      const analyticsQuery = supabase
         .from("submissions")
         .select("school_name, source, id, status");
 
@@ -404,13 +344,9 @@ export async function GET(request: NextRequest) {
           const src = submission.source || "Unknown";
           const key = `${src}::${school}`;
 
-          // Count by source
           bySource[src] = (bySource[src] || 0) + 1;
-
-          // Count by school
           bySchool[school] = (bySchool[school] || 0) + 1;
 
-          // Count by source and school combination
           bySourceAndSchool[key] = (bySourceAndSchool[key] || 0) + 1;
         });
 
