@@ -6,6 +6,7 @@ import {
   SubmissionRequestBody,
   Tables,
 } from "@/types/supabase";
+import { rateLimit } from "@/lib/rateLimit";
 
 // Extract LinkedIn profile identifier from URL
 // Handles formats like: linkedin.com/in/username, www.linkedin.com/in/username, etc.
@@ -79,6 +80,16 @@ function sanitizeSubmissions<
 }
 
 export async function POST(request: NextRequest) {
+  // Apply rate limiting: 5 requests per minute per IP for DDoS protection
+  const rateLimitResult = rateLimit(request, {
+    maxRequests: 5,
+    windowMs: 60 * 1000, // 1 minute
+  });
+
+  if (!rateLimitResult.allowed && rateLimitResult.response) {
+    return rateLimitResult.response;
+  }
+
   try {
     const body: SubmissionRequestBody = await request.json();
     const {
@@ -211,7 +222,25 @@ export async function POST(request: NextRequest) {
       data: sanitizedSubmission as Tables<"submissions">,
     };
 
-    return NextResponse.json(response);
+    // Add rate limit headers to response
+    const headers = new Headers();
+    if (rateLimitResult.limit) {
+      headers.set("X-RateLimit-Limit", rateLimitResult.limit.toString());
+    }
+    if (rateLimitResult.remaining !== undefined) {
+      headers.set(
+        "X-RateLimit-Remaining",
+        rateLimitResult.remaining.toString()
+      );
+    }
+    if (rateLimitResult.resetTime) {
+      headers.set(
+        "X-RateLimit-Reset",
+        new Date(rateLimitResult.resetTime).toISOString()
+      );
+    }
+
+    return NextResponse.json(response, { headers });
   } catch (error) {
     console.error("Error creating submission:", error);
     return NextResponse.json(

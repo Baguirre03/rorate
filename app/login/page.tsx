@@ -33,12 +33,14 @@ function LoginForm() {
       const { data, error } = await supabase.auth.signInWithOtp({
         email,
         options: {
+          data: {
+            confirmation_url: callbackUrl,
+          },
           emailRedirectTo: callbackUrl,
         },
       });
 
       if (error) {
-        console.error("[Auth Error]", error);
         throw error;
       }
 
