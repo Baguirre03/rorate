@@ -5,12 +5,8 @@ interface RateLimitEntry {
   resetTime: number;
 }
 
-// In-memory store for rate limiting
-// Note: In serverless environments, this only works per-instance
-// For production DDoS protection, consider using Redis/KV store
 const rateLimitStore = new Map<string, RateLimitEntry>();
 
-// Clean up old entries every 5 minutes
 setInterval(() => {
   const now = Date.now();
   for (const [key, entry] of rateLimitStore.entries()) {
