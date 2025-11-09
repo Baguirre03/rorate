@@ -4,7 +4,7 @@ import { createServerSupabaseClient } from "@/lib/supabaseServer";
 export async function GET() {
   try {
     const supabase = await createServerSupabaseClient();
-    
+
     const { count, error } = await supabase
       .from("submissions")
       .select("*", { count: "exact", head: true })
@@ -29,11 +29,11 @@ export async function GET() {
     console.error("Error fetching submission count:", error);
     // Return error with no-cache headers so client can retry
     return NextResponse.json(
-      { 
+      {
         error: "Failed to fetch submission count",
         count: 0, // Provide fallback count
       },
-      { 
+      {
         status: 500,
         headers: {
           "Cache-Control": "no-store, no-cache, must-revalidate",

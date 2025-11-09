@@ -52,8 +52,6 @@ export default function SubmissionCounter() {
   }
 
   if (error) {
-    console.error("Error fetching submission count:", error);
-    // Silently fail - don't show error to users, just show 0 or hide component
     return null;
   }
 
