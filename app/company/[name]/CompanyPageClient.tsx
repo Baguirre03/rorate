@@ -20,6 +20,7 @@ import { Tables } from "@/types/supabase";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import SubmitCTA from "@/components/SubmitCTA";
 import { StructuredData } from "@/components/StructuredData";
+import { SITE_URL } from "@/lib/constants";
 
 type SubmissionWithCompany = Tables<"submissions"> & {
   companies: Pick<Tables<"companies">, "id" | "name"> | null;
@@ -108,9 +109,7 @@ export default function CompanyPageClient({
         "@type": "WebPage",
         name: `${companyName} Return Offer Rate`,
         description: `${companyName} return offer rate statistics and data. ${data.stats.total} submissions, ${data.stats.percentage}% return offer rate.`,
-        url: `${
-          process.env.SITE_URL || "https://rorates.fyi"
-        }/company/${encodeURIComponent(companyName)}`,
+        url: `${SITE_URL}/company/${encodeURIComponent(companyName)}`,
         mainEntity: {
           "@type": "Organization",
           name: companyName,
@@ -122,7 +121,7 @@ export default function CompanyPageClient({
               "@type": "ListItem",
               position: 1,
               name: "Home",
-              item: process.env.SITE_URL || "https://rorates.fyi",
+              item: SITE_URL,
             },
             {
               "@type": "ListItem",

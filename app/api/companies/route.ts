@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 export async function GET(request: NextRequest) {
+  const supabase = await createServerSupabaseClient();
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const search = searchParams.get("search");
@@ -28,17 +30,12 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    if (!data) {
-      return NextResponse.json({ data: [] });
-    }
-
     const companyStats = new Map<
       string,
       { name: string; total: number; offers: number; percentage: number }
     >();
 
     data.forEach((submission) => {
-      // Handle Supabase's response structure
       const companies = Array.isArray(submission.companies)
         ? submission.companies[0]
         : submission.companies;
@@ -64,7 +61,6 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Calculate percentages and convert to array
     const companies = Array.from(companyStats.values())
       .map((company) => ({
         ...company,

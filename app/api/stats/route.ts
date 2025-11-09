@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 import type { Tables } from "@/types/supabase";
 
 type SubmissionWithCompany = {
@@ -9,6 +9,8 @@ type SubmissionWithCompany = {
 };
 
 export async function GET(request: NextRequest) {
+  const supabase = await createServerSupabaseClient();
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const companyName = searchParams.get("company");

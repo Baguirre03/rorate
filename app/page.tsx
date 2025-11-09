@@ -9,8 +9,7 @@ import { useCompanySearch } from "@/hooks/useCompanySearch";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import Link from "next/link";
 import { StructuredData } from "@/components/StructuredData";
-
-const siteUrl = process.env.SITE_URL || "https://rorates.fyi";
+import { SITE_URL } from "@/lib/constants";
 
 export default function Home() {
   const { handleCompanySelect } = useCompanySearch();
@@ -31,12 +30,12 @@ export default function Home() {
     name: "Return Offer Rates.fyi",
     description:
       "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns.",
-    url: siteUrl,
+    url: SITE_URL,
     potentialAction: {
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `${siteUrl}/company/{search_term_string}`,
+        urlTemplate: `${SITE_URL}/company/{search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },

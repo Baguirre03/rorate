@@ -1,14 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createServerClient } from "@supabase/ssr";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> | { id: string } }
 ) {
-  try {
-    const response = NextResponse.next();
+  const supabase = await createServerSupabaseClient();
 
-    // Handle both sync and async params (Next.js 15+)
+  try {
     const resolvedParams = await Promise.resolve(params);
     const submissionId = parseInt(resolvedParams.id);
 
@@ -18,23 +17,6 @@ export async function PATCH(
         { status: 400 }
       );
     }
-
-    const supabase = createServerClient(
-      process.env.SUPABASE_URL!,
-      process.env.SUPABASE_ANON_KEY!,
-      {
-        cookies: {
-          getAll() {
-            return request.cookies.getAll();
-          },
-          setAll(cookiesToSet) {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              response.cookies.set(name, value, options)
-            );
-          },
-        },
-      }
-    );
 
     const {
       data: { user },
@@ -67,22 +49,12 @@ export async function PATCH(
       .eq("id", submissionId);
 
     if (error) {
-      console.error("Supabase error:", error);
       throw new Error(error.message || "Database error");
     }
 
-    // Return JSON response with updated cookies from Supabase
-    // We don't return the updated data since the frontend just invalidates queries anyway
-    const jsonResponse = NextResponse.json({
+    return NextResponse.json({
       success: true,
     });
-
-    // Copy any cookies that Supabase set during the request
-    response.cookies.getAll().forEach((cookie) => {
-      jsonResponse.cookies.set(cookie.name, cookie.value);
-    });
-
-    return jsonResponse;
   } catch (error) {
     console.error("Error updating submission:", error);
     const errorMessage =

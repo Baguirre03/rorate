@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 // Remove sensitive fields from submission data before sending to frontend
 // This is a public endpoint, so we remove: linkedin_url, school_name, source
@@ -48,6 +48,8 @@ export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ name: string }> | { name: string } }
 ) {
+  const supabase = await createServerSupabaseClient();
+
   try {
     const resolvedParams = await Promise.resolve(params);
     const companyName = decodeURIComponent(resolvedParams.name);
@@ -56,8 +58,6 @@ export async function GET(
     const term = searchParams.get("term");
     const year = searchParams.get("year");
 
-    // Get all accepted submissions for this company
-    // Use ilike for case-insensitive exact match
     let query = supabase
       .from("submissions")
       .select(

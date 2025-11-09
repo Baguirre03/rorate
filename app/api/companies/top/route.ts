@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { supabase } from "@/lib/supabaseClient";
+import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 type CompanyStats = {
   name: string;
@@ -10,13 +10,14 @@ type CompanyStats = {
 };
 
 export async function GET(request: NextRequest) {
+  const supabase = await createServerSupabaseClient();
+
   try {
     const searchParams = request.nextUrl.searchParams;
     const sort = searchParams.get("sort") || "most-submissions";
     const limit = parseInt(searchParams.get("limit") || "15");
     const offset = parseInt(searchParams.get("offset") || "0");
 
-    // First, get the most recent year from submissions
     const { data: yearData, error: yearError } = await supabase
       .from("submissions")
       .select("year")
@@ -35,7 +36,6 @@ export async function GET(request: NextRequest) {
 
     const mostRecentYear = yearData.year;
 
-    // Get all accepted submissions for the most recent year
     const { data: submissions, error } = await supabase
       .from("submissions")
       .select(
