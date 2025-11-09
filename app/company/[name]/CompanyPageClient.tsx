@@ -109,7 +109,7 @@ export default function CompanyPageClient({
         name: `${companyName} Return Offer Rate`,
         description: `${companyName} return offer rate statistics and data. ${data.stats.total} submissions, ${data.stats.percentage}% return offer rate.`,
         url: `${
-          process.env.NEXT_PUBLIC_SITE_URL || "https://rorates.fyi"
+          process.env.SITE_URL || "https://rorates.fyi"
         }/company/${encodeURIComponent(companyName)}`,
         mainEntity: {
           "@type": "Organization",
@@ -122,7 +122,7 @@ export default function CompanyPageClient({
               "@type": "ListItem",
               position: 1,
               name: "Home",
-              item: process.env.NEXT_PUBLIC_SITE_URL || "https://rorates.fyi",
+              item: process.env.SITE_URL || "https://rorates.fyi",
             },
             {
               "@type": "ListItem",

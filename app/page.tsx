@@ -10,7 +10,7 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 import Link from "next/link";
 import { StructuredData } from "@/components/StructuredData";
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://rorates.fyi";
+const siteUrl = process.env.SITE_URL || "https://rorates.fyi";
 
 export default function Home() {
   const { handleCompanySelect } = useCompanySearch();

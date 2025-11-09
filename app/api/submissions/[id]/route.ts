@@ -20,8 +20,8 @@ export async function PATCH(
     }
 
     const supabase = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!,
       {
         cookies: {
           getAll() {
@@ -45,7 +45,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (user?.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL!) {
+    if (user?.email !== process.env.ADMIN_EMAIL!) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 

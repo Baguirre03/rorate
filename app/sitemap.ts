@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://rorates.fyi";
+  const baseUrl = process.env.SITE_URL || "https://rorates.fyi";
 
   // Static pages
   const staticPages: MetadataRoute.Sitemap = [
@@ -73,4 +73,3 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     return staticPages;
   }
 }
-

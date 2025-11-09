@@ -6,7 +6,7 @@ import { Analytics } from "@vercel/analytics/react";
 
 export default function Providers({ children }: { children: ReactNode }) {
   const [queryClient] = useState(() => new QueryClient());
-  const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === "prod";
+  const isProduction = process.env.ENVIRONMENT === "prod";
 
   return (
     <QueryClientProvider client={queryClient}>

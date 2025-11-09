@@ -6,12 +6,20 @@ import {
   SubmissionRequestBody,
   Tables,
 } from "@/types/supabase";
-import { rateLimit } from "@/lib/rateLimit";
 import {
   checkSubmissionLimit,
   incrementSubmissionCount,
 } from "@/lib/submissionLimit";
 import { validateUserAgent } from "@/lib/userAgentValidation";
+import {
+  sanitizeCompanyName,
+  sanitizeSchoolName,
+  sanitizeSource,
+  validateYear,
+  validateTerm,
+  validateInternType,
+  validatePositionType,
+} from "@/lib/inputSanitization";
 
 // Extract LinkedIn profile identifier from URL
 // Handles formats like: linkedin.com/in/username, www.linkedin.com/in/username, etc.
@@ -91,20 +99,20 @@ export async function POST(request: NextRequest) {
     return userAgentCheck.response;
   }
 
-  // Layer 2: Rate limiting - 5 requests per minute per IP for DDoS protection
-  const rateLimitResult = rateLimit(request, {
-    maxRequests: 5,
-    windowMs: 60 * 1000, // 1 minute
-  });
-
-  if (!rateLimitResult.allowed && rateLimitResult.response) {
-    return rateLimitResult.response;
-  }
-
-  // Layer 3: Submission limit - Maximum 10 submissions per IP
+  // Layer 2: Submission limit - Maximum 10 submissions per IP
   const submissionLimitCheck = checkSubmissionLimit(request, 10);
   if (!submissionLimitCheck.allowed && submissionLimitCheck.response) {
     return submissionLimitCheck.response;
+  }
+
+  // Layer 4: Request size validation
+  const contentLength = request.headers.get("content-length");
+  const MAX_REQUEST_SIZE = 10 * 1024; // 10KB limit
+  if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
+    return NextResponse.json(
+      { error: "Request body too large" },
+      { status: 413 }
+    );
   }
 
   try {
@@ -121,6 +129,7 @@ export async function POST(request: NextRequest) {
       source,
     } = body;
 
+    // Validate required fields
     if (
       !linkedinUrl ||
       !companyName ||
@@ -134,11 +143,31 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Sanitize and validate inputs
+    const sanitizedCompanyName = sanitizeCompanyName(companyName);
+    if (!sanitizedCompanyName) {
+      return NextResponse.json(
+        { error: "Invalid company name" },
+        { status: 400 }
+      );
+    }
+
+    const validatedYear = validateYear(year);
+    if (!validatedYear) {
+      return NextResponse.json(
+        { error: "Invalid year. Must be between 2000 and 2100" },
+        { status: 400 }
+      );
+    }
+
+    const validatedTerm = validateTerm(term);
+    if (!validatedTerm) {
+      return NextResponse.json({ error: "Invalid term" }, { status: 400 });
+    }
+
     // Validate positionType - always required
-    if (
-      !positionType ||
-      (positionType !== "Full Time" && positionType !== "Intern")
-    ) {
+    const validatedPositionType = validatePositionType(positionType);
+    if (!validatedPositionType) {
       return NextResponse.json(
         {
           error:
@@ -147,6 +176,15 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Sanitize optional fields
+    const sanitizedSchoolName = schoolName
+      ? sanitizeSchoolName(schoolName)
+      : null;
+    const sanitizedSource = source ? sanitizeSource(source) : null;
+    const validatedInternType = internType
+      ? validateInternType(internType)
+      : null;
 
     // Normalize LinkedIn URL
     const normalizedLinkedInUrl = normalizeLinkedInUrl(linkedinUrl);
@@ -163,13 +201,13 @@ export async function POST(request: NextRequest) {
     let { data: company } = await supabase
       .from("companies")
       .select("id")
-      .eq("name", companyName)
+      .eq("name", sanitizedCompanyName)
       .single();
 
     if (!company) {
       const { data: newCompany, error: createError } = await supabase
         .from("companies")
-        .insert({ name: companyName })
+        .insert({ name: sanitizedCompanyName })
         .select("id")
         .single();
 
@@ -183,8 +221,8 @@ export async function POST(request: NextRequest) {
       .from("submissions")
       .select("id, linkedin_url, company_id, term, year")
       .eq("company_id", company.id)
-      .eq("year", year)
-      .eq("term", term);
+      .eq("year", validatedYear)
+      .eq("term", validatedTerm);
 
     if (checkError) {
       console.error("Error checking for duplicates:", checkError);
@@ -209,17 +247,17 @@ export async function POST(request: NextRequest) {
 
     const submissionData: SubmissionInsert = {
       company_id: company.id,
-      year,
-      term,
+      year: validatedYear,
+      term: validatedTerm,
       return_offer_extended: returnOfferExtended,
       status: "waiting",
-      intern_type: internType || null,
+      intern_type: validatedInternType,
       linkedin_url: normalizedLinkedInUrl,
       // Position type is always required (validated above)
-      position_type: positionType,
-      // Analytics fields
-      school_name: schoolName?.trim() || null,
-      source: source?.trim() || null,
+      position_type: validatedPositionType,
+      // Analytics fields (sanitized)
+      school_name: sanitizedSchoolName,
+      source: sanitizedSource,
     };
 
     const { data: submission, error: submissionError } = await supabase
@@ -242,23 +280,8 @@ export async function POST(request: NextRequest) {
       data: sanitizedSubmission as Tables<"submissions">,
     };
 
-    // Add rate limit and submission limit headers to response
+    // Add submission limit headers to response
     const headers = new Headers();
-    if (rateLimitResult.limit) {
-      headers.set("X-RateLimit-Limit", rateLimitResult.limit.toString());
-    }
-    if (rateLimitResult.remaining !== undefined) {
-      headers.set(
-        "X-RateLimit-Remaining",
-        rateLimitResult.remaining.toString()
-      );
-    }
-    if (rateLimitResult.resetTime) {
-      headers.set(
-        "X-RateLimit-Reset",
-        new Date(rateLimitResult.resetTime).toISOString()
-      );
-    }
     // Add submission limit headers
     if (submissionLimitCheck.currentCount !== undefined) {
       headers.set(
@@ -294,8 +317,8 @@ export async function GET(request: NextRequest) {
 
     // Create server client for database queries
     const client = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env.SUPABASE_URL!,
+      process.env.SUPABASE_ANON_KEY!,
       {
         cookies: {
           getAll() {
@@ -322,7 +345,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+    if (user.email !== process.env.ADMIN_EMAIL) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }

@@ -8,7 +8,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const resolvedParams = await Promise.resolve(params);
   const companyName = decodeURIComponent(resolvedParams.name);
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://rorates.fyi";
+  const siteUrl = process.env.SITE_URL || "https://rorates.fyi";
   const url = `${siteUrl}/company/${encodeURIComponent(companyName)}`;
 
   return {

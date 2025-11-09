@@ -3,7 +3,7 @@
 import { track } from "@vercel/analytics";
 
 export function useAnalytics() {
-  const isProduction = process.env.NEXT_PUBLIC_ENVIRONMENT === "prod";
+  const isProduction = process.env.ENVIRONMENT === "prod";
 
   const trackClick = (
     eventName: string,
