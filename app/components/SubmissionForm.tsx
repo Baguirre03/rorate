@@ -328,7 +328,7 @@ export default function SubmissionForm({
 
       if (!response.ok) {
         // Handle duplicate submission error
-        if (response.status === 409 && data.duplicate) {
+        if (response.status === 409 && data?.duplicate) {
           setIsSubmitting(false);
           setErrors((prev) => ({
             ...prev,
@@ -354,7 +354,17 @@ export default function SubmissionForm({
           }, 100);
           return;
         }
-        throw new Error(data.error || "Failed to submit");
+
+        // Handle rate limit error
+        if (response.status === 429) {
+          throw new Error(
+            data?.message ||
+              data?.error ||
+              "Too many requests. Please wait a moment."
+          );
+        }
+
+        throw new Error(data?.error || data?.message || "Failed to submit");
       }
 
       // Success - show toast and redirect to top companies page

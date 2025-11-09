@@ -3,8 +3,16 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export async function middleware(req: NextRequest) {
+  const pathname = req.nextUrl.pathname;
+  const method = req.method;
+
   // Skip authentication for public endpoints
-  if (req.nextUrl.pathname === "/api/submissions/count") {
+  // - GET /api/submissions/count (public counter)
+  // - POST /api/submissions (public submission endpoint)
+  if (
+    pathname === "/api/submissions/count" ||
+    (pathname === "/api/submissions" && method === "POST")
+  ) {
     return NextResponse.next();
   }
 
