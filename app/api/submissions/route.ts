@@ -14,7 +14,10 @@ import {
   validateInternType,
   validatePositionType,
 } from "@/lib/inputSanitization";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
+import {
+  createServerSupabaseClient,
+  createServiceRoleClient,
+} from "@/lib/supabaseServer";
 
 // Extract LinkedIn profile identifier from URL
 // Handles formats like: linkedin.com/in/username, www.linkedin.com/in/username, etc.
@@ -97,7 +100,9 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const supabase = await createServerSupabaseClient();
+  // Use service role client for inserts to bypass RLS
+  // We've already validated all input server-side, so this is safe
+  const supabase = createServiceRoleClient();
 
   try {
     const body: SubmissionRequestBody = await request.json();
