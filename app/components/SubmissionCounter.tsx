@@ -14,19 +14,27 @@ export default function SubmissionCounter() {
   const pathname = usePathname();
   const isSubmitPage = pathname === "/submit";
 
-  const { data, isLoading } = useQuery<SubmissionCountResponse>({
+  const { data, isLoading, error } = useQuery<SubmissionCountResponse>({
     queryKey: ["submission-count"],
     queryFn: async () => {
-      const response = await fetch("/api/submissions/count");
+      const response = await fetch("/api/submissions/count", {
+        cache: "no-store", // Prevent caching issues
+      });
       if (!response.ok) {
-        throw new Error("Failed to fetch submission count");
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(
+          errorData.error ||
+            `Failed to fetch submission count: ${response.status}`
+        );
       }
       return response.json();
     },
     refetchInterval: 30000, // Refetch every 30 seconds
+    retry: 3, // Retry failed requests
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  const count = data?.count || 0;
+  const count = data?.count ?? 0;
   const nextMilestone = Math.ceil((count + 1) / 100) * 100;
   const progress = count % 100;
   const progressPercent = (progress / 100) * 100;
@@ -41,6 +49,12 @@ export default function SubmissionCounter() {
         </div>
       </div>
     );
+  }
+
+  if (error) {
+    console.error("Error fetching submission count:", error);
+    // Silently fail - don't show error to users, just show 0 or hide component
+    return null;
   }
 
   return (

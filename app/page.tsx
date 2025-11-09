@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { TrendingUp, Plus, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CompanySearch from "@/components/CompanySearch";
@@ -24,53 +24,59 @@ export default function Home() {
     });
   }, [trackPageView]);
 
-  const websiteSchema = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "Return Offer Rates.fyi",
-    description:
-      "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns.",
-    url: SITE_URL,
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: `${SITE_URL}/company/{search_term_string}`,
+  const websiteSchema = useMemo(
+    () => ({
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      name: "Return Offer Rates.fyi",
+      description:
+        "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns.",
+      url: SITE_URL,
+      potentialAction: {
+        "@type": "SearchAction",
+        target: {
+          "@type": "EntryPoint",
+          urlTemplate: `${SITE_URL}/company/{search_term_string}`,
+        },
+        "query-input": "required name=search_term_string",
       },
-      "query-input": "required name=search_term_string",
-    },
-  };
+    }),
+    []
+  );
 
-  const faqSchema = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    mainEntity: [
-      {
-        "@type": "Question",
-        name: "What is a return offer rate?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "A return offer rate is the percentage of interns who receive a full-time or return internship offer from a company after completing their internship. It's calculated by dividing the number of interns who received return offers by the total number of internship submissions.",
+  const faqSchema = useMemo(
+    () => ({
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      mainEntity: [
+        {
+          "@type": "Question",
+          name: "What is a return offer rate?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "A return offer rate is the percentage of interns who receive a full-time or return internship offer from a company after completing their internship. It's calculated by dividing the number of interns who received return offers by the total number of internship submissions.",
+          },
         },
-      },
-      {
-        "@type": "Question",
-        name: "How do I find a company's return offer rate?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Search for the company name on Return Offer Rates.fyi to see their return offer rate, statistics, and detailed data including breakdowns by year, term, and intern type.",
+        {
+          "@type": "Question",
+          name: "How do I find a company's return offer rate?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Search for the company name on Return Offer Rates.fyi to see their return offer rate, statistics, and detailed data including breakdowns by year, term, and intern type.",
+          },
         },
-      },
-      {
-        "@type": "Question",
-        name: "Which companies have the best return offer rates?",
-        acceptedAnswer: {
-          "@type": "Answer",
-          text: "Visit our Top Companies page to see companies ranked by return offer rates. You can view companies with the most submissions, best rates, or compare different companies.",
+        {
+          "@type": "Question",
+          name: "Which companies have the best return offer rates?",
+          acceptedAnswer: {
+            "@type": "Answer",
+            text: "Visit our Top Companies page to see companies ranked by return offer rates. You can view companies with the most submissions, best rates, or compare different companies.",
+          },
         },
-      },
-    ],
-  };
+      ],
+    }),
+    []
+  );
 
   return (
     <>
