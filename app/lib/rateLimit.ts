@@ -34,7 +34,7 @@ function getClientIP(request: NextRequest): string {
 
   // Fallback to a default if no IP header is found
   // In production, this shouldn't happen, but we need a fallback
-  return request.ip || "unknown";
+  return "unknown";
 }
 
 export interface RateLimitOptions {
