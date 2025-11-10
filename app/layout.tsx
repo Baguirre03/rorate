@@ -95,8 +95,8 @@ export default function RootLayout({
         <Providers>
           <TopNav />
           {children}
-          {IS_PROD && <Analytics />}
         </Providers>
+        {IS_PROD && <Analytics />}
       </body>
     </html>
   );
