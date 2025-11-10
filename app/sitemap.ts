@@ -1,5 +1,5 @@
 import { MetadataRoute } from "next";
-import { createServerSupabaseClient } from "@/lib/supabaseServer";
+import { createClient } from "@supabase/supabase-js";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.SITE_URL || "https://rorates.fyi";
@@ -33,7 +33,17 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    const supabase = await createServerSupabaseClient();
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+        },
+      }
+    );
+
     const { data: submissions, error } = await supabase
       .from("public_accepted_submissions")
       .select("company_name")
