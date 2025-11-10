@@ -28,18 +28,12 @@ export async function GET(
     const term = searchParams.get("term");
     const year = searchParams.get("year");
 
+    // Use public_accepted_submissions view which includes company_name directly
+    // (no foreign key relationship needed - company data is joined in the view)
     let query = supabase
       .from("public_accepted_submissions")
-      .select(
-        `
-        *,
-        companies (
-          id,
-          name
-        )
-      `
-      )
-      .ilike("companies.name", companyName);
+      .select("*")
+      .ilike("company_name", companyName);
 
     if (internType) {
       query = query.eq("intern_type", internType);
@@ -59,11 +53,9 @@ export async function GET(
 
     const exactMatchSubmissions =
       submissions?.filter((submission) => {
-        const companies = Array.isArray(submission.companies)
-          ? submission.companies[0]
-          : submission.companies;
-        const dbCompanyName = companies?.name;
-        return dbCompanyName?.toLowerCase() === companyName.toLowerCase();
+        return (
+          submission.company_name?.toLowerCase() === companyName.toLowerCase()
+        );
       }) || [];
 
     let companyDomain: string | null = null;
@@ -142,16 +134,14 @@ export async function GET(
       })
     );
 
-    const firstCompany = exactMatchSubmissions[0].companies
-      ? Array.isArray(exactMatchSubmissions[0].companies)
-        ? exactMatchSubmissions[0].companies[0]
-        : exactMatchSubmissions[0].companies
-      : null;
+    // Get company info from the first submission (company_name is now a direct field)
+    const firstSubmission = exactMatchSubmissions[0];
+    const dbCompanyName = firstSubmission?.company_name || companyName;
 
     return NextResponse.json({
       company: {
-        id: firstCompany?.id || 0,
-        name: firstCompany?.name || companyName,
+        id: firstSubmission?.company_id || 0,
+        name: dbCompanyName,
         domain: companyDomain,
         logoUrl: companyDomain
           ? `/api/logo?domain=${encodeURIComponent(companyDomain)}`

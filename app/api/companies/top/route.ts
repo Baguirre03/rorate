@@ -36,15 +36,7 @@ export async function GET(request: NextRequest) {
 
     const { data: submissions, error } = await supabase
       .from("public_accepted_submissions")
-      .select(
-        `
-        return_offer_extended,
-        companies (
-          id,
-          name
-        )
-      `
-      )
+      .select("return_offer_extended, company_name, company_id")
       .eq("year", mostRecentYear);
 
     if (error) throw error;
@@ -61,10 +53,8 @@ export async function GET(request: NextRequest) {
     const companyStats = new Map<string, CompanyStats>();
 
     submissions.forEach((submission) => {
-      const companies = Array.isArray(submission.companies)
-        ? submission.companies[0]
-        : submission.companies;
-      const companyName = companies?.name;
+      // company_name is now a direct field in the view (no nested structure)
+      const companyName = submission.company_name;
       if (!companyName) return;
 
       if (!companyStats.has(companyName)) {

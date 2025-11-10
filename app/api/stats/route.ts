@@ -5,7 +5,7 @@ import type { Tables } from "@/types/supabase";
 type SubmissionWithCompany = {
   return_offer_extended: Tables<"submissions">["return_offer_extended"];
   year: Tables<"submissions">["year"];
-  companies: Pick<Tables<"companies">, "name">[] | null;
+  company_name: string;
 };
 
 export async function GET(request: NextRequest) {
@@ -14,18 +14,12 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const companyName = searchParams.get("company");
-    let query = supabase.from("public_accepted_submissions").select(
-      `
-        return_offer_extended,
-        year,
-        companies (
-          name
-        )
-      `
-    );
+    let query = supabase
+      .from("public_accepted_submissions")
+      .select("return_offer_extended, year, company_name");
 
     if (companyName) {
-      query = query.eq("companies.name", companyName);
+      query = query.eq("company_name", companyName);
     }
 
     const { data, error } = await query;

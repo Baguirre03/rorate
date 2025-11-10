@@ -41,3 +41,4 @@ yarn-error.log*
 next-env.d.ts
 
 SUPABASE_RLS_SETUP.md
+*.sql

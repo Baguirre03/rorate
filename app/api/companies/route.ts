@@ -10,19 +10,11 @@ export async function GET(request: NextRequest) {
 
     let query = supabase
       .from("public_accepted_submissions")
-      .select(
-        `
-        return_offer_extended,
-        companies (
-          id,
-          name
-        )
-      `
-      )
+      .select("return_offer_extended, company_name, company_id")
       .eq("year", 2025);
 
     if (search) {
-      query = query.ilike("companies.name", `%${search}%`);
+      query = query.ilike("company_name", `%${search}%`);
     }
 
     const { data, error } = await query;
@@ -35,10 +27,8 @@ export async function GET(request: NextRequest) {
     >();
 
     data.forEach((submission) => {
-      const companies = Array.isArray(submission.companies)
-        ? submission.companies[0]
-        : submission.companies;
-      const companyName = companies?.name;
+      // company_name is now a direct field in the view
+      const companyName = submission.company_name;
       if (!companyName) return;
 
       if (!companyStats.has(companyName)) {
