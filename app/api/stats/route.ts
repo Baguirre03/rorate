@@ -14,19 +14,15 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const companyName = searchParams.get("company");
-
-    let query = supabase
-      .from("submissions")
-      .select(
-        `
+    let query = supabase.from("public_accepted_submissions").select(
+      `
         return_offer_extended,
         year,
         companies (
           name
         )
       `
-      )
-      .eq("status", "accepted");
+    );
 
     if (companyName) {
       query = query.eq("companies.name", companyName);

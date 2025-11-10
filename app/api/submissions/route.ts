@@ -58,33 +58,6 @@ function normalizeLinkedInUrl(url: string): string {
   return trimmed;
 }
 
-function sanitizeSubmission<
-  T extends {
-    school_name?: string | null;
-    source?: string | null;
-    linkedin_url?: string | null;
-  }
->(submission: T): Omit<T, "school_name" | "source"> {
-  const {
-    school_name: _school_name,
-    source: _source,
-    ...sanitized
-  } = submission;
-  return {
-    ...sanitized,
-  };
-}
-
-function sanitizeSubmissions<
-  T extends {
-    school_name?: string | null;
-    source?: string | null;
-    linkedin_url?: string | null;
-  }
->(submissions: T[]): Array<Omit<T, "school_name" | "source">> {
-  return submissions.map(sanitizeSubmission);
-}
-
 export async function POST(request: NextRequest) {
   const userAgentCheck = validateUserAgent(request);
   if (!userAgentCheck.allowed && userAgentCheck.response) {
@@ -249,11 +222,9 @@ export async function POST(request: NextRequest) {
       throw submissionError;
     }
 
-    const sanitizedSubmission = sanitizeSubmission(submission);
-
     const response = {
       success: true,
-      data: sanitizedSubmission as Tables<"submissions">,
+      data: submission as Tables<"submissions">,
     };
 
     return NextResponse.json(response);
@@ -328,7 +299,7 @@ export async function GET(request: NextRequest) {
 
     if (error) throw error;
 
-    const sanitizedData = data ? sanitizeSubmissions(data) : [];
+    const submissionData = data || [];
 
     let analytics = null;
     if (includeAnalytics && isAdmin) {
@@ -374,10 +345,10 @@ export async function GET(request: NextRequest) {
     }
 
     const responseData: {
-      data: typeof sanitizedData;
+      data: typeof submissionData;
       analytics?: typeof analytics;
     } = {
-      data: sanitizedData,
+      data: submissionData,
     };
 
     if (analytics) {

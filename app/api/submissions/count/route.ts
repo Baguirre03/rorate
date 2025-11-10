@@ -5,9 +5,8 @@ export async function GET() {
   const supabase = await createServerSupabaseClient();
   try {
     const { count, error } = await supabase
-      .from("submissions")
-      .select("*", { count: "exact", head: true })
-      .eq("status", "accepted");
+      .from("public_accepted_submissions")
+      .select("*", { count: "exact", head: true });
 
     if (error) throw error;
 

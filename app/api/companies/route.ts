@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get("search");
 
     let query = supabase
-      .from("submissions")
+      .from("public_accepted_submissions")
       .select(
         `
         return_offer_extended,
@@ -19,7 +19,6 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .eq("status", "accepted")
       .eq("year", 2025);
 
     if (search) {

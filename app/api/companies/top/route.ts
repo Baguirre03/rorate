@@ -17,11 +17,9 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get("sort") || "most-submissions";
     const limit = parseInt(searchParams.get("limit") || "15");
     const offset = parseInt(searchParams.get("offset") || "0");
-
     const { data: yearData, error: yearError } = await supabase
-      .from("submissions")
+      .from("public_accepted_submissions")
       .select("year")
-      .eq("status", "accepted")
       .order("year", { ascending: false })
       .limit(1)
       .single();
@@ -37,7 +35,7 @@ export async function GET(request: NextRequest) {
     const mostRecentYear = yearData.year;
 
     const { data: submissions, error } = await supabase
-      .from("submissions")
+      .from("public_accepted_submissions")
       .select(
         `
         return_offer_extended,
@@ -47,7 +45,6 @@ export async function GET(request: NextRequest) {
         )
       `
       )
-      .eq("status", "accepted")
       .eq("year", mostRecentYear);
 
     if (error) throw error;

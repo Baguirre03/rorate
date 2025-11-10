@@ -1,36 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createServerSupabaseClient } from "@/lib/supabaseServer";
 
-// Remove sensitive fields from submission data before sending to frontend
-// This is a public endpoint, so we remove: linkedin_url, school_name, source
-function sanitizeSubmission<
-  T extends {
-    school_name?: string | null;
-    source?: string | null;
-    linkedin_url?: string | null;
-  }
->(submission: T): Omit<T, "school_name" | "source" | "linkedin_url"> {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const {
-    school_name: _school_name,
-    source: _source,
-    linkedin_url: _linkedin_url,
-    ...sanitized
-  } = submission;
-  return sanitized;
-}
-
-// Remove sensitive fields from array of submissions
-function sanitizeSubmissions<
-  T extends {
-    school_name?: string | null;
-    source?: string | null;
-    linkedin_url?: string | null;
-  }
->(submissions: T[]): Array<Omit<T, "school_name" | "source" | "linkedin_url">> {
-  return submissions.map(sanitizeSubmission);
-}
-
 type YearStats = {
   year: number;
   total: number;
@@ -58,8 +28,10 @@ export async function GET(
     const term = searchParams.get("term");
     const year = searchParams.get("year");
 
+    // Use public_accepted_submissions view which only exposes non-sensitive fields
+    // and automatically filters for status = 'accepted'
     let query = supabase
-      .from("submissions")
+      .from("public_accepted_submissions")
       .select(
         `
         *,
@@ -69,7 +41,6 @@ export async function GET(
         )
       `
       )
-      .eq("status", "accepted")
       .ilike("companies.name", companyName);
 
     // Apply filters if provided
@@ -183,9 +154,6 @@ export async function GET(
         : exactMatchSubmissions[0].companies
       : null;
 
-    // Remove analytics fields before sending to frontend
-    const sanitizedSubmissions = sanitizeSubmissions(exactMatchSubmissions);
-
     return NextResponse.json({
       company: {
         id: firstCompany?.id || 0,
@@ -201,7 +169,7 @@ export async function GET(
         percentage,
       },
       byYear: yearStats.sort((a, b) => b.year - a.year),
-      submissions: sanitizedSubmissions,
+      submissions: exactMatchSubmissions,
     });
   } catch (error) {
     console.error("Error fetching company data:", error);
