@@ -17,7 +17,7 @@ interface CompanySearchProps {
   value?: string;
   className?: string;
   onInputChange?: (value: string) => void;
-  clearOnSelect?: boolean; // If true, clear input after selection
+  clearOnSelect?: boolean;
 }
 
 interface ClearbitSuggestion {
@@ -89,7 +89,6 @@ export default function CompanySearch({
         });
 
         setSuggestions(uniqueSuggestions);
-        // Only open if shouldOpen is true (user is typing, not just selecting)
         if (shouldOpen) {
           setIsOpen(true);
         }
@@ -105,41 +104,33 @@ export default function CompanySearch({
     [selectedCompany]
   );
 
-  // Set mounted state for portal
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  // Calculate dropdown position
   const updateDropdownPosition = useCallback(() => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect();
-      // For fixed positioning, getBoundingClientRect() already gives viewport coordinates
-      // Don't add scroll offsets - fixed positioning is relative to viewport, not document
       setDropdownPosition({
-        top: rect.bottom + 8, // 8px spacing below input
+        top: rect.bottom + 8,
         left: rect.left,
         width: rect.width,
       });
     }
   }, []);
 
-  // Update position when dropdown opens or window resizes/scrolls
   useEffect(() => {
     if (isOpen && suggestions.length > 0) {
-      // Initial position update
       updateDropdownPosition();
 
       const handleResize = () => {
         updateDropdownPosition();
       };
 
-      // Handle scroll events - update position on any scroll
       const handleScroll = () => {
         updateDropdownPosition();
       };
 
-      // Listen to scroll on window and document with capture to catch all scroll events
       window.addEventListener("resize", handleResize, { passive: true });
       window.addEventListener("scroll", handleScroll, {
         passive: true,
@@ -156,26 +147,21 @@ export default function CompanySearch({
         document.removeEventListener("scroll", handleScroll, { capture: true });
       };
     } else if (!isOpen) {
-      // Clear position when dropdown closes
       setDropdownPosition(null);
     }
   }, [isOpen, suggestions.length, updateDropdownPosition]);
 
-  // Sync value prop with internal state
   useEffect(() => {
     setSearchQuery(value);
   }, [value]);
 
-  // Debounce effect
   useEffect(() => {
-    // Don't search if query exactly matches selected company (prevent re-opening after selection)
     if (selectedCompany && searchQuery === selectedCompany.name) {
       return;
     }
 
     const timeoutId = setTimeout(() => {
       if (searchQuery.trim()) {
-        // Only search and open if user is actively typing (not just selected a company)
         searchCompanies(searchQuery, true);
       } else {
         setSuggestions([]);
@@ -186,7 +172,6 @@ export default function CompanySearch({
     return () => clearTimeout(timeoutId);
   }, [searchQuery, searchCompanies, selectedCompany]);
 
-  // Handle company selection
   const handleSelectCompany = useCallback(
     (company: ClearbitSuggestion) => {
       const selected: Company = {
@@ -211,7 +196,6 @@ export default function CompanySearch({
     [onCompanySelect, clearOnSelect]
   );
 
-  // Click outside handler
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -228,7 +212,6 @@ export default function CompanySearch({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Keyboard navigation
   const handleKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (!isOpen && suggestions.length === 0) return;
@@ -259,7 +242,6 @@ export default function CompanySearch({
     [isOpen, suggestions, selectedIndex, handleSelectCompany]
   );
 
-  // Scroll selected item into view
   useEffect(() => {
     if (selectedIndex >= 0 && dropdownRef.current) {
       const selectedElement = dropdownRef.current.children[
@@ -297,7 +279,6 @@ export default function CompanySearch({
               (!selectedCompany || searchQuery !== selectedCompany.name)
             ) {
               setIsOpen(true);
-              // Update position when focusing
               requestAnimationFrame(() => {
                 updateDropdownPosition();
               });
@@ -326,7 +307,7 @@ export default function CompanySearch({
             ref={dropdownRef}
             id="company-suggestions"
             role="listbox"
-            className="fixed z-[9999] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-auto"
+            className="fixed z-9999 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg max-h-64 overflow-auto"
             style={{
               top: `${dropdownPosition.top}px`,
               left: `${dropdownPosition.left}px`,

@@ -268,8 +268,6 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const isAdmin = true;
-
     let query = supabase
       .from("submissions")
       .select(
@@ -302,7 +300,7 @@ export async function GET(request: NextRequest) {
     const submissionData = data || [];
 
     let analytics = null;
-    if (includeAnalytics && isAdmin) {
+    if (includeAnalytics) {
       const analyticsQuery = supabase
         .from("submissions")
         .select("school_name, source, id, status");
