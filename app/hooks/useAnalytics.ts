@@ -1,16 +1,16 @@
 "use client";
 
-import { track } from "@vercel/analytics";
+import { usePostHog } from "posthog-js/react";
 
 export function useAnalytics() {
-  const isProduction = process.env.ENVIRONMENT === "prod";
+  const posthog = usePostHog();
 
   const trackClick = (
     eventName: string,
     properties?: Record<string, string | number>
   ) => {
-    if (isProduction) {
-      track(eventName, properties);
+    if (posthog) {
+      posthog.capture(eventName, properties);
     }
   };
 
@@ -18,8 +18,8 @@ export function useAnalytics() {
     pageName: string,
     properties?: Record<string, string | number>
   ) => {
-    if (isProduction) {
-      track("page_view", {
+    if (posthog) {
+      posthog.capture("page_view", {
         page: pageName,
         ...properties,
       });
@@ -29,6 +29,6 @@ export function useAnalytics() {
   return {
     trackClick,
     trackPageView,
-    isProduction,
+    isProduction: false, // PostHog works in all environments
   };
 }
