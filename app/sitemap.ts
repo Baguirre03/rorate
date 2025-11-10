@@ -33,13 +33,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ];
 
   try {
-    // Fetch all companies with accepted submissions
     const supabase = await createServerSupabaseClient();
-    const { data: companies, error } = await supabase
-      .from("submissions")
-      .select("companies!inner(name)")
-      .eq("status", "accepted")
-      .not("companies.name", "is", null);
+    const { data: submissions, error } = await supabase
+      .from("public_accepted_submissions")
+      .select("company_name")
+      .not("company_name", "is", null);
 
     if (error) {
       console.error("Error fetching companies for sitemap:", error);
@@ -48,12 +46,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
     // Get unique company names
     const uniqueCompanies = new Set<string>();
-    companies?.forEach((submission: any) => {
-      const company = Array.isArray(submission.companies)
-        ? submission.companies[0]
-        : submission.companies;
-      if (company?.name) {
-        uniqueCompanies.add(company.name);
+    submissions?.forEach((submission: { company_name: string }) => {
+      if (submission.company_name) {
+        uniqueCompanies.add(submission.company_name);
       }
     });
 
