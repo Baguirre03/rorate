@@ -8,13 +8,13 @@ import SubmitCTA from "@/components/SubmitCTA";
 import { StructuredData } from "@/components/StructuredData";
 import { SITE_URL } from "@/lib/constants";
 import Loader from "@/components/Loader";
-import CompanyError from "@/components/companyPage/CompanyError";
-import CompanyHeader from "@/components/companyPage/CompanyHeader";
-import Filters from "@/components/companyPage/Filters";
-import NoData from "@/components/companyPage/NoData";
-import StatsDisplay from "@/components/companyPage/StatsDisplay";
-import YearBreakdown from "@/components/companyPage/YearBreakdown";
-import SubmissionsList from "@/components/companyPage/SubmissionsList";
+import CompanyError from "@/components/companypage/CompanyError";
+import CompanyHeader from "@/components/companypage/CompanyHeader";
+import Filters from "@/components/companypage/Filters";
+import NoData from "@/components/companypage/NoData";
+import StatsDisplay from "@/components/companypage/StatsDisplay";
+import YearBreakdown from "@/components/companypage/YearBreakdown";
+import SubmissionsList from "@/components/companypage/SubmissionsList";
 
 type SubmissionWithCompany = Tables<"submissions"> & {
   companies: Pick<Tables<"companies">, "id" | "name"> | null;
