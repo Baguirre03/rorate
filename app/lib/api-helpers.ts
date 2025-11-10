@@ -23,17 +23,15 @@ export function errorResponse(
 export function notFoundResponse(
   message: string = "Resource not found"
 ): NextResponse<ApiResponse<never>> {
-  return NextResponse.json(
-    { error: message } as ApiResponse<never>,
-    { status: 404 }
-  );
+  return NextResponse.json({ error: message } as ApiResponse<never>, {
+    status: 404,
+  });
 }
 
 export function unauthorizedResponse(
   message: string = "Unauthorized"
 ): NextResponse<ApiResponse<never>> {
-  return NextResponse.json(
-    { error: message } as ApiResponse<never>,
-    { status: 401 }
-  );
+  return NextResponse.json({ error: message } as ApiResponse<never>, {
+    status: 401,
+  });
 }

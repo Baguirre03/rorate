@@ -4,8 +4,8 @@ import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
-import CompanySearch, { Company } from "./CompanySearch";
-import SubmissionCounter from "./SubmissionCounter";
+import CompanySearch, { Company } from "@/components/CompanySearch";
+import SubmissionCounter from "@/components/SubmissionCounter";
 import { SubmissionFormData, SubmissionRequestBody } from "@/types/supabase";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -59,17 +59,6 @@ function createSubmissionPayload(
   schoolName?: string,
   source?: string
 ): SubmissionRequestBody {
-  const getPositionType = (): string => {
-    const positionType = formData.positionType?.trim();
-    if (
-      positionType &&
-      (positionType === "Full Time" || positionType === "Intern")
-    ) {
-      return positionType;
-    }
-    return "Full Time";
-  };
-
   return {
     linkedinUrl: normalizeLinkedInUrl(formData.linkedinUrl),
     companyName: formData.companyName.trim(),
@@ -77,7 +66,7 @@ function createSubmissionPayload(
     term: formData.term,
     internType: formData.internType || undefined,
     returnOfferExtended: formData.returnOfferExtended === true,
-    positionType: getPositionType(),
+    positionType: formData.positionType || "Full Time",
     schoolName: schoolName || undefined,
     source: source || undefined,
   };

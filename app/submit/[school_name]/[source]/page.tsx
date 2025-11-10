@@ -1,4 +1,4 @@
-import SubmissionForm from "@/components/SubmissionForm";
+import SubmissionForm from "@/components/submit/SubmissionForm";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
