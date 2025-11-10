@@ -58,11 +58,9 @@ export async function GET(request: NextRequest) {
       });
     }
 
-    // Calculate company statistics
     const companyStats = new Map<string, CompanyStats>();
 
     submissions.forEach((submission) => {
-      // Handle Supabase's response structure
       const companies = Array.isArray(submission.companies)
         ? submission.companies[0]
         : submission.companies;
@@ -88,10 +86,8 @@ export async function GET(request: NextRequest) {
       }
     });
 
-    // Company domains map (will be populated for paginated companies only)
     const companyDomains = new Map<string, string>();
 
-    // Calculate percentages and convert to array (without logos first for faster sorting)
     const companies = Array.from(companyStats.values())
       .map((company) => {
         return {
@@ -102,30 +98,29 @@ export async function GET(request: NextRequest) {
               : 0,
         };
       })
-      .filter((company) => company.total > 0); // Only include companies with submissions
+      .filter((company) => company.total > 0);
 
-    // Sort by different criteria based on sort parameter
     let sortedCompanies: CompanyStats[];
 
     switch (sort) {
       case "best-rates":
         sortedCompanies = [...companies]
-          .filter((c) => c.total >= 3) // Only include companies with at least 3 submissions for rate rankings
+          .filter((c) => c.total >= 3)
           .sort((a, b) => {
             if (b.percentage !== a.percentage) {
               return b.percentage - a.percentage;
             }
-            return b.total - a.total; // Tie-breaker: more submissions
+            return b.total - a.total;
           });
         break;
       case "worst-rates":
         sortedCompanies = [...companies]
-          .filter((c) => c.total >= 3) // Only include companies with at least 3 submissions for rate rankings
+          .filter((c) => c.total >= 3)
           .sort((a, b) => {
             if (a.percentage !== b.percentage) {
               return a.percentage - b.percentage;
             }
-            return b.total - a.total; // Tie-breaker: more submissions
+            return b.total - a.total;
           });
         break;
       case "most-submissions":
@@ -137,10 +132,8 @@ export async function GET(request: NextRequest) {
     const total = sortedCompanies.length;
     const paginatedCompanies = sortedCompanies.slice(offset, offset + limit);
 
-    // Fetch logos only for the paginated companies (more efficient)
     const paginatedCompanyNames = paginatedCompanies.map((c) => c.name);
     for (const companyName of paginatedCompanyNames) {
-      // Only fetch if we don't already have it
       if (!companyDomains.has(companyName)) {
         try {
           const clearbitResponse = await fetch(
@@ -163,13 +156,10 @@ export async function GET(request: NextRequest) {
               companyDomains.set(companyName, match.domain);
             }
           }
-        } catch {
-          // Silently fail if Clearbit lookup fails
-        }
+        } catch {}
       }
     }
 
-    // Add logo URLs to paginated companies
     const companiesWithLogos = paginatedCompanies.map((company) => {
       const domain = companyDomains.get(company.name);
       return {

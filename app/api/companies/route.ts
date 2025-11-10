@@ -68,7 +68,7 @@ export async function GET(request: NextRequest) {
             ? Math.round((company.offers / company.total) * 100)
             : 0,
       }))
-      .sort((a, b) => b.total - a.total); // Sort by total submissions
+      .sort((a, b) => b.total - a.total);
 
     return NextResponse.json({ data: companies });
   } catch (error) {

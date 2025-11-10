@@ -28,8 +28,6 @@ export async function GET(
     const term = searchParams.get("term");
     const year = searchParams.get("year");
 
-    // Use public_accepted_submissions view which only exposes non-sensitive fields
-    // and automatically filters for status = 'accepted'
     let query = supabase
       .from("public_accepted_submissions")
       .select(
@@ -43,7 +41,6 @@ export async function GET(
       )
       .ilike("companies.name", companyName);
 
-    // Apply filters if provided
     if (internType) {
       query = query.eq("intern_type", internType);
     }
@@ -60,7 +57,6 @@ export async function GET(
 
     if (error) throw error;
 
-    // Filter to ensure exact case-insensitive match
     const exactMatchSubmissions =
       submissions?.filter((submission) => {
         const companies = Array.isArray(submission.companies)
@@ -70,7 +66,6 @@ export async function GET(
         return dbCompanyName?.toLowerCase() === companyName.toLowerCase();
       }) || [];
 
-    // Try to get company domain from Clearbit
     let companyDomain: string | null = null;
     try {
       const clearbitResponse = await fetch(
@@ -147,7 +142,6 @@ export async function GET(
       })
     );
 
-    // Get the company name from the first submission (should be consistent)
     const firstCompany = exactMatchSubmissions[0].companies
       ? Array.isArray(exactMatchSubmissions[0].companies)
         ? exactMatchSubmissions[0].companies[0]
