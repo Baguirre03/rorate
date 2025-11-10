@@ -1,6 +1,5 @@
 import { Metadata } from "next";
 import CompanyPageClient from "./CompanyPageClient";
-const TEST = "test";
 
 export async function generateMetadata({
   params,
