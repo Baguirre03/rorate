@@ -13,7 +13,6 @@ export default function TopNav() {
   const router = useRouter();
   const { handleCompanySelect } = useCompanySearch();
 
-  // Don't show on homepage
   if (pathname === "/") {
     return null;
   }
