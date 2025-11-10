@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import CompanySearch, { Company } from "@/components/CompanySearch";
 import SubmissionCounter from "@/components/SubmissionCounter";
-import { SubmissionFormData, SubmissionRequestBody } from "@/types/supabase";
+import { SubmissionFormData, SubmissionRequestBody } from "@/types/submission";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

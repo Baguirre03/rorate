@@ -1,9 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import type { Tables } from "@/types/supabase";
 import type {
   SubmissionInsert,
   SubmissionRequestBody,
-  Tables,
-} from "@/types/supabase";
+} from "@/types/submission";
 import { validateUserAgent } from "@/lib/userAgentValidation";
 import {
   sanitizeCompanyName,
