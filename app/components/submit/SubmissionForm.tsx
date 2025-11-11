@@ -97,7 +97,6 @@ export default function SubmissionForm() {
   const schoolName = UTM_PARAM ? UTM[UTM_PARAM] : undefined;
   const source = SOURCE_PARAM ? SOURCES[SOURCE_PARAM] : undefined;
 
-  console.log(schoolName, source);
 
   const [formData, setFormData] = useState<SubmissionFormData>({
     linkedinUrl: "",

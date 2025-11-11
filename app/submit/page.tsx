@@ -1,5 +1,6 @@
 import SubmissionForm from "@/components/submit/SubmissionForm";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Submit Return Offer Data",
@@ -18,5 +19,9 @@ export const metadata: Metadata = {
 };
 
 export default function SubmitPage() {
-  return <SubmissionForm />;
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <SubmissionForm />
+    </Suspense>
+  );
 }
