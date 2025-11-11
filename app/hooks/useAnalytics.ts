@@ -1,10 +1,8 @@
 "use client";
 
-import { usePostHog } from "posthog-js/react";
+import posthog from "posthog-js";
 
 export function useAnalytics() {
-  const posthog = usePostHog();
-
   const trackClick = (
     eventName: string,
     properties?: Record<string, string | number>
