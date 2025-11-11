@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import CompanySearch, { Company } from "@/components/CompanySearch";
@@ -10,6 +10,8 @@ import { SubmissionFormData, SubmissionRequestBody } from "@/types/submission";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { SOURCES } from "./source";
+import { UTM } from "./utm";
 
 interface FormErrors {
   linkedinUrl?: string;
@@ -87,16 +89,16 @@ const currentYear = new Date().getFullYear();
 const YEARS = Array.from({ length: 7 }, (_, i) => currentYear - i);
 const TERMS = ["Fall", "Spring", "Summer"];
 
-interface SubmissionFormProps {
-  schoolName?: string;
-  source?: string;
-}
-
-export default function SubmissionForm({
-  schoolName,
-  source,
-}: SubmissionFormProps = {}) {
+export default function SubmissionForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const UTM_PARAM = searchParams.get("utm") || undefined;
+  const SOURCE_PARAM = searchParams.get("source") || undefined;
+  const schoolName = UTM_PARAM ? UTM[UTM_PARAM] : undefined;
+  const source = SOURCE_PARAM ? SOURCES[SOURCE_PARAM] : undefined;
+
+  console.log(schoolName, source);
+
   const [formData, setFormData] = useState<SubmissionFormData>({
     linkedinUrl: "",
     companyName: "",
