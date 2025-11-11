@@ -16,36 +16,22 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import useAuth from "@/hooks/useAuth";
 
 function LoginForm() {
-  const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
   const [emailSent, setEmailSent] = useState(false);
+  const { user, login, logout } = useAuth();
 
   const loginMutation = useMutation({
     mutationFn: async ({ email }: { email: string }) => {
-      const redirectTo = searchParams.get("redirectedFrom") || "/";
-      const siteUrl = window.location.origin;
-      const callbackUrl = `${siteUrl}/auth/callback?redirectTo=${encodeURIComponent(
-        redirectTo
-      )}`;
-
-      const { data, error } = await supabase.auth.signInWithOtp({
-        email,
-        options: {
-          data: {
-            confirmation_url: callbackUrl,
-          },
-          emailRedirectTo: callbackUrl,
-        },
-      });
-
-      if (error) {
-        throw error;
+      const data = await login(email);
+      if (data) {
+        return data;
       }
-
-      return data;
+      throw new Error("Failed to send email");
     },
+
     onSuccess: () => {
       setEmailSent(true);
       toast.success("Check your email!", {
@@ -72,6 +58,33 @@ function LoginForm() {
     },
     [email, loginMutation]
   );
+
+  if (user) {
+    return (
+      <div className="min-h-screen bg-zinc-50 dark:bg-black flex items-center justify-center py-12 px-4">
+        <Card className="w-full max-w-md">
+          <CardHeader className="space-y-1">
+            <CardTitle className="text-2xl font-bold text-center">
+              You are already logged in
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-col items-center space-y-4">
+              <Button
+                variant="outline"
+                onClick={async () => {
+                  await logout();
+                }}
+                className="w-full"
+              >
+                Log out
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (emailSent) {
     return (
