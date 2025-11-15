@@ -48,13 +48,19 @@ export default function TopNav() {
           </div>
           <div className="shrink-0 flex items-center gap-4 justify-end">
             {user && (
-              <Link
-                href="/me"
-                className="flex items-center justify-center w-8 h-8 rounded-full border border-border bg-background hover:bg-accent transition-colors"
-                aria-label="My Account"
-              >
-                <User className="h-4 w-4" />
-              </Link>
+              <div className="relative group">
+                <Link
+                  href="/me"
+                  className="flex items-center justify-center w-8 h-8 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                  aria-label="Account"
+                >
+                  <User className="h-4 w-4" />
+                </Link>
+                <div className="absolute right-0 top-full mt-2 px-2 py-1 text-xs font-medium text-white bg-foreground rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+                  View Account
+                  <div className="absolute -top-1 right-2 w-2 h-2 bg-foreground rotate-45"></div>
+                </div>
+              </div>
             )}
             <Link
               href="/"

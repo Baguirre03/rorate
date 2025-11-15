@@ -1,12 +1,13 @@
 "use client";
 
 import { useEffect, useState, useMemo } from "react";
-import { TrendingUp, Plus, ArrowRight } from "lucide-react";
+import { TrendingUp, Plus, ArrowRight, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CompanySearch from "@/components/CompanySearch";
 import SubmissionCounter from "@/components/SubmissionCounter";
 import { useCompanySearch } from "@/hooks/useCompanySearch";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import useAuth from "@/hooks/useAuth";
 import Link from "next/link";
 import { StructuredData } from "@/components/StructuredData";
 import { SITE_URL } from "@/lib/constants";
@@ -14,6 +15,7 @@ import { SITE_URL } from "@/lib/constants";
 export default function Home() {
   const { handleCompanySelect } = useCompanySearch();
   const { trackClick, trackPageView } = useAnalytics();
+  const { user } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -145,13 +147,10 @@ export default function Home() {
                 transitionDelay: mounted ? "450ms" : "0ms",
               }}
             >
-              <Link
-                href="/companies"
-                className="w-full sm:w-auto max-w-xs sm:max-w-none group"
-              >
+              <Link href="/companies" className="w-full sm:w-64 group">
                 <Button
                   size="lg"
-                  className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-7 py-4 sm:py-5 h-auto font-medium shadow-sm hover:shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
+                  className="w-full text-sm sm:text-base px-6 sm:px-7 py-4 sm:py-5 h-auto font-medium shadow-sm hover:shadow-md transition-all duration-200 group-hover:-translate-y-0.5"
                   onClick={() =>
                     trackClick("click_top_companies_button", { page: "home" })
                   }
@@ -162,19 +161,35 @@ export default function Home() {
                 </Button>
               </Link>
               <Link
-                href="/submit"
-                className="w-full sm:w-auto max-w-xs sm:max-w-none group"
+                href={
+                  user
+                    ? "/submit"
+                    : `/login?redirectTo=${encodeURIComponent("/submit")}`
+                }
+                className="w-full sm:w-64 group"
               >
                 <Button
                   size="lg"
                   variant="outline"
-                  className="w-full sm:w-auto text-sm sm:text-base px-6 sm:px-7 py-4 sm:py-5 h-auto font-medium border-2 hover:border-foreground/20 transition-all duration-200 group-hover:-translate-y-0.5 hover:shadow-sm"
+                  className="w-full text-sm sm:text-base px-6 sm:px-7 py-4 sm:py-5 h-auto font-medium border-2 hover:border-foreground/20 transition-all duration-200 group-hover:-translate-y-0.5 hover:shadow-sm"
                   onClick={() =>
-                    trackClick("click_submit_button", { page: "home" })
+                    trackClick(
+                      user ? "click_submit_button" : "click_login_button",
+                      { page: "home" }
+                    )
                   }
                 >
-                  <Plus className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-90" />
-                  Submit Your Return Offer
+                  {user ? (
+                    <>
+                      <Plus className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:rotate-90" />
+                      Submit Your Return Offer
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="h-4 w-4 mr-2 transition-transform duration-200 group-hover:scale-110" />
+                      Log In
+                    </>
+                  )}
                 </Button>
               </Link>
             </div>
