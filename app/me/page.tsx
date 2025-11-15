@@ -105,20 +105,6 @@ export default function MePage() {
                   </p>
                 </div>
               </div>
-
-              {user.last_sign_in_at && (
-                <div className="flex items-start gap-3">
-                  <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-foreground">
-                      Last Sign In
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {formatDate(user.last_sign_in_at)}
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </Card>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, Suspense, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import useAuth from "@/hooks/useAuth";
 import LoginLoading from "@/components/login/LoginLoading";
 import LoginEmailSent from "@/components/login/LoginEmailSent";
@@ -12,22 +12,24 @@ function LoginFormContainer() {
   const [email, setEmail] = useState("");
   const { user, login, googleSignin, loading } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirectTo") || "/me";
 
   useEffect(() => {
     if (!loading && user) {
-      router.push("/me");
+      router.push(redirectTo);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, redirectTo]);
 
   const handleLogin = useCallback(
     async (email: string) => {
-      const data = await login(email);
+      const data = await login(email, redirectTo);
       if (data) {
         return data;
       }
       throw new Error("Failed to send email");
     },
-    [login]
+    [login, redirectTo]
   );
 
   const handleEmailSent = useCallback((email: string) => {
@@ -41,12 +43,12 @@ function LoginFormContainer() {
   }, []);
 
   const handleGoogleSignin = useCallback(async () => {
-    const data = await googleSignin();
+    const data = await googleSignin(redirectTo);
     if (data) {
       return data;
     }
     throw new Error("Failed to sign in with Google");
-  }, [googleSignin]);
+  }, [googleSignin, redirectTo]);
 
   if (loading) {
     return <LoginLoading />;

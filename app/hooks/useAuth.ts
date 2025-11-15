@@ -33,19 +33,24 @@ export const useAuth = () => {
     };
   }, [getUser]);
 
-  const login = useCallback(async (email: string) => {
-    const callbackUrl = `${window.location.origin}/auth/callback?redirectTo=/me`;
-    const { data, error } = await supabase.auth.signInWithOtp({
-      email: email,
-      options: {
-        emailRedirectTo: callbackUrl,
-      },
-    });
-    if (error) {
-      throw error;
-    }
-    return data;
-  }, []);
+  const login = useCallback(
+    async (email: string, redirectTo: string = "/me") => {
+      const callbackUrl = `${
+        window.location.origin
+      }/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`;
+      const { data, error } = await supabase.auth.signInWithOtp({
+        email: email,
+        options: {
+          emailRedirectTo: callbackUrl,
+        },
+      });
+      if (error) {
+        throw error;
+      }
+      return data;
+    },
+    []
+  );
 
   const logout = useCallback(async (): Promise<void> => {
     const { error } = await supabase.auth.signOut();
@@ -55,8 +60,10 @@ export const useAuth = () => {
     setUser(null);
   }, []);
 
-  const googleSignin = useCallback(async () => {
-    const callbackUrl = `${window.location.origin}/auth/callback?redirectTo=/me`;
+  const googleSignin = useCallback(async (redirectTo: string = "/me") => {
+    const callbackUrl = `${
+      window.location.origin
+    }/auth/callback?redirectTo=${encodeURIComponent(redirectTo)}`;
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {

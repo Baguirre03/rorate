@@ -4,13 +4,16 @@ import { useState, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { usePaginatedCompanies } from "@/hooks/usePaginatedCompanies";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import useAuth from "@/hooks/useAuth";
 import SubmitCTA from "@/components/SubmitCTA";
 import CompaniesErrorState from "@/components/companies/ErrorState";
 import HeaderWithCTA from "@/components/companies/HeaderWithCTA";
 import CompaniesTabs from "@/components/companies/CompaniesTabs";
+import { GatedCompaniesSection } from "@/components/hidden-ui";
 
 export default function TopCompaniesPage() {
   const router = useRouter();
+  const { user, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = useState<
     "most-submissions" | "best-rates" | "worst-rates"
   >("most-submissions");
@@ -60,6 +63,29 @@ export default function TopCompaniesPage() {
     );
   }
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <HeaderWithCTA year={year} onTrackClick={trackClick} />
+          <GatedCompaniesSection sort={activeTab} />
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
+        <div className="max-w-6xl mx-auto">
+          <HeaderWithCTA year={year} onTrackClick={trackClick} />
+          <GatedCompaniesSection sort={activeTab} />
+        </div>
+      </div>
+    );
+  }
+
+  // User is logged in - show real content
   return (
     <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
