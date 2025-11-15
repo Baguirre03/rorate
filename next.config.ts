@@ -16,6 +16,9 @@ const nextConfig: NextConfig = {
       {
         pathname: "/api/logo",
       },
+      {
+        pathname: "/google.png",
+      },
     ],
     unoptimized: false,
   },

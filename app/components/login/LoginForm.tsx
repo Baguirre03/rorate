@@ -3,7 +3,8 @@
 import { useState, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Mail, Send, Loader2, LogIn } from "lucide-react";
+import { Mail, Send, Loader2 } from "lucide-react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -159,8 +160,14 @@ export default function LoginForm({
           </>
         ) : (
           <>
-            <LogIn className="h-4 w-4 mr-2" />
-            Continue with Google
+            <Image
+              src="/google.png"
+              alt="Google"
+              width={20}
+              height={20}
+              className="mr-2"
+            />
+            Sign in With Google
           </>
         )}
       </Button>

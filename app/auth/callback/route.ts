@@ -29,9 +29,9 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      const redirectResponse = NextResponse.redirect(
-        new URL(redirectTo, request.url)
-      );
+      const redirectUrl = new URL(redirectTo, request.url);
+      redirectUrl.searchParams.set("signedIn", "true");
+      const redirectResponse = NextResponse.redirect(redirectUrl);
 
       response.cookies.getAll().forEach((cookie) => {
         redirectResponse.cookies.set(cookie.name, cookie.value);

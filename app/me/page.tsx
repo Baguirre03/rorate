@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { CheckCircle2, LogOut, Mail, Calendar, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -13,12 +13,21 @@ import LoginLoading from "@/components/login/LoginLoading";
 export default function MePage() {
   const { user, loading, logout } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     if (!loading && !user) {
       router.push("/login");
     }
   }, [user, loading, router]);
+
+  useEffect(() => {
+    if (!loading && user && searchParams.get("signedIn") === "true") {
+      toast.success("Successfully signed in!");
+      // Remove the query parameter from URL
+      router.replace("/me");
+    }
+  }, [user, loading, searchParams, router]);
 
   const handleLogout = useCallback(async () => {
     try {

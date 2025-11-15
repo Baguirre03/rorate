@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import useAuth from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
 import CompanySearch, { Company } from "@/components/CompanySearch";
 import SubmissionCounter from "@/components/SubmissionCounter";
@@ -92,11 +93,25 @@ const TERMS = ["Fall", "Spring", "Summer"];
 export default function SubmissionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { user, loading } = useAuth();
   const UTM_PARAM = searchParams.get("utm") || undefined;
   const SOURCE_PARAM = searchParams.get("source") || undefined;
   const schoolName = UTM_PARAM ? UTM[UTM_PARAM] : undefined;
   const source = SOURCE_PARAM ? SOURCES[SOURCE_PARAM] : undefined;
 
+  // Show success toast when redirected after sign-in
+  useEffect(() => {
+    if (!loading && user && searchParams.get("signedIn") === "true") {
+      toast.success("Successfully signed in!");
+      // Remove the signedIn parameter from URL, but preserve other params
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("signedIn");
+      const newUrl = params.toString()
+        ? `/submit?${params.toString()}`
+        : "/submit";
+      router.replace(newUrl);
+    }
+  }, [user, loading, searchParams, router]);
 
   const [formData, setFormData] = useState<SubmissionFormData>({
     linkedinUrl: "",
