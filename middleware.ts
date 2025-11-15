@@ -6,11 +6,13 @@ export async function middleware(req: NextRequest) {
   const pathname = req.nextUrl.pathname;
   const method = req.method;
 
-  // Skip authentication for public endpoints
+  // Skip authentication/admin check for public endpoints
   // - GET /api/submissions/count (public counter)
   // - POST /api/submissions (public submission endpoint)
+  // - GET /api/submissions/check (user can check their own submissions)
   if (
     pathname === "/api/submissions/count" ||
+    pathname === "/api/submissions/check" ||
     (pathname === "/api/submissions" && method === "POST")
   ) {
     return NextResponse.next();

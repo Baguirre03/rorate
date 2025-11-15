@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 import { CheckCircle2, LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,9 +14,12 @@ interface LoginSignedInProps {
 }
 
 export default function LoginSignedIn({ user, onLogout }: LoginSignedInProps) {
+  const queryClient = useQueryClient();
+
   const handleLogout = useCallback(async () => {
     try {
       await onLogout();
+      queryClient.invalidateQueries({ queryKey: ["hasSubmitted"] });
       toast.success("Logged out successfully");
     } catch (error) {
       toast.error("Failed to log out", {
@@ -23,7 +27,7 @@ export default function LoginSignedIn({ user, onLogout }: LoginSignedInProps) {
           error instanceof Error ? error.message : "Please try again.",
       });
     }
-  }, [onLogout]);
+  }, [onLogout, queryClient]);
 
   return (
     <LoginContainer>

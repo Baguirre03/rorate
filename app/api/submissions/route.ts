@@ -73,6 +73,11 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  const supabaseAuth = await createServerSupabaseClient();
+  const {
+    data: { user },
+  } = await supabaseAuth.auth.getUser();
+
   // Use service role client for inserts to bypass RLS
   // We've already validated all input server-side, so this is safe
   const supabase = createServiceRoleClient();
@@ -210,6 +215,7 @@ export async function POST(request: NextRequest) {
       position_type: validatedPositionType,
       school_name: sanitizedSchoolName,
       source: sanitizedSource,
+      user_id: user?.id || null,
     };
 
     const { data: submission, error: submissionError } = await supabase

@@ -2,6 +2,7 @@
 
 import { useState, useCallback, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import useAuth from "@/hooks/useAuth";
 import LoginLoading from "@/components/login/LoginLoading";
 import LoginEmailSent from "@/components/login/LoginEmailSent";
@@ -14,12 +15,14 @@ function LoginFormContainer() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const redirectTo = searchParams.get("redirectTo") || "/me";
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!loading && user) {
+      queryClient.invalidateQueries({ queryKey: ["hasSubmitted"] });
       router.push(redirectTo);
     }
-  }, [user, loading, router, redirectTo]);
+  }, [user, loading, router, redirectTo, queryClient]);
 
   const handleLogin = useCallback(
     async (email: string) => {

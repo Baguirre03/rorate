@@ -374,8 +374,12 @@ export default function SubmissionForm() {
         throw new Error(data?.error || data?.message || "Failed to submit");
       }
 
-      // Success - invalidate hasSubmitted query to refetch
-      queryClient.invalidateQueries({ queryKey: ["hasSubmitted"] });
+      // Refetch hasSubmitted query to update status
+      // Use exact: false to match all queries starting with ["hasSubmitted"]
+      await queryClient.refetchQueries({
+        queryKey: ["hasSubmitted"],
+        exact: false,
+      });
 
       // Success - show toast and redirect to top companies page
       toast.success("Submission successful!", {

@@ -4,10 +4,9 @@ import { Tables } from "@/types/supabase";
 
 interface HasSubmittedResponse {
   hasSubmitted: boolean;
-  submissions: Tables<"submissions"> &
-    {
-      companies: Pick<Tables<"companies">, "id" | "name"> | null;
-    }[];
+  submissions: (Tables<"submissions"> & {
+    companies: Pick<Tables<"companies">, "id" | "name"> | null;
+  })[];
   error?: string;
 }
 
@@ -35,9 +34,10 @@ export default function useHasSubmitted() {
         throw new Error(error.error || "Failed to check submissions");
       }
 
-      return response.json();
+      const result = await response.json();
+      return result;
     },
-    enabled: !authLoading && !!user, // Only run query if user is logged in
+    enabled: !!user, // Only run query if user is logged in
     retry: false,
   });
 

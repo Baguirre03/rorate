@@ -2,18 +2,31 @@
 
 import { useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CheckCircle2, LogOut, Mail, Calendar, User } from "lucide-react";
+import { useQueryClient } from "@tanstack/react-query";
+import {
+  CheckCircle2,
+  LogOut,
+  Mail,
+  Calendar,
+  User,
+  ExternalLink,
+  FileText,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import useAuth from "@/hooks/useAuth";
+import useHasSubmitted from "@/hooks/useHasSubmitted";
 import LoginContainer from "@/components/login/LoginContainer";
 import LoginLoading from "@/components/login/LoginLoading";
 
 export default function MePage() {
   const { user, loading, logout } = useAuth();
+  const { submissions, isLoading: submissionsLoading } = useHasSubmitted();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -23,15 +36,17 @@ export default function MePage() {
 
   useEffect(() => {
     if (!loading && user && searchParams.get("signedIn") === "true") {
+      queryClient.invalidateQueries({ queryKey: ["hasSubmitted"] });
       toast.success("Successfully signed in!");
       // Remove the query parameter from URL
       router.replace("/me");
     }
-  }, [user, loading, searchParams, router]);
+  }, [user, loading, searchParams, router, queryClient]);
 
   const handleLogout = useCallback(async () => {
     try {
       await logout();
+      queryClient.invalidateQueries({ queryKey: ["hasSubmitted"] });
       toast.success("Logged out successfully");
       router.push("/login");
     } catch (error) {
@@ -40,7 +55,7 @@ export default function MePage() {
           error instanceof Error ? error.message : "Please try again.",
       });
     }
-  }, [logout, router]);
+  }, [logout, router, queryClient]);
 
   if (loading) {
     return <LoginLoading />;
@@ -57,6 +72,19 @@ export default function MePage() {
       month: "long",
       day: "numeric",
     });
+  };
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status.toLowerCase()) {
+      case "accepted":
+        return "default";
+      case "waiting":
+        return "secondary";
+      case "declined":
+        return "destructive";
+      default:
+        return "secondary";
+    }
   };
 
   return (
@@ -116,6 +144,91 @@ export default function MePage() {
               </div>
             </div>
           </div>
+        </Card>
+
+        {/* Submissions Card */}
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <FileText className="h-5 w-5 text-muted-foreground" />
+            <h2 className="text-lg font-semibold">My Submissions</h2>
+          </div>
+
+          {submissionsLoading ? (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              Loading submissions...
+            </div>
+          ) : !submissions || submissions.length === 0 ? (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              No submissions yet. Submit your return offer to get started!
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {submissions.map((submission) => (
+                <div
+                  key={submission.id}
+                  className="border rounded-md p-4 hover:bg-accent/50 transition-colors"
+                >
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <h3 className="text-sm font-semibold">
+                        {submission.companies?.name || "Unknown Company"}
+                      </h3>
+                      <Badge
+                        variant={getStatusBadgeVariant(submission.status)}
+                        className="text-xs px-1.5 py-0"
+                      >
+                        {submission.status}
+                      </Badge>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                      <span>
+                        <span className="font-medium">Year:</span>{" "}
+                        {submission.year}
+                      </span>
+                      <span>
+                        <span className="font-medium">Term:</span>{" "}
+                        {submission.term}
+                      </span>
+                      {submission.intern_type && (
+                        <span>
+                          <span className="font-medium">Type:</span>{" "}
+                          {submission.intern_type}
+                        </span>
+                      )}
+                      <span>
+                        <span className="font-medium">Return Offer:</span>{" "}
+                        {submission.return_offer_extended ? "Yes" : "No"}
+                      </span>
+                      {submission.return_offer_extended &&
+                        submission.position_type && (
+                          <span>
+                            <span className="font-medium">Position:</span>{" "}
+                            {submission.position_type}
+                          </span>
+                        )}
+                      {submission.linkedin_url && (
+                        <a
+                          href={submission.linkedin_url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline inline-flex items-center gap-1"
+                        >
+                          LinkedIn
+                          <ExternalLink className="h-3 w-3" />
+                        </a>
+                      )}
+                    </div>
+                    {submission.submitted_at && (
+                      <div className="text-xs text-muted-foreground">
+                        Submitted:{" "}
+                        {new Date(submission.submitted_at).toLocaleDateString()}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </Card>
 
         {/* Logout Button */}
