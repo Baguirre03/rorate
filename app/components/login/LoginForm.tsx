@@ -3,7 +3,7 @@
 import { useState, useCallback } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Mail, Send, Loader2 } from "lucide-react";
+import { Mail, Send, Loader2, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,9 +12,14 @@ import LoginContainer from "./LoginContainer";
 interface LoginFormProps {
   onLogin: (email: string) => Promise<unknown>;
   onEmailSent: (email: string) => void;
+  onGoogleSignin: () => Promise<unknown>;
 }
 
-export default function LoginForm({ onLogin, onEmailSent }: LoginFormProps) {
+export default function LoginForm({
+  onLogin,
+  onEmailSent,
+  onGoogleSignin,
+}: LoginFormProps) {
   const [email, setEmail] = useState("");
 
   const loginMutation = useMutation({
@@ -33,6 +38,21 @@ export default function LoginForm({ onLogin, onEmailSent }: LoginFormProps) {
     },
     onError: (error: Error) => {
       toast.error("Failed to send email", {
+        description: error.message || "Please try again.",
+      });
+    },
+  });
+
+  const googleSigninMutation = useMutation({
+    mutationFn: async () => {
+      const data = await onGoogleSignin();
+      if (data) {
+        return data;
+      }
+      throw new Error("Failed to sign in with Google");
+    },
+    onError: (error: Error) => {
+      toast.error("Failed to sign in with Google", {
         description: error.message || "Please try again.",
       });
     },
@@ -112,6 +132,38 @@ export default function LoginForm({ onLogin, onEmailSent }: LoginFormProps) {
           </Button>
         </div>
       </form>
+
+      {/* Divider */}
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-border" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-background px-2 text-muted-foreground">Or</span>
+        </div>
+      </div>
+
+      {/* Google Sign In Button */}
+      <Button
+        type="button"
+        variant="outline"
+        className="w-full"
+        onClick={() => googleSigninMutation.mutate()}
+        disabled={googleSigninMutation.isPending || loginMutation.isPending}
+        size="lg"
+      >
+        {googleSigninMutation.isPending ? (
+          <>
+            <Loader2 className="h-4 w-4 animate-spin" />
+            Signing in...
+          </>
+        ) : (
+          <>
+            <LogIn className="h-4 w-4 mr-2" />
+            Continue with Google
+          </>
+        )}
+      </Button>
     </LoginContainer>
   );
 }

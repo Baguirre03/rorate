@@ -10,7 +10,7 @@ import LoginForm from "@/components/login/LoginForm";
 function LoginFormContainer() {
   const [emailSent, setEmailSent] = useState(false);
   const [email, setEmail] = useState("");
-  const { user, login, logout, loading } = useAuth();
+  const { user, login, logout, googleSignin, loading } = useAuth();
 
   const handleLogin = useCallback(
     async (email: string) => {
@@ -39,6 +39,14 @@ function LoginFormContainer() {
     setEmail("");
   }, [logout]);
 
+  const handleGoogleSignin = useCallback(async () => {
+    const data = await googleSignin();
+    if (data) {
+      return data;
+    }
+    throw new Error("Failed to sign in with Google");
+  }, [googleSignin]);
+
   if (loading) {
     return <LoginLoading />;
   }
@@ -51,7 +59,13 @@ function LoginFormContainer() {
     return <LoginEmailSent email={email} onResend={handleResend} />;
   }
 
-  return <LoginForm onLogin={handleLogin} onEmailSent={handleEmailSent} />;
+  return (
+    <LoginForm
+      onLogin={handleLogin}
+      onEmailSent={handleEmailSent}
+      onGoogleSignin={handleGoogleSignin}
+    />
+  );
 }
 
 export default function LoginPage() {

@@ -55,11 +55,26 @@ export const useAuth = () => {
     setUser(null);
   }, []);
 
+  const googleSignin = useCallback(async () => {
+    const callbackUrl = `${window.location.origin}/auth/callback`;
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: callbackUrl,
+      },
+    });
+    if (error) {
+      throw error;
+    }
+    return data;
+  }, []);
+
   return {
     user: user,
     loading: loading,
     login: login,
     logout: logout,
+    googleSignin: googleSignin,
   };
 };
 
