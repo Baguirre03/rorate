@@ -72,7 +72,16 @@ export default function TopCompaniesPage() {
       <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
           <HeaderWithCTA year={year} onTrackClick={trackClick} />
-          <GatedCompaniesSection sort={activeTab} />
+          <CompaniesTabs
+            activeTab={activeTab}
+            onTabChange={handleTabChange}
+            year={year}
+            companies={[]}
+            hasMore={false}
+            onLoadMore={handleLoadMore}
+            isLoadingMore={false}
+            isLoading={true}
+          />
         </div>
       </div>
     );

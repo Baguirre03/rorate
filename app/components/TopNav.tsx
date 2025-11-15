@@ -2,16 +2,18 @@
 
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import CompanySearch from "./CompanySearch";
 import { useCompanySearch } from "@/hooks/useCompanySearch";
+import useAuth from "@/hooks/useAuth";
 import Logo from "./Logo";
 
 export default function TopNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { handleCompanySelect } = useCompanySearch();
+  const { user } = useAuth();
 
   if (pathname === "/") {
     return null;
@@ -43,10 +45,19 @@ export default function TopNav() {
               clearOnSelect={true}
             />
           </div>
-          <div className="shrink-0 hidden sm:flex items-center">
+          <div className="shrink-0 flex items-center gap-4">
+            {user && (
+              <Link
+                href="/me"
+                className="flex items-center justify-center w-8 h-8 rounded-full border border-border bg-background hover:bg-accent transition-colors"
+                aria-label="My Account"
+              >
+                <User className="h-4 w-4" />
+              </Link>
+            )}
             <Link
               href="/"
-              className="flex items-center gap-2 text-sm font-semibold text-foreground hover:text-foreground/80 transition-colors h-5"
+              className="hidden sm:flex items-center gap-2 text-sm font-semibold text-foreground hover:text-foreground/80 transition-colors h-5"
             >
               <Logo className="w-5 h-5 text-foreground" />
               <span className="leading-5">rorates.fyi</span>
