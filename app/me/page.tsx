@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -21,7 +21,7 @@ import useHasSubmitted from "@/hooks/useHasSubmitted";
 import LoginContainer from "@/components/login/LoginContainer";
 import LoginLoading from "@/components/login/LoginLoading";
 
-export default function MePage() {
+function MePageContent() {
   const { user, loading, logout } = useAuth();
   const { submissions, isLoading: submissionsLoading } = useHasSubmitted();
   const router = useRouter();
@@ -243,5 +243,13 @@ export default function MePage() {
         </Button>
       </div>
     </LoginContainer>
+  );
+}
+
+export default function MePage() {
+  return (
+    <Suspense fallback={<LoginLoading />}>
+      <MePageContent />
+    </Suspense>
   );
 }
