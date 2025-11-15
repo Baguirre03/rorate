@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Tables } from "@/types/supabase";
 import { useAnalytics } from "@/hooks/useAnalytics";
+import useAuth from "@/hooks/useAuth";
 import SubmitCTA from "@/components/SubmitCTA";
 import { StructuredData } from "@/components/StructuredData";
 import { SITE_URL } from "@/lib/constants";
@@ -15,6 +16,7 @@ import NoData from "@/components/companypage/NoData";
 import StatsDisplay from "@/components/companypage/StatsDisplay";
 import YearBreakdown from "@/components/companypage/YearBreakdown";
 import SubmissionsList from "@/components/companypage/SubmissionsList";
+import { GatedCompanyPage } from "@/components/hidden-ui";
 
 type SubmissionWithCompany = Tables<"submissions"> & {
   companies: Pick<Tables<"companies">, "id" | "name"> | null;
@@ -57,6 +59,7 @@ export default function CompanyPageClient({
 }: {
   companyName: string;
 }) {
+  const { user, loading: authLoading } = useAuth();
   const { trackClick, trackPageView } = useAnalytics();
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedInternType, setSelectedInternType] = useState<string>("all");
@@ -136,7 +139,7 @@ export default function CompanyPageClient({
       }
     : null;
 
-  if (isLoading) {
+  if (isLoading || authLoading) {
     return <Loader />;
   }
 
@@ -150,6 +153,11 @@ export default function CompanyPageClient({
     byYear: [],
     submissions: [],
   };
+
+  // If user is not logged in, show gated version
+  if (!user) {
+    return <GatedCompanyPage companyName={companyName} company={company} />;
+  }
 
   const hasNoData = !data || stats.total === 0;
 
