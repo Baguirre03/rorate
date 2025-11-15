@@ -34,7 +34,7 @@ export const useAuth = () => {
   }, [getUser]);
 
   const login = useCallback(async (email: string) => {
-    const callbackUrl = `${window.location.origin}/auth/callback`;
+    const callbackUrl = `${window.location.origin}/auth/callback?redirectTo=/me`;
     const { data, error } = await supabase.auth.signInWithOtp({
       email: email,
       options: {
@@ -56,7 +56,7 @@ export const useAuth = () => {
   }, []);
 
   const googleSignin = useCallback(async () => {
-    const callbackUrl = `${window.location.origin}/auth/callback`;
+    const callbackUrl = `${window.location.origin}/auth/callback?redirectTo=/me`;
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: "google",
       options: {
