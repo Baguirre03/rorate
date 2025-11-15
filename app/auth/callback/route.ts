@@ -4,15 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  let redirectTo = requestUrl.searchParams.get("redirectTo") || "/me";
-
-  console.log("redirectTo", redirectTo);
-  // Decode the redirectTo in case it was double-encoded
-  try {
-    redirectTo = decodeURIComponent(redirectTo);
-  } catch {
-    // If decoding fails, use as-is
-  }
+  const redirectTo = requestUrl.searchParams.get("redirectTo") || "/me";
 
   if (code) {
     const response = NextResponse.next();
@@ -37,13 +29,8 @@ export async function GET(request: NextRequest) {
     const { error } = await supabase.auth.exchangeCodeForSession(code);
 
     if (!error) {
-      // Construct the redirect URL using request.url as base
       const redirectUrl = new URL(redirectTo, request.url);
       redirectUrl.searchParams.set("signedIn", "true");
-
-      console.log("Redirecting to:", redirectUrl.toString());
-      console.log("redirectTo param was:", redirectTo);
-      console.log("Full callback URL:", requestUrl.toString());
 
       const redirectResponse = NextResponse.redirect(redirectUrl);
 
