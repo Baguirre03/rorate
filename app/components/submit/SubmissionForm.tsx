@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import useAuth from "@/hooks/useAuth";
 import { Loader2 } from "lucide-react";
@@ -93,6 +94,7 @@ const TERMS = ["Fall", "Spring", "Summer"];
 export default function SubmissionForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const queryClient = useQueryClient();
   const { user, loading } = useAuth();
   const UTM_PARAM = searchParams.get("utm") || undefined;
   const SOURCE_PARAM = searchParams.get("source") || undefined;
@@ -371,6 +373,9 @@ export default function SubmissionForm() {
 
         throw new Error(data?.error || data?.message || "Failed to submit");
       }
+
+      // Success - invalidate hasSubmitted query to refetch
+      queryClient.invalidateQueries({ queryKey: ["hasSubmitted"] });
 
       // Success - show toast and redirect to top companies page
       toast.success("Submission successful!", {

@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import { Tables } from "@/types/supabase";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import useAuth from "@/hooks/useAuth";
+import useHasSubmitted from "@/hooks/useHasSubmitted";
 import SubmitCTA from "@/components/SubmitCTA";
 import { StructuredData } from "@/components/StructuredData";
 import { SITE_URL } from "@/lib/constants";
@@ -60,6 +61,7 @@ export default function CompanyPageClient({
   companyName: string;
 }) {
   const { user, loading: authLoading } = useAuth();
+  const { hasSubmitted, isLoading: hasSubmittedLoading } = useHasSubmitted();
   const { trackClick, trackPageView } = useAnalytics();
   const [selectedYear, setSelectedYear] = useState<string>("all");
   const [selectedInternType, setSelectedInternType] = useState<string>("all");
@@ -107,6 +109,8 @@ export default function CompanyPageClient({
       }
       return response.json();
     },
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
   });
 
   const companySchema = data?.company
@@ -154,9 +158,17 @@ export default function CompanyPageClient({
     submissions: [],
   };
 
-  // If user is not logged in, show gated version
-  if (!user) {
-    return <GatedCompanyPage companyName={companyName} company={company} />;
+  if (user && hasSubmittedLoading) {
+    return <Loader />;
+  }
+  if (!user || (user && hasSubmitted !== true)) {
+    return (
+      <GatedCompanyPage
+        companyName={companyName}
+        company={company}
+        hasSubmitted={hasSubmitted}
+      />
+    );
   }
 
   const hasNoData = !data || stats.total === 0;

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { usePaginatedCompanies } from "@/hooks/usePaginatedCompanies";
 import { useAnalytics } from "@/hooks/useAnalytics";
 import useAuth from "@/hooks/useAuth";
+import useHasSubmitted from "@/hooks/useHasSubmitted";
 import SubmitCTA from "@/components/SubmitCTA";
 import CompaniesErrorState from "@/components/companies/ErrorState";
 import HeaderWithCTA from "@/components/companies/HeaderWithCTA";
@@ -14,6 +15,7 @@ import { GatedCompaniesSection } from "@/components/hidden-ui";
 export default function TopCompaniesPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
+  const { hasSubmitted, isLoading: hasSubmittedLoading } = useHasSubmitted();
   const [activeTab, setActiveTab] = useState<
     "most-submissions" | "best-rates" | "worst-rates"
   >("most-submissions");
@@ -63,7 +65,9 @@ export default function TopCompaniesPage() {
     );
   }
 
-  if (authLoading) {
+  const isLoadingStatus = authLoading || hasSubmittedLoading;
+
+  if (isLoadingStatus) {
     return (
       <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
@@ -74,7 +78,7 @@ export default function TopCompaniesPage() {
     );
   }
 
-  if (!user) {
+  if (!user || (user && hasSubmitted !== true)) {
     return (
       <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
         <div className="max-w-6xl mx-auto">
@@ -85,7 +89,7 @@ export default function TopCompaniesPage() {
     );
   }
 
-  // User is logged in - show real content
+  // User is logged in AND has submitted - show real content
   return (
     <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">

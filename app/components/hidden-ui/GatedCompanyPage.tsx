@@ -1,6 +1,7 @@
 "use client";
 
 import { Lock } from "lucide-react";
+import useAuth from "@/hooks/useAuth";
 import CompanyHeader from "@/components/companypage/CompanyHeader";
 import HiddenDataGate from "./HiddenDataGate";
 
@@ -10,12 +11,30 @@ interface GatedCompanyPageProps {
     name?: string;
     logoUrl?: string | null;
   } | null;
+  hasSubmitted?: boolean | null;
 }
 
 export default function GatedCompanyPage({
   companyName,
   company,
+  hasSubmitted,
 }: GatedCompanyPageProps) {
+  const { user } = useAuth();
+
+  const isLoggedIn = !!user;
+  const hasSubmittedRO = hasSubmitted === true;
+
+  // Determine message based on auth and submission status
+  const message =
+    isLoggedIn && !hasSubmittedRO
+      ? "Submit a return offer to see data"
+      : "Sign in and submit a return offer to see data";
+
+  const ctaText =
+    isLoggedIn && !hasSubmittedRO ? "Submit Return Offer" : "Sign and Submit";
+
+  const redirectTo = "/submit";
+
   return (
     <div className="min-h-screen bg-background py-6 sm:py-12 px-4 sm:px-6">
       <div className="max-w-6xl mx-auto">
@@ -75,9 +94,9 @@ export default function GatedCompanyPage({
 
         {/* Hidden Data Gate */}
         <HiddenDataGate
-          message="Submit a return offer to see data"
-          ctaText="Sign in to View Data"
-          redirectTo="/submit"
+          message={message}
+          ctaText={ctaText}
+          redirectTo={redirectTo}
         />
       </div>
     </div>
