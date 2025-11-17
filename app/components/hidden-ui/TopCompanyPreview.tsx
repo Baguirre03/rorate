@@ -1,6 +1,8 @@
 "use client";
 
 import { useTopCompanies } from "@/hooks/useTopCompanies";
+import useAuth from "@/hooks/useAuth";
+import useHasSubmitted from "@/hooks/useHasSubmitted";
 import CompanyCard from "@/components/companies/CompanyCard";
 
 interface TopCompanyPreviewProps {
@@ -10,7 +12,11 @@ interface TopCompanyPreviewProps {
 export default function TopCompanyPreview({
   sort = "most-submissions",
 }: TopCompanyPreviewProps) {
+  const { user } = useAuth();
+  const { hasSubmitted } = useHasSubmitted();
   const { data, isLoading, error } = useTopCompanies(sort, 1);
+
+  const hideSubmissionsAndOffers = !user || hasSubmitted !== true;
 
   if (isLoading) {
     return (
@@ -88,7 +94,11 @@ export default function TopCompanyPreview({
         </div>
         <div></div>
       </div>
-      <CompanyCard company={topCompany} rank={1} />
+      <CompanyCard
+        company={topCompany}
+        rank={1}
+        hideSubmissionsAndOffers={hideSubmissionsAndOffers}
+      />
     </div>
   );
 }

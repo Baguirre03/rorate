@@ -1,4 +1,4 @@
-import { Building2, ArrowRight } from "lucide-react";
+import { Building2, ArrowRight, Lock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { CompanyStats } from "@/hooks/useTopCompanies";
@@ -7,9 +7,14 @@ import { useAnalytics } from "@/hooks/useAnalytics";
 export interface CompanyCardProps {
   company: CompanyStats;
   rank: number;
+  hideSubmissionsAndOffers?: boolean;
 }
 
-export default function CompanyCard({ company, rank }: CompanyCardProps) {
+export default function CompanyCard({
+  company,
+  rank,
+  hideSubmissionsAndOffers = false,
+}: CompanyCardProps) {
   const { trackClick } = useAnalytics();
 
   return (
@@ -61,16 +66,24 @@ export default function CompanyCard({ company, rank }: CompanyCardProps) {
 
             {/* Submissions */}
             <div className="text-right">
-              <div className="text-base font-semibold text-foreground">
-                {company.total}
-              </div>
+              {hideSubmissionsAndOffers ? (
+                <Lock className="h-4 w-4 text-muted-foreground/50 ml-auto" />
+              ) : (
+                <div className="text-base font-semibold text-foreground">
+                  {company.total}
+                </div>
+              )}
             </div>
 
             {/* Offers */}
             <div className="text-right">
-              <div className="text-base font-semibold text-foreground">
-                {company.offers}
-              </div>
+              {hideSubmissionsAndOffers ? (
+                <Lock className="h-4 w-4 text-muted-foreground/50 ml-auto" />
+              ) : (
+                <div className="text-base font-semibold text-foreground">
+                  {company.offers}
+                </div>
+              )}
             </div>
 
             {/* RO Rate */}
@@ -132,17 +145,25 @@ export default function CompanyCard({ company, rank }: CompanyCardProps) {
                 <div className="text-xs text-muted-foreground mb-0.5">
                   Submissions
                 </div>
-                <div className="text-sm font-semibold text-foreground">
-                  {company.total}
-                </div>
+                {hideSubmissionsAndOffers ? (
+                  <Lock className="h-4 w-4 text-muted-foreground/50 ml-auto" />
+                ) : (
+                  <div className="text-sm font-semibold text-foreground">
+                    {company.total}
+                  </div>
+                )}
               </div>
               <div className="text-right flex-1">
                 <div className="text-xs text-muted-foreground mb-0.5">
                   Offers
                 </div>
-                <div className="text-sm font-semibold text-foreground">
-                  {company.offers}
-                </div>
+                {hideSubmissionsAndOffers ? (
+                  <Lock className="h-4 w-4 text-muted-foreground/50 ml-auto" />
+                ) : (
+                  <div className="text-sm font-semibold text-foreground">
+                    {company.offers}
+                  </div>
+                )}
               </div>
               <div className="text-right flex-1">
                 <div className="text-xs text-muted-foreground mb-0.5">
