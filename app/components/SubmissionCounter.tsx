@@ -58,17 +58,13 @@ export default function SubmissionCounter() {
   return (
     <div className="text-center py-8 border-t border-border">
       <div className="inline-flex flex-col items-center gap-4 max-w-lg mx-auto px-4">
-        <div className="inline-flex items-center gap-2 text-sm mb-1">
-          <Gift className="h-5 w-5 text-primary" />
-          <span className="text-foreground">
-            <span className="font-semibold">{count.toLocaleString()}</span>{" "}
-            <span className="text-muted-foreground">approved submissions</span>
-          </span>
-        </div>
         <div className="space-y-3">
-          <p className="text-base font-semibold text-foreground leading-relaxed">
-            Submit your return offer & enter to win a $15 giftcard!
-          </p>
+          <div className="inline-flex items-center gap-2">
+            <Gift className="h-5 w-5 text-primary shrink-0" />
+            <p className="text-base font-semibold text-foreground leading-relaxed">
+              Submit your return offer & enter to win a $15 giftcard!
+            </p>
+          </div>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
             Every 100 submissions triggers a giveaway. Winner selected randomly
             and reached out via LinkedIn.
