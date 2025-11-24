@@ -48,8 +48,12 @@ export async function GET() {
       );
     }
 
+    const hasOnlyReject =
+      data?.filter((submission) => submission.status === "declined").length ===
+      data?.length;
+
     return NextResponse.json({
-      hasSubmitted: (data?.length ?? 0) > 0 && data?.[0]?.status != "declined",
+      hasSubmitted: (data?.length ?? 0) > 0 && !hasOnlyReject,
       submissions: data || [],
     });
   } catch (error) {
