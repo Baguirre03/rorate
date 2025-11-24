@@ -46,7 +46,15 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(redirectUrl);
   }
 
-  if (user?.email !== process.env.ADMIN_EMAIL!) {
+  const adminEmails = [process.env.ADMIN_EMAIL!, process.env.ADMIN_EMAIL2!];
+
+  if (!user?.email) {
+    const redirectUrl = req.nextUrl.clone();
+    redirectUrl.pathname = "/";
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  if (!adminEmails.includes(user?.email)) {
     const redirectUrl = req.nextUrl.clone();
     redirectUrl.pathname = "/";
     return NextResponse.redirect(redirectUrl);
