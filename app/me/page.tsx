@@ -77,7 +77,7 @@ function MePageContent() {
   const getStatusBadgeVariant = (status: string) => {
     switch (status.toLowerCase()) {
       case "accepted":
-        return "default";
+        return "success";
       case "waiting":
         return "secondary";
       case "declined":
