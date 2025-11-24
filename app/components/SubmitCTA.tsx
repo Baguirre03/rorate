@@ -18,7 +18,7 @@ export default function SubmitCTA() {
         </h2>
         <p className="text-sm text-muted-foreground mb-6 max-w-md mx-auto">
           Help others by submitting your return offer information. All
-          submissions are reviewed before being published.
+          contributions are reviewed before being published.
         </p>
         <Link href="/submit">
           <Button

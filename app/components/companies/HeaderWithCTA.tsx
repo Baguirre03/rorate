@@ -50,7 +50,7 @@ export default function HeaderWithCTA({
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                     Share your experience and enter our $15 giftcard giveaway.
-                    Every 100 submissions triggers a new giveaway!
+                    Every 100 contributions triggers a new giveaway!
                   </p>
                 </>
               ) : (
@@ -63,7 +63,7 @@ export default function HeaderWithCTA({
                   </div>
                   <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
                     Share your experience and enter our $15 giftcard giveaway.
-                    Every 100 submissions triggers a new giveaway!
+                    Every 100 contributions triggers a new giveaway!
                   </p>
                 </>
               )}

@@ -7,10 +7,12 @@ import { CompanyStats } from "@/hooks/useTopCompanies";
 
 interface HiddenCompaniesSkeletonProps {
   companies: CompanyStats[];
+  startRank?: number;
 }
 
 export default function HiddenCompaniesSkeleton({
   companies,
+  startRank = 2,
 }: HiddenCompaniesSkeletonProps) {
   return (
     <>
@@ -24,7 +26,7 @@ export default function HiddenCompaniesSkeleton({
               {/* Rank Number */}
               <div className="text-center">
                 <span className="text-sm sm:text-base font-medium text-muted-foreground">
-                  {index + 2}
+                  {startRank + index}
                 </span>
               </div>
 
@@ -57,7 +59,7 @@ export default function HiddenCompaniesSkeleton({
                 </h3>
               </div>
 
-              {/* Submissions - Hidden */}
+              {/* Contributions - Hidden */}
               <div className="text-right">
                 <Lock className="h-4 w-4 text-muted-foreground/50 ml-auto" />
               </div>
@@ -120,7 +122,7 @@ export default function HiddenCompaniesSkeleton({
               <div className="flex items-center gap-4">
                 <div className="text-right flex-1">
                   <div className="text-xs text-muted-foreground mb-0.5">
-                    Submissions
+                    Contributions
                   </div>
                   <Lock className="h-4 w-4 text-muted-foreground/50 ml-auto" />
                 </div>

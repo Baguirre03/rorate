@@ -34,8 +34,8 @@ export default function CompaniesTabs({
           className="flex items-center gap-1 sm:gap-2 text-xs sm:text-sm"
         >
           <BarChart3 className="h-3 w-3 sm:h-4 sm:w-4" />
-          <span className="hidden sm:inline">Most Submissions</span>
-          <span className="sm:hidden">Submissions</span>
+          <span className="hidden sm:inline">Most Contributions</span>
+          <span className="sm:hidden">Contributions</span>
         </TabsTrigger>
         <TabsTrigger
           value="best-rates"
@@ -58,12 +58,12 @@ export default function CompaniesTabs({
       <TabsContent value="most-submissions" className="mt-6 sm:mt-8">
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">
-            Companies ranked by total number of submissions in {year}
+            Companies ranked by total number of contributions in {year}
           </p>
         </div>
         <TabContent
           companies={companies}
-          emptyMessage="No submission data available for this category."
+          emptyMessage="No contribution data available for this category."
           icon={BarChart3}
           hasMore={hasMore}
           onLoadMore={onLoadMore}
@@ -76,12 +76,12 @@ export default function CompaniesTabs({
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">
             Companies with the highest return offer rates in {year} (minimum 3
-            submissions required)
+            contributions required)
           </p>
         </div>
         <TabContent
           companies={companies}
-          emptyMessage="No companies meet the minimum submission threshold for rate rankings."
+          emptyMessage="No companies meet the minimum contribution threshold for rate rankings."
           icon={TrendingUp}
           hasMore={hasMore}
           onLoadMore={onLoadMore}
@@ -94,12 +94,12 @@ export default function CompaniesTabs({
         <div className="mb-6">
           <p className="text-sm text-muted-foreground">
             Companies with the lowest return offer rates in {year} (minimum 3
-            submissions required)
+            contributions required)
           </p>
         </div>
         <TabContent
           companies={companies}
-          emptyMessage="No companies meet the minimum submission threshold for rate rankings."
+          emptyMessage="No companies meet the minimum contribution threshold for rate rankings."
           icon={TrendingDown}
           hasMore={hasMore}
           onLoadMore={onLoadMore}

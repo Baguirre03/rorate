@@ -66,8 +66,8 @@ export default function SubmissionCounter() {
             </p>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed max-w-md">
-            Every 100 submissions triggers a giveaway. Winner selected randomly
-            and reached out via LinkedIn.
+            Every 100 contributions triggers a giveaway. Winner selected
+            randomly and reached out via LinkedIn.
           </p>
         </div>
         <div className="w-full max-w-xs space-y-3 pt-2">

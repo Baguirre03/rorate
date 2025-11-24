@@ -429,7 +429,7 @@ export default function SubmissionForm() {
           </h1>
           <p className="text-sm sm:text-base text-muted-foreground px-2">
             Help others by sharing your internship return offer experience. All
-            submissions are reviewed before being published. Your data will
+            contributions are reviewed before being published. Your data will
             remain anonymous.
           </p>
         </div>

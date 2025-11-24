@@ -19,7 +19,12 @@ export default function GatedCompaniesSection({
 }: GatedCompaniesSectionProps) {
   const { user, loading: authLoading } = useAuth();
   const { hasSubmitted, isLoading: hasSubmittedLoading } = useHasSubmitted();
-  const { data, isLoading } = useTopCompanies(sort, 5); // Fetch 5 to show top + 4 hidden
+  const hasSubmittedRO = hasSubmitted === true;
+  const hideSubmissionsAndOffers = !user || hasSubmittedRO !== true;
+  const { data, isLoading } = useTopCompanies(
+    sort,
+    hideSubmissionsAndOffers ? 7 : 5
+  );
 
   // Fetch company count
   const { data: companyCountData, isLoading: isCompanyCountLoading } =
@@ -39,14 +44,20 @@ export default function GatedCompaniesSection({
 
   const isLoadingStatus = authLoading || hasSubmittedLoading;
   const isLoggedIn = !!user;
-  const hasSubmittedRO = hasSubmitted === true;
 
   // Show top company preview
   const firstPage = data?.pages?.[0];
   const showTopCompany =
     !isLoading && firstPage && firstPage.data && firstPage.data.length > 0;
-  const hiddenCompanies = firstPage?.data?.slice(1, 5) || []; // Get companies 2-5
+  // When locked, TopCompanyPreview shows 3 companies (indices 0-2), so hidden should start at index 3
+  // When unlocked, TopCompanyPreview shows 1 company (index 0), so hidden should start at index 1
+  const topPreviewCount = hideSubmissionsAndOffers ? 3 : 1;
+  // Get next 4 companies after top preview (or however many are available)
+  const hiddenCompanies =
+    firstPage?.data?.slice(topPreviewCount, topPreviewCount + 4) || [];
   const companyCount = companyCountData?.count || 0;
+  // Calculate total companies shown: top preview + hidden companies
+  const companiesShown = topPreviewCount + hiddenCompanies.length;
 
   // Determine message based on auth and submission status
   const message =
@@ -69,13 +80,17 @@ export default function GatedCompaniesSection({
       {/* Show hidden companies (visible but locked) */}
       {showTopCompany && hiddenCompanies.length > 0 && (
         <div className="border border-border/50 rounded-lg overflow-hidden bg-card">
-          <HiddenCompaniesSkeleton companies={hiddenCompanies} />
+          <HiddenCompaniesSkeleton
+            companies={hiddenCompanies}
+            startRank={topPreviewCount + 1}
+          />
           {/* Company count display */}
-          {!isCompanyCountLoading && companyCount > 5 && (
+          {!isCompanyCountLoading && companyCount > companiesShown && (
             <div className="px-4 sm:px-6 py-4 text-center border-t border-border bg-muted/50">
               <p className="text-base font-medium text-foreground">
-                (and return offer rates for {companyCount - 5} other{" "}
-                {companyCount - 5 === 1 ? "company" : "companies"})
+                (and return offer rates for {companyCount - companiesShown}{" "}
+                other{" "}
+                {companyCount - companiesShown === 1 ? "company" : "companies"})
               </p>
             </div>
           )}

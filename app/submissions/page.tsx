@@ -183,7 +183,7 @@ export default function SubmissionsPage() {
             <CardHeader className="px-4 sm:px-6 pt-4 sm:pt-6">
               <CardTitle className="text-lg sm:text-xl">Error</CardTitle>
               <CardDescription className="text-xs sm:text-sm">
-                Failed to load submissions. Please try again.
+                Failed to load contributions. Please try again.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -215,10 +215,11 @@ export default function SubmissionsPage() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <CardTitle className="text-lg sm:text-xl">
-                  Submissions
+                  Contributions
                 </CardTitle>
                 <CardDescription className="text-xs sm:text-sm">
-                  Review and manage all submissions ({submissions.length} total)
+                  Review and manage all contributions ({submissions.length}{" "}
+                  total)
                 </CardDescription>
               </div>
               <Button
@@ -251,10 +252,10 @@ export default function SubmissionsPage() {
                 <div className="space-y-6">
                   <div>
                     <h3 className="text-sm font-semibold mb-3">
-                      Submission Analytics
+                      Contribution Analytics
                     </h3>
                     <div className="text-sm text-muted-foreground mb-4">
-                      Total submissions: {analyticsData.analytics.total}
+                      Total contributions: {analyticsData.analytics.total}
                     </div>
 
                     {/* By Source */}
@@ -346,7 +347,7 @@ export default function SubmissionsPage() {
           <CardContent className="p-3 sm:p-4 md:p-6">
             {submissions.length === 0 ? (
               <div className="text-center py-8 sm:py-12 text-muted-foreground text-xs sm:text-sm">
-                No submissions found
+                No contributions found
               </div>
             ) : (
               <div className="space-y-2 sm:space-y-3">

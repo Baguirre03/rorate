@@ -23,7 +23,7 @@ export interface SubmissionsListProps {
 }
 
 export default function SubmissionsList({
-  title = "Submissions",
+  title = "Contributions",
   description,
   icon: Icon = TrendingUp,
   submissions,
@@ -99,7 +99,7 @@ export default function SubmissionsList({
           ))}
           {hasMore && showCount && (
             <div className="text-center text-xs sm:text-sm font-medium text-muted-foreground pt-2 sm:pt-4">
-              Showing {limit} of {submissions.length} submissions
+              Showing {limit} of {submissions.length} contributions
             </div>
           )}
         </div>

@@ -9,7 +9,7 @@ export default function TableSkeleton() {
           Company
         </div>
         <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
-          Submissions
+          Contributions
         </div>
         <div className="text-xs font-medium text-muted-foreground uppercase tracking-wider text-right">
           Offers

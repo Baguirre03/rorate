@@ -146,20 +146,20 @@ function MePageContent() {
           </div>
         </Card>
 
-        {/* Submissions Card */}
+        {/* Contributions Card */}
         <Card className="p-6">
           <div className="flex items-center gap-2 mb-4">
             <FileText className="h-5 w-5 text-muted-foreground" />
-            <h2 className="text-lg font-semibold">My Submissions</h2>
+            <h2 className="text-lg font-semibold">My Contributions</h2>
           </div>
 
           {submissionsLoading ? (
             <div className="text-center py-8 text-muted-foreground text-sm">
-              Loading submissions...
+              Loading contributions...
             </div>
           ) : !submissions || submissions.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground text-sm">
-              No submissions yet. Submit your return offer to get started!
+              No contributions yet. Submit your return offer to get started!
             </div>
           ) : (
             <div className="space-y-3">

@@ -118,7 +118,7 @@ export default function CompanyPageClient({
         "@context": "https://schema.org",
         "@type": "WebPage",
         name: `${companyName} Return Offer Rate`,
-        description: `${companyName} return offer rate statistics and data. ${data.stats.total} submissions, ${data.stats.percentage}% return offer rate.`,
+        description: `${companyName} return offer rate statistics and data. ${data.stats.total} contributions, ${data.stats.percentage}% return offer rate.`,
         url: `${SITE_URL}/company/${encodeURIComponent(companyName)}`,
         mainEntity: {
           "@type": "Organization",
@@ -287,7 +287,7 @@ export default function CompanyPageClient({
               }
               description={
                 selectedYear === "all"
-                  ? "Return offer rate across all submissions"
+                  ? "Return offer rate across all contributions"
                   : `Return offer rate for ${selectedYear}`
               }
               stats={[
@@ -301,7 +301,7 @@ export default function CompanyPageClient({
                 },
                 {
                   value: filteredStats.total,
-                  label: "Total Submissions",
+                  label: "Total Contributions",
                 },
               ]}
               percentage={filteredStats.percentage}
@@ -312,11 +312,11 @@ export default function CompanyPageClient({
           )}
           {filteredSubmissions.length > 0 && (
             <SubmissionsList
-              title="Submissions"
+              title="Contributions"
               description={`${
                 selectedYear === "all"
-                  ? `Recent submissions for ${company?.name}`
-                  : `${selectedYear} submissions for ${company?.name}`
+                  ? `Recent contributions for ${company?.name}`
+                  : `${selectedYear} contributions for ${company?.name}`
               }${hasActiveFilters ? " (filtered)" : ""}`}
               submissions={filteredSubmissions}
               limit={10}

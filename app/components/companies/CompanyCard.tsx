@@ -64,7 +64,7 @@ export default function CompanyCard({
               </h3>
             </div>
 
-            {/* Submissions */}
+            {/* Contributions */}
             <div className="text-right">
               {hideSubmissionsAndOffers ? (
                 <Lock className="h-4 w-4 text-muted-foreground/50 ml-auto" />
@@ -143,7 +143,7 @@ export default function CompanyCard({
             <div className="flex items-center gap-4">
               <div className="text-right flex-1">
                 <div className="text-xs text-muted-foreground mb-0.5">
-                  Submissions
+                  Contributions
                 </div>
                 {hideSubmissionsAndOffers ? (
                   <Lock className="h-4 w-4 text-muted-foreground/50 ml-auto" />

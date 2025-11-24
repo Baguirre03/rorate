@@ -51,7 +51,7 @@ export default function GatedCompanyPage({
               Overall Statistics
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground">
-              Return offer rate across all submissions
+              Return offer rate across all contributions
             </p>
           </div>
           <div>
@@ -77,7 +77,7 @@ export default function GatedCompanyPage({
                   <Lock className="h-6 w-6 sm:h-7 sm:w-7 text-muted-foreground" />
                 </div>
                 <div className="text-xs sm:text-sm font-medium text-muted-foreground uppercase tracking-wide">
-                  Total Submissions
+                  Total Contributions
                 </div>
               </div>
             </div>
