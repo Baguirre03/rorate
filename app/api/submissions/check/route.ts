@@ -23,8 +23,6 @@ export async function GET() {
       );
     }
 
-    // Let RLS handle the filtering based on auth.uid() = user_id
-    // The explicit .eq() filter is redundant but harmless
     const { data, error } = await supabase
       .from("submissions")
       .select(
@@ -51,7 +49,7 @@ export async function GET() {
     }
 
     return NextResponse.json({
-      hasSubmitted: (data?.length ?? 0) > 0,
+      hasSubmitted: (data?.length ?? 0) > 0 && data?.[0]?.status != "declined",
       submissions: data || [],
     });
   } catch (error) {
