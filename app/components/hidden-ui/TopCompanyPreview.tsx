@@ -14,9 +14,12 @@ export default function TopCompanyPreview({
 }: TopCompanyPreviewProps) {
   const { user } = useAuth();
   const { hasSubmitted } = useHasSubmitted();
-  const { data, isLoading, error } = useTopCompanies(sort, 1);
-
   const hideSubmissionsAndOffers = !user || hasSubmitted !== true;
+  // Fetch 3 companies when locked to show percentages, 1 when unlocked
+  const { data, isLoading, error } = useTopCompanies(
+    sort,
+    hideSubmissionsAndOffers ? 3 : 1
+  );
 
   if (isLoading) {
     return (
@@ -72,7 +75,10 @@ export default function TopCompanyPreview({
     return null;
   }
 
-  const topCompany = firstPage.data[0];
+  const companies = firstPage.data;
+  const companiesToShow = hideSubmissionsAndOffers
+    ? companies.slice(0, 3)
+    : [companies[0]];
 
   return (
     <div className="border border-border/50 rounded-lg overflow-hidden bg-card">
@@ -94,11 +100,14 @@ export default function TopCompanyPreview({
         </div>
         <div></div>
       </div>
-      <CompanyCard
-        company={topCompany}
-        rank={1}
-        hideSubmissionsAndOffers={hideSubmissionsAndOffers}
-      />
+      {companiesToShow.map((company, index) => (
+        <CompanyCard
+          key={company.name}
+          company={company}
+          rank={index + 1}
+          hideSubmissionsAndOffers={hideSubmissionsAndOffers}
+        />
+      ))}
     </div>
   );
 }
