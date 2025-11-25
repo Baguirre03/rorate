@@ -523,7 +523,7 @@ export default function SubmissionForm() {
                 value={formData.term}
                 onChange={handleInputChange}
                 disabled={isSubmitting}
-                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`flex h-10 w-full rounded-md border-[0.5px] border-input/60 bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                   errors.term ? "border-destructive" : ""
                 }`}
               >
@@ -548,7 +548,7 @@ export default function SubmissionForm() {
                 value={formData.year}
                 onChange={handleYearChange}
                 disabled={isSubmitting}
-                className={`flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
+                className={`flex h-10 w-full rounded-md border-[0.5px] border-input/60 bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${
                   errors.year ? "border-destructive" : ""
                 }`}
               >

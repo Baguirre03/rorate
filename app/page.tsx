@@ -56,7 +56,7 @@ export default function Home() {
           name: "What is a return offer rate?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "A return offer rate is the percentage of interns who receive a full-time or return internship offer from a company after completing their internship. It's calculated by dividing the number of interns who received return offers by the total number of internship contributions.",
+            text: "A return offer rate is the percentage of interns who receive a full-time or return internship offer from a company after completing their internship. It's calculated by dividing the number of interns who received return offers by the total number of internship submissions.",
           },
         },
         {
@@ -72,7 +72,7 @@ export default function Home() {
           name: "Which companies have the best return offer rates?",
           acceptedAnswer: {
             "@type": "Answer",
-            text: "Visit our Top Companies page to see companies ranked by return offer rates. You can view companies with the most contributions, best rates, or compare different companies.",
+            text: "Visit our Top Companies page to see companies ranked by return offer rates. You can view companies with the most submissions, best rates, or compare different companies.",
           },
         },
       ],
