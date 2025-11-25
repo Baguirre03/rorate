@@ -127,7 +127,7 @@ export default function Home() {
             >
               <div className="max-w-2xl w-full relative">
                 <div className="absolute -inset-1 bg-border/30 rounded-lg blur opacity-0 hover:opacity-100 transition-opacity duration-300"></div>
-                <div className="relative bg-card border border-border/50 rounded-lg p-1 shadow-sm hover:shadow-md transition-shadow duration-300">
+                <div className="relative bg-card border border-border/50 rounded-lg p-1 shadow-sm hover:shadow-md transition-all duration-300 animate-[pulse-subtle_3s_ease-in-out_infinite] hover:animate-none hover:scale-[1.01]">
                   <CompanySearch
                     onCompanySelect={handleCompanySelect}
                     className="w-full"
