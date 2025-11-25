@@ -17,8 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Return Offer Rates.fyi - Company Return Offer Statistics",
-    template: "%s | Return Offer Rates.fyi",
+    default: "rorates.fyi - Company Return Offer Statistics",
+    template: "%s | rorates.fyi",
   },
   description:
     "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns. Search by company name to see detailed statistics and trends.",
@@ -30,9 +30,9 @@ export const metadata: Metadata = {
     "return offer data",
     "internship conversion rate",
   ],
-  authors: [{ name: "Return Offer Rates.fyi" }],
-  creator: "Return Offer Rates.fyi",
-  publisher: "Return Offer Rates.fyi",
+  authors: [{ name: "rorates.fyi" }],
+  creator: "rorates.fyi",
+  publisher: "rorates.fyi",
   formatDetection: {
     email: false,
     address: false,
@@ -59,6 +59,14 @@ export const metadata: Metadata = {
     description:
       "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns.",
     siteName: "Return Offer Rates.fyi",
+    images: [
+      {
+        url: "/icon.svg",
+        width: 1200,
+        height: 1200,
+        alt: "Return Offer Rates.fyi Logo",
+      },
+    ],
   },
   twitter: {
     card: "summary",
@@ -66,6 +74,7 @@ export const metadata: Metadata = {
     description:
       "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns.",
     creator: "@roratesfyi",
+    images: ["/icon.svg"],
   },
   robots: {
     index: true,
