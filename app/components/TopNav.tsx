@@ -26,7 +26,7 @@ export default function TopNav() {
   const backButtonPath = isOnCompaniesPage ? "/" : "/companies";
 
   return (
-    <div className="border-b border-border/50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
+    <div className="border-b border-border/50 bg-background/95 backdrop-blur supports-backdrop-filter:bg-muted/20 sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 py-3 sm:py-4">
         <div className="grid grid-cols-[auto_1fr_auto] gap-3 sm:gap-4 md:gap-6 items-center">
           <Button
@@ -55,9 +55,9 @@ export default function TopNav() {
               >
                 <User className="h-4 w-4" />
               </Link>
-              <div className="absolute right-0 top-full mt-2 px-2 py-1 text-xs font-medium text-white bg-foreground rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
+              <div className="absolute right-0 top-full mt-2 px-2 py-1 text-xs font-medium bg-popover text-popover-foreground border border-border rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none whitespace-nowrap z-50">
                 {user ? "View Account" : "Sign In"}
-                <div className="absolute -top-1 right-2 w-2 h-2 bg-foreground rotate-45"></div>
+                <div className="absolute -top-1 right-2 w-2 h-2 bg-popover border-l border-b border-border rotate-45"></div>
               </div>
             </div>
             <Link
