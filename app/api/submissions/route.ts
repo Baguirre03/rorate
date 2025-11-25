@@ -267,7 +267,10 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    if (user.email !== process.env.ADMIN_EMAIL) {
+    if (
+      user.email !== process.env.ADMIN_EMAIL &&
+      user.email !== process.env.ADMIN_EMAIL2
+    ) {
       return NextResponse.json(
         { error: "Unauthorized - Admin access required" },
         { status: 403 }
