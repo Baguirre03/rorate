@@ -308,6 +308,53 @@ export async function GET(request: NextRequest) {
 
     const submissionData = data || [];
 
+    const userMap: Record<
+      string,
+      {
+        email: string | null;
+        fullName: string | null;
+      }
+    > = {};
+
+    const uniqueUserIds = Array.from(
+      new Set(
+        submissionData
+          .map((submission) => submission.user_id)
+          .filter((id): id is string => Boolean(id))
+      )
+    );
+
+    if (uniqueUserIds.length > 0) {
+      const supabaseAdmin = createServiceRoleClient();
+      await Promise.all(
+        uniqueUserIds.map(async (userId) => {
+          const { data: userData, error: userError } =
+            await supabaseAdmin.auth.admin.getUserById(userId);
+
+          if (!userError && userData?.user) {
+            const metadata = userData.user.user_metadata ?? {};
+            userMap[userId] = {
+              email: userData.user.email ?? null,
+              fullName:
+                typeof metadata.full_name === "string"
+                  ? metadata.full_name
+                  : null,
+            };
+          } else if (userError?.message !== "User not found") {
+            console.error("Failed to fetch user data", userId, userError);
+          }
+        })
+      );
+    }
+
+    const enrichedSubmissionData = submissionData.map((submission) => ({
+      ...submission,
+      user:
+        submission.user_id && userMap[submission.user_id]
+          ? userMap[submission.user_id]
+          : null,
+    }));
+
     let analytics = null;
     if (includeAnalytics) {
       const analyticsQuery = supabase
@@ -352,10 +399,10 @@ export async function GET(request: NextRequest) {
     }
 
     const responseData: {
-      data: typeof submissionData;
+      data: typeof enrichedSubmissionData;
       analytics?: typeof analytics;
     } = {
-      data: submissionData,
+      data: enrichedSubmissionData,
     };
 
     if (analytics) {

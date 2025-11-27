@@ -1,6 +1,5 @@
 "use client";
 
-import { Metadata } from "next";
 import { useState, useCallback, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useQueryClient } from "@tanstack/react-query";
@@ -8,19 +7,6 @@ import useAuth from "@/hooks/useAuth";
 import LoginLoading from "@/components/login/LoginLoading";
 import LoginEmailSent from "@/components/login/LoginEmailSent";
 import LoginForm from "@/components/login/LoginForm";
-
-export const metadata: Metadata = {
-  title: "Log in | rorates.fyi",
-  description: "Login to rorates.fyi to submit or view return offer insights.",
-  robots: {
-    index: false,
-    follow: false,
-    googleBot: {
-      index: false,
-      follow: false,
-    },
-  },
-};
 
 function LoginFormContainer() {
   const [emailSent, setEmailSent] = useState(false);

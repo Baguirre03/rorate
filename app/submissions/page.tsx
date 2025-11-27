@@ -11,6 +11,7 @@ import {
   Loader2,
   ArrowLeft,
   BarChart3,
+  UserCircle2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -40,6 +41,11 @@ type SubmissionWithCompany = {
     id: number;
     name: string;
   };
+  user: {
+    email: string | null;
+    fullName: string | null;
+    avatarUrl: string | null;
+  } | null;
 };
 
 type AnalyticsData = {
@@ -368,6 +374,12 @@ export default function SubmissionsPage() {
                           >
                             {submission.status}
                           </Badge>
+                          <span className="inline-flex items-center gap-1 text-[11px] sm:text-xs text-muted-foreground">
+                            <UserCircle2 className="h-3.5 w-3.5" />
+                            {submission.user?.fullName ||
+                              submission.user?.email ||
+                              "Guest submission"}
+                          </span>
                         </div>
                         <div className="flex flex-wrap items-center gap-x-3 sm:gap-x-4 gap-y-1 text-xs text-muted-foreground">
                           <span>
