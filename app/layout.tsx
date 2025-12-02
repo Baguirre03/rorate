@@ -24,11 +24,20 @@ export const metadata: Metadata = {
     "Discover return offer rates for tech companies. Find out which companies extend the most return offers to interns. Search by company name to see detailed statistics and trends.",
   keywords: [
     "return offer rate",
+    "return offer rates",
     "internship return offer",
     "company return offer statistics",
     "tech internship return offers",
-    "return offer data",
+    "return offer data by company",
     "internship conversion rate",
+    "internship conversion rate by company",
+    "internship conversion rate by company and year",
+    "internship conversion rate by company and term",
+    "internship conversion rate by company and year and term",
+    "internship conversion rate by company and year and term and source",
+    "internship conversion rate by company and year and term and source and school",
+    "internship conversion rate by company and year and term and source and school and position type",
+    "internship conversion rate by company and year and term and source and school and position type and intern type",
   ],
   authors: [{ name: "rorates.fyi" }],
   creator: "rorates.fyi",
@@ -42,15 +51,8 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
-  icons: {
-    icon: [
-      { url: "/icon.svg", type: "image/svg+xml", sizes: "any" },
-      { url: "/icon.svg", type: "image/svg+xml", sizes: "32x32" },
-      { url: "/icon.svg", type: "image/svg+xml", sizes: "16x16" },
-    ],
-    apple: [{ url: "/icon.svg", type: "image/svg+xml", sizes: "180x180" }],
-    shortcut: "/icon.svg",
-  },
+  // Icons are automatically handled by Next.js via app/icon.tsx (PNG) and app/icon.svg (SVG)
+  // Next.js will automatically add the appropriate link tags to the <head>
   openGraph: {
     type: "website",
     locale: "en_US",
