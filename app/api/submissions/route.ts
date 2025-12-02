@@ -18,6 +18,18 @@ import {
   createServerSupabaseClient,
   createServiceRoleClient,
 } from "@/lib/supabaseServer";
+import { Ratelimit } from "@upstash/ratelimit";
+import { Redis } from "@upstash/redis";
+
+const redis = new Redis({
+  url: process.env.UPSTASH_REDIS_REST_URL!,
+  token: process.env.UPSTASH_REDIS_REST_TOKEN!,
+});
+
+const ratelimit = new Ratelimit({
+  redis,
+  limiter: Ratelimit.slidingWindow(10, "1h"),
+});
 
 // Extract LinkedIn profile identifier from URL
 // Handles formats like: linkedin.com/in/username, www.linkedin.com/in/username, etc.
@@ -62,6 +74,17 @@ export async function POST(request: NextRequest) {
   const userAgentCheck = validateUserAgent(request);
   if (!userAgentCheck.allowed && userAgentCheck.response) {
     return userAgentCheck.response;
+  }
+
+  // Rate limit based on IP address
+  const forwardedFor = request.headers.get("x-forwarded-for");
+  const realIp = request.headers.get("x-real-ip");
+  const forwardedIp = forwardedFor?.split(",")[0]?.trim() || null;
+  const ipAddress = realIp || forwardedIp || "unknown";
+
+  const { success } = await ratelimit.limit(ipAddress);
+  if (!success) {
+    return NextResponse.json({ error: "Rate limit exceeded" }, { status: 429 });
   }
 
   const contentLength = request.headers.get("content-length");
