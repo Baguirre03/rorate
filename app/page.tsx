@@ -43,7 +43,7 @@ export default function Home() {
         "query-input": "required name=search_term_string",
       },
     }),
-    []
+    [],
   );
 
   const faqSchema = useMemo(
@@ -77,7 +77,7 @@ export default function Home() {
         },
       ],
     }),
-    []
+    [],
   );
 
   return (
@@ -175,7 +175,7 @@ export default function Home() {
                   onClick={() =>
                     trackClick(
                       user ? "click_submit_button" : "click_login_button",
-                      { page: "home" }
+                      { page: "home" },
                     )
                   }
                 >
