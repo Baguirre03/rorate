@@ -341,6 +341,7 @@ export default function CompanySearch({
                         width={32}
                         height={32}
                         className="w-full h-full object-contain rounded"
+                        unoptimized
                         onError={(e) => {
                           (e.target as HTMLImageElement).style.display = "none";
                         }}

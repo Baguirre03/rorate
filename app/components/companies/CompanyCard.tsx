@@ -45,6 +45,7 @@ export default function CompanyCard({
                     width={48}
                     height={48}
                     className="w-full h-full object-contain p-1"
+                    unoptimized
                     onError={(e) => {
                       (e.target as HTMLImageElement).style.display = "none";
                     }}

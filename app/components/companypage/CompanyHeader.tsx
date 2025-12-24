@@ -28,6 +28,7 @@ export default function CompanyHeader({
               width={64}
               height={64}
               className="w-full h-full object-contain"
+              unoptimized
               onError={(e) => {
                 (e.target as HTMLImageElement).style.display = "none";
               }}
