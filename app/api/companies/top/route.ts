@@ -17,27 +17,11 @@ export async function GET(request: NextRequest) {
     const sort = searchParams.get("sort") || "most-submissions";
     const limit = parseInt(searchParams.get("limit") || "15");
     const offset = parseInt(searchParams.get("offset") || "0");
-    const { data: yearData, error: yearError } = await supabase
-      .from("public_accepted_submissions")
-      .select("year")
-      .order("year", { ascending: false })
-      .limit(1)
-      .single();
-
-    if (yearError || !yearData) {
-      return NextResponse.json({
-        data: [],
-        total: 0,
-        year: new Date().getFullYear(),
-      });
-    }
-
-    const mostRecentYear = yearData.year;
 
     const { data: submissions, error } = await supabase
       .from("public_accepted_submissions")
       .select("return_offer_extended, company_name, company_id")
-      .eq("year", mostRecentYear);
+      .eq("year", 2025);
 
     if (error) throw error;
 
@@ -46,7 +30,7 @@ export async function GET(request: NextRequest) {
         data: [],
         total: 0,
         hasMore: false,
-        year: mostRecentYear,
+        year: 2025,
       });
     }
 
@@ -164,7 +148,7 @@ export async function GET(request: NextRequest) {
       data: companiesWithLogos,
       total,
       hasMore: offset + limit < total,
-      year: mostRecentYear,
+      year: 2025,
     });
   } catch (error) {
     console.error("Error fetching top companies:", error);

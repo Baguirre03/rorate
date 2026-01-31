@@ -17,7 +17,7 @@ export function usePaginatedCompanies(
   const companies: CompanyStats[] =
     data?.pages.flatMap((page) => page.data) ?? [];
 
-  const year = data?.pages[0]?.year ?? new Date().getFullYear();
+  const year = data?.pages[0]?.year ?? 2025;
 
   const loadMore = useCallback(() => {
     if (hasNextPage && !isFetchingNextPage) {
