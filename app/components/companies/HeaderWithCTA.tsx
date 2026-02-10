@@ -1,25 +1,19 @@
 "use client";
 
-import Link from "next/link";
-import { Gift, Plus, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import useAuth from "@/hooks/useAuth";
-
 export interface HeaderWithCTAProps {
   year: number;
   onTrackClick?: (
     event: string,
-    data?: Record<string, string | number>
+    data?: Record<string, string | number>,
   ) => void;
   className?: string;
 }
 
 export default function HeaderWithCTA({
   year,
-  onTrackClick,
   className = "",
 }: HeaderWithCTAProps) {
-  const { user, loading: authLoading } = useAuth();
+  // Giftcard banner used: useAuth, onTrackClick, Link, Gift, Plus, ArrowRight, Button
   return (
     <>
       {/* Header */}
@@ -34,7 +28,7 @@ export default function HeaderWithCTA({
         </div>
       </div>
 
-      {/* Top CTA */}
+      {/* Giftcard giveaway banner – commented out
       <div className="mb-6 sm:mb-8">
         <div className="bg-card border border-border rounded-lg p-4 sm:p-5 shadow-sm">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
@@ -107,6 +101,7 @@ export default function HeaderWithCTA({
           </div>
         </div>
       </div>
+      */}
     </>
   );
 }

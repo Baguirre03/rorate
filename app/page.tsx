@@ -84,7 +84,18 @@ export default function Home() {
     <>
       <StructuredData data={websiteSchema} />
       <StructuredData data={faqSchema} />
-      <div className="min-h-screen bg-background flex items-start justify-center pt-12 sm:pt-20 md:pt-32 relative">
+      <div className="min-h-screen bg-background flex items-start justify-center pt-12 sm:pt-20 md:pt-32 relative overflow-hidden">
+        {/* Subtle animated gradient sweep */}
+        <div
+          className="absolute inset-0 z-0 pointer-events-none home-gradient-drift"
+          aria-hidden
+          style={{
+            background:
+              "linear-gradient(120deg, transparent 0%, var(--muted) 35%, transparent 65%, var(--muted) 85%, transparent 100%)",
+            backgroundSize: "300% 300%",
+            backgroundPosition: "0% 50%",
+          }}
+        />
         <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-12 sm:pb-20 md:pb-32 w-full relative z-10">
           {/* Hero Section - Search Focused */}
           <div className="text-center">
@@ -205,10 +216,7 @@ export default function Home() {
                 transitionDelay: mounted ? "600ms" : "0ms",
               }}
             >
-              <div className="relative">
-                <div className="absolute inset-x-0 top-0 h-px bg-border/50"></div>
-                <SubmissionCounter />
-              </div>
+              <SubmissionCounter />
             </div>
           </div>
         </div>

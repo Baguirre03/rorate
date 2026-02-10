@@ -1,19 +1,14 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Gift, ArrowRight } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Button } from "@/components/ui/button";
+// Giftcard banner used: Gift, ArrowRight, Link, usePathname, Button
 
 interface SubmissionCountResponse {
   count: number;
 }
 
 export default function SubmissionCounter() {
-  const pathname = usePathname();
-  const isSubmitPage = pathname === "/submit";
-
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars -- data used when giftcard banner is uncommented
   const { data, isLoading, error } = useQuery<SubmissionCountResponse>({
     queryKey: ["submission-count"],
     queryFn: async () => {
@@ -24,7 +19,7 @@ export default function SubmissionCounter() {
         const errorData = await response.json().catch(() => ({}));
         throw new Error(
           errorData.error ||
-            `Failed to fetch submission count: ${response.status}`
+            `Failed to fetch submission count: ${response.status}`,
         );
       }
       return response.json();
@@ -34,27 +29,13 @@ export default function SubmissionCounter() {
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
-  const count = data?.count ?? 0;
-  const nextMilestone = Math.ceil((count + 1) / 100) * 100;
-  const progress = count % 100;
-  const progressPercent = (progress / 100) * 100;
-  const submissionsNeeded = nextMilestone - count;
-
-  if (isLoading) {
-    return (
-      <div className="text-center py-5 border-t border-border">
-        <div className="inline-flex items-center gap-2 text-sm">
-          <Gift className="h-4 w-4 text-primary animate-pulse" />
-          <span className="h-4 w-32 bg-muted animate-pulse rounded" />
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (isLoading || error) {
     return null;
   }
 
+  // Giftcard giveaway banner – commented out
+  return null;
+  /*
   return (
     <div className="text-center py-8 border-t border-border">
       <div className="inline-flex flex-col items-center gap-4 max-w-lg mx-auto px-4">
@@ -98,4 +79,5 @@ export default function SubmissionCounter() {
       </div>
     </div>
   );
+  */
 }
